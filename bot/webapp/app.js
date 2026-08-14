@@ -82,7 +82,9 @@
       app_open: 'Открой приложение через бота', load_fail: 'Не удалось загрузить данные',
       tab_guides: 'Гайды',
       g_tab_maps: 'Карты', g_tab_mikra: 'Микра',
-      g_sections: 'разделов', g_back_guides: 'В гайды', g_soon: 'Скоро здесь появится контент'
+      g_sections: 'разделов', g_back_guides: 'В гайды', g_soon: 'Скоро здесь появится контент',
+      g_cat_smokes: 'Смоки', g_cat_molotovs: 'Молотовы', g_cat_flashes: 'Флешки',
+      g_cat_grenades: 'Гранаты', g_cat_setups: 'Сетапы', g_cat_tactics: 'Тактики'
     },
     en: {
       tab_stats: 'Stats', tab_settings: 'Settings', back: 'Back',
@@ -131,7 +133,9 @@
       app_open: 'Open the app from the bot', load_fail: 'Failed to load data',
       tab_guides: 'Guides',
       g_tab_maps: 'Maps', g_tab_mikra: 'Micro',
-      g_sections: 'sections', g_back_guides: 'Back to guides', g_soon: 'Content coming soon'
+      g_sections: 'sections', g_back_guides: 'Back to guides', g_soon: 'Content coming soon',
+      g_cat_smokes: 'Smokes', g_cat_molotovs: 'Molotovs', g_cat_flashes: 'Flashes',
+      g_cat_grenades: 'Grenades', g_cat_setups: 'Setups', g_cat_tactics: 'Tactics'
     }
   };
 
@@ -1318,11 +1322,20 @@
     { id: 'overpass-smokes', name: 'Дымы на Overpass' }
   ];
 
-  function gBackBtn() {
+  const GUIDE_CATS = [
+    { id: 'smokes', key: 'g_cat_smokes' },
+    { id: 'molotovs', key: 'g_cat_molotovs' },
+    { id: 'flashes', key: 'g_cat_flashes' },
+    { id: 'grenades', key: 'g_cat_grenades' },
+    { id: 'setups', key: 'g_cat_setups' },
+    { id: 'tactics', key: 'g_cat_tactics' }
+  ];
+
+  function gBackBtn(onClick) {
     const back = el('button', 'back-btn');
     back.appendChild(iconEl('back'));
     back.appendChild(document.createTextNode(t('g_back_guides')));
-    back.addEventListener('click', () => renderGuides());
+    back.addEventListener('click', () => (onClick || renderGuides)());
     return back;
   }
 
@@ -1391,6 +1404,21 @@
     clear();
     view.appendChild(gBackBtn());
     view.appendChild(sectionTitle('guides', item.name));
+    const grid = el('div', 'cat-grid');
+    GUIDE_CATS.forEach(cat => {
+      const btn = el('div', 'cat-btn');
+      btn.appendChild(el('span', 'cat-name', t(cat.key)));
+      btn.appendChild(el('span', 'g-chev', '›'));
+      btn.addEventListener('click', () => renderGuideCat(item, cat));
+      grid.appendChild(btn);
+    });
+    view.appendChild(grid);
+  }
+
+  function renderGuideCat(item, cat) {
+    clear();
+    view.appendChild(gBackBtn(() => renderGuideDetail(item)));
+    view.appendChild(sectionTitle('guides', t(cat.key)));
     view.appendChild(el('p', 'section-text', t('g_soon')));
   }
 
