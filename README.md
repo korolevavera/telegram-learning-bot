@@ -4,6 +4,7 @@
 
 ## Функции
 
+- 🎮 **Telegram Mini App** — кнопка «Открыть приложение» открывает приложение прямо внутри Telegram (веб-интерфейс с уроками, карточками, тестами и прогрессом).
 - 📚 **Уроки** — пошаговый текст + вопросы в конце. Бот помнит, где ты остановился.
 - 🃏 **Карточки** — термин → значение. Выученные карточки больше не показываются.
 - 🧪 **Тесты** — викторины со счётом, лучший результат сохраняется.
@@ -40,25 +41,28 @@ copy .env.example .env    # Windows
 1. Запушь этот репозиторий на GitHub.
 2. На [railway.app](https://railway.app) нажми **New Project → Deploy from GitHub repo**, выбери репозиторий.
 3. Добавь плагин **PostgreSQL** (Project → Create → Database → PostgreSQL). Переменная `DATABASE_URL` подставится автоматически.
-4. В переменных окружения (`Variables`) добавь `BOT_TOKEN` со значением от @BotFather.
-5. Railway сам соберёт проект (конфиг в `railway.json`). Готово — бот работает.
+4. В переменных окружения (`Variables`) добавь `BOT_TOKEN` со значением от @BotFather и `WEBAPP_URL` — публичный URL сервиса (появится после создания домена на вкладке Settings → Networking).
+5. Railway сам соберёт проект (конфиг в `railway.toml`). Готово — бот работает.
 
-Конфиг сборки и запуска — в `railway.json` (Nixpacks, старт через `python -m bot.main`).
+Конфиг сборки и запуска — в `railway.toml` (Nixpacks, старт через `python -m bot.main`).
 
 ## Структура проекта
 
 ```
 telegram-learning-bot/
 ├── bot/
-│   ├── main.py            # точка входа
+│   ├── main.py            # точка входа (бот + веб-сервер Mini App)
 │   ├── config.py          # чтение .env
 │   ├── db.py              # подключение к БД (SQLite локально / PostgreSQL на Railway)
 │   ├── models.py          # таблицы: users, lesson_progress, quiz_results, card_states
 │   ├── content.py         # ⭐ ТВОЙ КОНТЕНТ: уроки, карточки, тесты
+│   ├── services.py        # общий слой работы с БД (бот + Mini App)
+│   ├── web_server.py      # aiohttp-сервер и API для Mini App
+│   ├── webapp/index.html  # сама Mini App (фронтенд)
 │   ├── keyboards.py       # кнопки
 │   ├── states.py          # состояния диалогов
 │   └── handlers/          # логика меню, уроков, карточек, тестов, прогресса
 ├── requirements.txt
-├── railway.json
+├── railway.toml
 └── .env.example
 ```
