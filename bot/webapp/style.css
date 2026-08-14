@@ -734,13 +734,13 @@ header h1 .brand .hl {
 .g-map:active { transform: scale(.98); border-color: rgba(var(--accent-rgb),.5); }
 .map-pic {
   position: relative;
-  flex: 1; height: 96px;
-  display: grid; place-items: center;
+  flex: 1; height: 112px;
+  display: block;
   overflow: hidden;
   border-radius: 2px 8px 8px 2px;
-  background: linear-gradient(160deg, rgba(0,0,0,.5), rgba(0,0,0,.25));
+  background: rgba(0,0,0,.4);
 }
-.map-pic img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.map-pic img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .map-name {
   position: absolute; top: 8px; left: 8px;
   font-family: 'Orbitron', sans-serif; font-weight: 700;
