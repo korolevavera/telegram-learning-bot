@@ -38,23 +38,23 @@
 
   function clear() { view.innerHTML = ''; }
 
-  function playerRow(player, label, value) {
+  function playerRow(p) {
     const row = el('div', 'player-row');
     const rank = el('div', 'player-rank');
-    rank.textContent = player.rank != null ? player.rank : player.position != null ? player.position : '—';
+    rank.textContent = p.rank != null ? p.rank : '—';
     if (rank.textContent === '1') rank.classList.add('top1');
     else if (rank.textContent === '2' || rank.textContent === '3') rank.classList.add('top2');
 
     const info = el('div', 'player-info');
-    info.appendChild(el('div', 'player-nick', player.nickname));
+    info.appendChild(el('div', 'player-nick', p.name));
     const meta = el('div', 'player-meta');
-    if (player.team) meta.appendChild(el('span', null, player.team));
-    if (player.country_code) meta.appendChild(el('span', 'c-badge', player.country_code.toUpperCase()));
+    if (p.team) meta.appendChild(el('span', null, p.team));
+    if (p.country_code) meta.appendChild(el('span', 'c-badge', p.country_code.toUpperCase()));
     info.appendChild(meta);
 
     const stat = el('div', 'player-stat');
-    stat.appendChild(el('div', 'val', value));
-    stat.appendChild(el('div', 'lab', label));
+    stat.appendChild(el('div', 'val', p.value));
+    stat.appendChild(el('div', 'lab', p.label));
 
     row.appendChild(rank); row.appendChild(info); row.appendChild(stat);
     return row;
@@ -70,16 +70,20 @@
       const s = res.stats;
       clear();
       view.appendChild(sectionTitle('stats', 'Статистика'));
-      view.appendChild(el('p', 'muted-note', 'Данные: FACEIT · обновляется раз в 15 мин.'));
-      view.appendChild(el('div', 'section-title', 'FACEIT · ELO (' + (s.faceit && s.faceit.region ? s.faceit.region : 'EU') + ')'));
-      if (s.faceit && s.faceit.players && s.faceit.players.length) {
-        s.faceit.players.forEach(p => {
-          const item = Object.assign({}, p, { rank: p.position });
-          view.appendChild(playerRow(item, 'ELO', p.faceit_elo != null ? p.faceit_elo.toLocaleString('en-US') : '—'));
-        });
-      } else {
-        view.appendChild(el('p', 'section-text', 'FACEIT не подключён: добавь FACEIT_API_KEY'));
+      view.appendChild(el('p', 'muted-note', 'Источники: bo3.gg/HLTV · FACEIT · обновление каждые 15 мин.'));
+      const sections = s.sections || [];
+      if (!sections.length) {
+        view.appendChild(el('p', 'section-text', 'Нет данных'));
+        return;
       }
+      sections.forEach(sec => {
+        view.appendChild(el('div', 'section-title', sec.title + (sec.subtitle ? ' · ' + sec.subtitle : '')));
+        if (sec.items && sec.items.length) {
+          sec.items.forEach(it => view.appendChild(playerRow(it)));
+        } else {
+          view.appendChild(el('p', 'section-text', 'Нет данных'));
+        }
+      });
     } catch (err) {
       view.appendChild(el('p', 'section-text', 'Не удалось загрузить статистику'));
     }
