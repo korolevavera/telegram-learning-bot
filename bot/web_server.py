@@ -9,7 +9,7 @@ from aiohttp import web
 from .config_loader import CONFIG
 from .content import CARDS, LESSONS, QUIZZES
 from .services import get_progress, save_quiz_result, set_card_known, upsert_lesson_progress
-from .stats import get_stats
+from .stats import clear_cache, get_stats
 
 STATIC_DIR = Path(__file__).resolve().parent / "webapp"
 
@@ -110,6 +110,8 @@ async def api_stats(request: web.Request) -> web.Response:
     auth = _auth(request)
     if auth is None:
         return _unauthorized()
+    if request.query.get("refresh"):
+        clear_cache()
     try:
         stats = await get_stats()
     except Exception:

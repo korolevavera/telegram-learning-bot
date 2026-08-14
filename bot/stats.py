@@ -149,8 +149,9 @@ async def get_bo3_teams(limit: int = TOP_TEAMS) -> list[dict]:
                 "rank": t.get("rank"),
                 "name": t.get("name"),
                 "country_code": (t.get("country") or {}).get("code"),
-                "value": wr if wr is not None else "—",
-                "label": "WIN%",
+                "value": wr,
+                "decimals": 1,
+                "image": t.get("image_url"),
             }
         )
     logger.info("fetched bo3 teams: %s", len(result))
@@ -180,8 +181,9 @@ async def get_bo3_players(limit: int = TOP_PRO) -> list[dict]:
                 "name": p.get("nickname"),
                 "team": (p.get("team") or {}).get("name"),
                 "country_code": (p.get("country") or {}).get("code"),
-                "value": f"{rating:.2f}" if rating is not None else "—",
-                "label": "RATING",
+                "value": rating,
+                "decimals": 2,
+                "image": (p.get("image_versions") or {}).get("webp") or p.get("image_url"),
             }
         )
     logger.info("fetched bo3 players: %s", len(result))
@@ -202,6 +204,7 @@ async def get_stats() -> dict:
                 "id": "teams",
                 "title": "Команды",
                 "subtitle": f"Топ-{len(teams)} · рейтинг про-сцены",
+                "unit": "WIN%",
                 "items": teams,
             }
         )
@@ -211,8 +214,9 @@ async def get_stats() -> dict:
                 "rank": it.get("position"),
                 "name": it.get("nickname"),
                 "country_code": it.get("country"),
-                "value": str(it["faceit_elo"]) if it.get("faceit_elo") is not None else "—",
-                "label": "ELO",
+                "value": it.get("faceit_elo"),
+                "decimals": 0,
+                "image": None,
             }
             for it in faceit
         ]
@@ -221,6 +225,7 @@ async def get_stats() -> dict:
                 "id": "faceit",
                 "title": "FACEIT",
                 "subtitle": f"Топ-{len(items)} · регион EU",
+                "unit": "ELO",
                 "items": items,
             }
         )
@@ -230,6 +235,7 @@ async def get_stats() -> dict:
                 "id": "pro",
                 "title": "Про-сцена",
                 "subtitle": f"Топ-{len(pro)} · рейтинг за 6 мес.",
+                "unit": "RATING",
                 "items": pro,
             }
         )
@@ -242,3 +248,7 @@ async def get_stats() -> dict:
 
 async def close() -> None:
     await _close_session()
+
+
+def clear_cache() -> None:
+    _cache.clear()
