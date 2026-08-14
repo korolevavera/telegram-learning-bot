@@ -3,7 +3,8 @@
   if (tg) { tg.ready(); tg.expand(); tg.setHeaderColor && tg.setHeaderColor('#05070d'); }
 
   const ICONS = {
-    bolt: '<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>',
+    bolt: '<svg class="bolt" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>',
+    kamina: '<svg class="kamina" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4.2 9C4.2 4.6 7.7 2 12 2s7.8 2.6 7.8 7c0 .9-.2 1.9-.5 2.7H4.7c-.3-.8-.5-1.8-.5-2.7z" fill="#d93a1e"/><path d="M7.2 2.6l1 2.2 1-2.2 1.1 2.2 1.1-2.2 1.1 2.2 1-2.2 1.1 2.2 1-2.2" stroke="#ff5b2b" stroke-width="1.1" stroke-linecap="round"/><path d="M5 10.6h14c.5 2.3-.2 5.3-1.5 7.5-1.3 2.2-3.1 3.9-5.5 3.9s-4.2-1.7-5.5-3.9C5.2 15.9 4.5 12.9 5 10.6z" fill="#f2b28a"/><path d="M5.4 13.1h13.2v.8H5.4z" fill="#161616"/><rect x="6.2" y="13" width="4.5" height="3.9" rx="1" fill="#1a1a1a"/><rect x="13.3" y="13" width="4.5" height="3.9" rx="1" fill="#1a1a1a"/><path d="M10.8 13.4h2.4v3.5h-2.4z" fill="#1a1a1a"/><path d="M7.4 16.1h2" stroke="#ffd23f" stroke-width=".8" stroke-linecap="round"/><path d="M14.6 16.1h2" stroke="#ffd23f" stroke-width=".8" stroke-linecap="round"/><path d="M10 19.6c.6.5 1.3.7 2 .7s1.4-.2 2-.7" stroke="#7a3c1c" stroke-width=".8" stroke-linecap="round"/></svg>',
     stats: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>',
     refresh: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><polyline points="21 3 21 9 15 9"/></svg>',
     back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>',
@@ -66,6 +67,8 @@
       f_streak: 'Серия', f_longest: 'Макс. серия', f_last: 'Последние матчи', f_maps: 'Карты',
       f_matches_n: 'Матчей: ', f_socials: 'Соц сети',
       set_theme: 'Тема оформления', set_lang: 'Язык',
+      gurren_q1: '«Верь в меня, что верит в тебя!» — Камина',
+      gurren_note: 'Команда Дай-Гуррен · «Кто, по-твоему, мы такие?!»',
       theme_dark: 'Тёмная', theme_light: 'Светлая', theme_gurren: 'Gurren Lagann',
       lang_ru: 'Русский', lang_en: 'English',
       profile_tg: 'Профиль Telegram', app_label: 'Приложение', version: 'Версия',
@@ -108,6 +111,8 @@
       f_streak: 'Streak', f_longest: 'Longest streak', f_last: 'Recent matches', f_maps: 'Maps',
       f_matches_n: 'Matches: ', f_socials: 'Social links',
       set_theme: 'Theme', set_lang: 'Language',
+      gurren_q1: '"Believe in the me that believes in you!" — Kamina',
+      gurren_note: 'Team Dai-Gurren · "Who the hell do you think we are?!"',
       theme_dark: 'Dark', theme_light: 'Light', theme_gurren: 'Gurren Lagann',
       lang_ru: 'Russian', lang_en: 'English',
       profile_tg: 'Telegram profile', app_label: 'App', version: 'Version',
@@ -500,6 +505,10 @@
     search.setAttribute('placeholder', t('search_ph'));
     searchBox.appendChild(search);
     view.appendChild(searchBox);
+
+    if (currentTheme === 'gurren') {
+      view.appendChild(el('div', 'gurren-quote', t('gurren_q1')));
+    }
 
     let onboarded = true;
     try { onboarded = localStorage.getItem(ONB_KEY) === '1'; } catch (e) {}
@@ -1183,8 +1192,12 @@
       currentTheme = v;
       saveSettings();
       applyTheme();
+      renderSettings();
     }));
     view.appendChild(themeRow);
+    if (currentTheme === 'gurren') {
+      view.appendChild(el('div', 'gurren-note', t('gurren_note')));
+    }
 
     view.appendChild(sectionTitle('settings', t('set_lang')));
     const langRow = el('div', 'set-row');
@@ -1268,7 +1281,7 @@
     document.body.appendChild(orb2);
 
     document.getElementById('appHeader').innerHTML =
-      '<h1><span class="logo">' + ICONS.bolt + '</span><span class="brand">CS2 <span class="hl">COACH</span></span></h1>' +
+      '<h1><span class="logo">' + ICONS.bolt + ICONS.kamina + '</span><span class="brand">CS2 <span class="hl">COACH</span></span></h1>' +
       '<span id="userName"></span>';
 
     let tabBar = document.getElementById('tabBar');

@@ -173,6 +173,8 @@ header h1 .logo {
   animation: logoPulse 2.6s ease-in-out infinite;
 }
 header h1 .logo svg { width: 16px; height: 16px; }
+header h1 .logo svg.bolt { display: block; }
+header h1 .logo svg.kamina { display: none; }
 header h1 .brand {
   font-family: 'Orbitron', sans-serif;
   font-weight: 700; letter-spacing: 3px; color: var(--text);
@@ -721,4 +723,74 @@ header h1 .brand .hl {
 @keyframes drift2 {
   from { transform: translate(0, 0); }
   to { transform: translate(60px, -50px); }
+}
+
+html[data-theme="gurren"] header h1 .logo {
+  background: linear-gradient(135deg, #ffd23f, #ff5b2b 55%, #c02212);
+  box-shadow: 0 0 14px rgba(255, 91, 43, .5);
+  animation: gurrenPulse 1.3s ease-in-out infinite;
+}
+html[data-theme="gurren"] header h1 .logo svg.bolt { display: none; }
+html[data-theme="gurren"] header h1 .logo svg.kamina { display: block; width: 20px; height: 20px; }
+html[data-theme="gurren"] header h1 .brand .hl {
+  background: linear-gradient(90deg, #ffd23f, #ff5b2b, #ff3b2f);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 0 18px rgba(255, 91, 43, .35);
+}
+
+html[data-theme="gurren"] body::after {
+  content: '';
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200' fill='none' stroke='%23ffd23f' stroke-width='6' stroke-linecap='round'%3E%3Cpath d='M100 100 m0-40 a40 40 0 1 1 40 40' opacity='.9'/%3E%3Cpath d='M100 100 m0-75 a75 75 0 1 1 75 75' opacity='.55'/%3E%3Cpath d='M100 100 m0-105 a105 105 0 1 1 105 105' opacity='.32'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: 50% 66%;
+  background-size: min(92vw, 660px);
+  opacity: .09;
+}
+
+html[data-theme="gurren"] .orb1 {
+  background: radial-gradient(circle, rgba(255, 59, 47, .30), transparent 65%);
+}
+html[data-theme="gurren"] .orb2 {
+  background: radial-gradient(circle, rgba(255, 209, 102, .26), transparent 65%);
+}
+
+html[data-theme="gurren"] .loadbar-fill {
+  background: linear-gradient(90deg, transparent, #ffd23f, #ff5b2b, #ff3b2f, transparent);
+  box-shadow: 0 0 8px rgba(255, 91, 43, .7);
+}
+
+html[data-theme="gurren"] .tab.active { text-shadow: 0 0 8px rgba(255, 179, 0, .8); }
+html[data-theme="gurren"] .tab.active .tab-ico { filter: drop-shadow(0 0 8px rgba(255, 179, 0, .9)); }
+
+.gurren-quote {
+  margin: 10px 0 14px;
+  padding: 9px 12px 9px 14px;
+  font-size: 13px;
+  font-style: italic;
+  letter-spacing: .3px;
+  color: var(--gold);
+  background: linear-gradient(90deg, rgba(255, 59, 47, .12), rgba(255, 179, 0, .04), transparent);
+  border-left: 3px solid #ff5b2b;
+  border-radius: 6px;
+  text-shadow: 0 0 12px rgba(255, 209, 102, .4);
+}
+
+.gurren-note {
+  margin: 8px 0 16px;
+  font-size: 12px;
+  line-height: 1.5;
+  letter-spacing: .4px;
+  color: var(--gold);
+  background: linear-gradient(135deg, rgba(255, 59, 47, .14), rgba(255, 179, 0, .07));
+  border: 1px solid rgba(255, 209, 102, .28);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+
+@keyframes gurrenPulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 10px rgba(255, 91, 43, .35); }
+  50% { transform: scale(1.06); box-shadow: 0 0 20px rgba(255, 209, 63, .65); }
 }
