@@ -1297,16 +1297,16 @@
   }
 
   const GUIDES_MAPS = [
-    { id: 'dust2', name: 'Dust II' },
-    { id: 'mirage', name: 'Mirage' },
-    { id: 'inferno', name: 'Inferno' },
-    { id: 'nuke', name: 'Nuke' },
-    { id: 'ancient', name: 'Ancient' },
-    { id: 'overpass', name: 'Overpass' },
-    { id: 'anubis', name: 'Anubis' },
-    { id: 'vertigo', name: 'Vertigo' },
-    { id: 'train', name: 'Train' },
-    { id: 'cache', name: 'Cache' }
+    { id: 'dust2', name: 'Dust II', img: '/static/maps/dust2.png' },
+    { id: 'mirage', name: 'Mirage', img: '/static/maps/mirage.png' },
+    { id: 'inferno', name: 'Inferno', img: '/static/maps/inferno.png' },
+    { id: 'nuke', name: 'Nuke', img: '/static/maps/nuke.png' },
+    { id: 'ancient', name: 'Ancient', img: '/static/maps/ancient.png' },
+    { id: 'overpass', name: 'Overpass', img: '/static/maps/overpass.png' },
+    { id: 'anubis', name: 'Anubis', img: '/static/maps/anubis.png' },
+    { id: 'vertigo', name: 'Vertigo', img: '/static/maps/vertigo.png' },
+    { id: 'train', name: 'Train', img: '/static/maps/train.png' },
+    { id: 'cache', name: 'Cache', img: '/static/maps/cache.png' }
   ];
 
   const GUIDES_MIKRA = [
@@ -1346,6 +1346,21 @@
     return row;
   }
 
+  function gMapCard(map) {
+    const card = el('div', 'g-map');
+    const pic = el('div', 'map-pic');
+    const img = document.createElement('img');
+    img.setAttribute('src', map.img);
+    img.setAttribute('alt', map.name);
+    img.loading = 'lazy';
+    pic.appendChild(img);
+    pic.appendChild(el('span', 'map-name', map.name));
+    card.appendChild(pic);
+    card.appendChild(el('span', 'g-chev', '›'));
+    card.addEventListener('click', () => renderGuideDetail(map));
+    return card;
+  }
+
   function renderGuides() {
     if (loading) return;
     loading = true;
@@ -1363,9 +1378,7 @@
   }
 
   function renderMapsList(box) {
-    GUIDES_MAPS.forEach((map, i) => {
-      box.appendChild(gRow(String(i + 1), map.name, null, () => renderGuideDetail(map)));
-    });
+    GUIDES_MAPS.forEach(map => box.appendChild(gMapCard(map)));
   }
 
   function renderMikraList(box) {

@@ -721,6 +721,39 @@ header h1 .brand .hl {
   color: var(--muted);
 }
 
+.g-map {
+  display: flex; align-items: center; gap: 10px;
+  background: linear-gradient(145deg, var(--panel2), var(--panel));
+  border: 1px solid var(--border);
+  border-radius: 4px 12px 12px 4px;
+  padding: 6px 12px 6px 6px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: transform .15s, border-color .2s;
+}
+.g-map:active { transform: scale(.98); border-color: rgba(var(--accent-rgb),.5); }
+.map-pic {
+  position: relative;
+  flex: 1; height: 96px;
+  display: grid; place-items: center;
+  overflow: hidden;
+  border-radius: 2px 8px 8px 2px;
+  background: linear-gradient(160deg, rgba(0,0,0,.5), rgba(0,0,0,.25));
+}
+.map-pic img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.map-name {
+  position: absolute; top: 8px; left: 8px;
+  font-family: 'Orbitron', sans-serif; font-weight: 700;
+  font-size: 11px; letter-spacing: 1px;
+  color: var(--text);
+  background: rgba(10, 12, 16, .8);
+  border: 1px solid rgba(var(--accent-rgb),.45);
+  border-radius: 4px;
+  padding: 3px 8px;
+  text-shadow: 0 1px 2px rgba(0,0,0,.85);
+}
+.g-map .g-chev { flex: none; }
+
 .tab:focus-visible, .refresh-btn:focus-visible, .back-btn:focus-visible,
 .sub-tab:focus-visible, .link-btn:focus-visible, .star-btn:focus-visible,
 .sec-head:focus-visible, .hint-x:focus-visible {
