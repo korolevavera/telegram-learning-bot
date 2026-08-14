@@ -326,6 +326,166 @@ def _pct(won: Any, total: Any) -> float | None:
     return round(float(won) / float(total) * 100, 1)
 
 
+_RU_COUNTRIES = {
+    "RU": "России", "UA": "Украины", "KZ": "Казахстана", "BY": "Беларуси",
+    "PL": "Польши", "DE": "Германии", "SE": "Швеции", "DK": "Дании",
+    "NO": "Норвегии", "FI": "Финляндии", "LV": "Латвии", "EE": "Эстонии",
+    "LT": "Литвы", "RS": "Сербии", "TR": "Турции", "HU": "Венгрии",
+    "CZ": "Чехии", "SK": "Словакии", "BG": "Болгарии", "RO": "Румынии",
+    "GR": "Греции", "IT": "Италии", "NL": "Нидерландов", "BE": "Бельгии",
+    "PT": "Португалии", "ES": "Испании", "FR": "Франции", "GB": "Великобритании",
+    "US": "США", "CA": "Канады", "BR": "Бразилии", "AU": "Австралии",
+    "AR": "Аргентины", "CL": "Чили", "PE": "Перу", "MX": "Мексики",
+    "CO": "Колумбии", "ID": "Индонезии", "PH": "Филиппин", "TH": "Таиланда",
+    "VN": "Вьетнама", "SG": "Сингапура", "IN": "Индии", "IL": "Израиля",
+    "SA": "Саудовской Аравии", "AE": "ОАЭ", "CN": "Китая", "KR": "Южной Кореи",
+    "JP": "Японии", "HR": "Хорватии", "BA": "Боснии и Герцеговины",
+    "ME": "Черногории", "MK": "Северной Македонии", "XK": "Косова",
+    "GE": "Грузии", "AM": "Армении", "AZ": "Азербайджана", "UZ": "Узбекистана",
+    "MD": "Молдовы", "AT": "Австрии", "CH": "Швейцарии", "IE": "Ирландии",
+}
+
+_RU_MONTHS = {
+    1: "января", 2: "февраля", 3: "марта", 4: "апреля", 5: "мая", 6: "июня",
+    7: "июля", 8: "августа", 9: "сентября", 10: "октября", 11: "ноября", 12: "декабря",
+}
+
+_TIER_RU = {"s": "S", "a": "A", "b": "B", "c": "C", "d": "D"}
+
+
+def _plural(n: int, one: str, few: str, many: str) -> str:
+    n10, n100 = n % 10, n % 100
+    if n10 == 1 and n100 != 11:
+        return one
+    if 2 <= n10 <= 4 and not (12 <= n100 <= 14):
+        return few
+    return many
+
+
+def _fmt_date(value: Any) -> str | None:
+    text = str(value or "")[:10]
+    if len(text) != 10:
+        return None
+    try:
+        d = datetime.strptime(text, "%Y-%m-%d")
+    except ValueError:
+        return None
+    return f"{d.day} {_RU_MONTHS[d.month]} {d.year} года"
+
+
+def _fmt_money(value: Any) -> str:
+    try:
+        return f"{int(float(value)):,}".replace(",", " ")
+    except (TypeError, ValueError):
+        return ""
+
+
+def _build_player_bio(p: dict) -> str:
+    nickname = p.get("nickname") or "игрок"
+    real = " ".join(filter(None, (p.get("first_name"), p.get("last_name"))))
+    country = _RU_COUNTRIES.get(p.get("country_code")) or p.get("country_name")
+    role = p.get("role")
+    team = p.get("team")
+
+    opening = nickname
+    if real:
+        opening += f" (настоящее имя — {real})"
+    opening += " — профессиональный игрок в Counter-Strike 2"
+    details = []
+    if country:
+        details.append(f"родом из {country}")
+    bd = _fmt_date(p.get("birthday"))
+    if bd:
+        text = f"родился {bd}"
+        if p.get("age") is not None:
+            text += f" ({p['age']} {_plural(p['age'], 'год', 'года', 'лет')})"
+        details.append(text)
+    if role:
+        details.append(f"играет на позиции {role}")
+    if team:
+        details.append(f"сейчас выступает за команду {team}")
+    if details:
+        opening += " — " + ", ".join(details) + "."
+    parts = [opening]
+
+    timeline = p.get("teams") or []
+    if timeline:
+        dedup = []
+        for t in timeline:
+            if dedup and dedup[-1].get("team") == t.get("team"):
+                dedup[-1] = t
+            else:
+                dedup.append(t)
+        timeline = dedup
+        steps = []
+        first = timeline[0]
+        if first.get("date"):
+            start = f"Профессиональную карьеру начал в {str(first['date'])[:4]} году"
+        else:
+            start = "Профессиональную карьеру начинал с первых командных составов"
+        if first.get("team"):
+            start += f" в {first['team']}"
+        steps.append(start + ".")
+        final_team = timeline[-1].get("team") if len(timeline) > 1 else None
+        for t in timeline[1:-1]:
+            if not t.get("team"):
+                continue
+            if final_team and t.get("team") == final_team:
+                continue
+            if t.get("date"):
+                steps.append(f"В {str(t['date'])[:4]} году перешёл в {t['team']}.")
+            else:
+                steps.append(f"Затем выступал за {t['team']}.")
+        if len(timeline) > 1 and final_team:
+            joined = _fmt_date(p.get("joined_team_at"))
+            if joined:
+                steps.append(f"С {joined} выступает за {final_team}.")
+            else:
+                steps.append(f"В итоге оказался в {final_team}.")
+        parts.append(" ".join(steps))
+
+    won = [a for a in (p.get("achievements") or []) if (a.get("title") or "").lower() == "winner"]
+    if won:
+        names = ", ".join(
+            a["tournament"] for a in won if a.get("tournament")
+        )
+        if not names:
+            names = None
+        count = len(won)
+        text = (
+            f"История успеха {nickname} насчитывает {count} "
+            f"побед{_plural(count, 'у', 'ы', '')} на профессиональных турнирах"
+        )
+        if names:
+            text += f" — среди них {names}"
+        text += "."
+        parts.append(text)
+
+    prize = _fmt_money(p.get("total_prize"))
+    if prize:
+        parts.append(f"За карьеру суммарные призовые превысили ${prize}.")
+
+    stats = p.get("stats") or {}
+    rating = p.get("rating")
+    if rating is not None:
+        extras = []
+        if stats.get("match_winrate") is not None:
+            extras.append(f"винрейт в матчах — {stats['match_winrate']:.1f}%")
+        if stats.get("kd") is not None:
+            extras.append(f"K/D — {stats['kd']:.2f}")
+        if stats.get("adr") is not None:
+            extras.append(f"средний урон за раунд — {stats['adr']:.1f}")
+        if stats.get("hs") is not None:
+            extras.append(f"точность попаданий в голову — {stats['hs']:.1f}%")
+        tail = f"За последние шесть месяцев рейтинг {nickname} составил {rating:.2f}"
+        if extras:
+            tail += " (" + ", ".join(extras) + ")"
+        tail += " — это подтверждает его статус одного из самых ярких игроков современной сцены."
+        parts.append(tail)
+
+    return "\n\n".join(p for p in parts if p)
+
+
 def _fnum(value: Any) -> float | None:
     if value is None:
         return None
@@ -753,6 +913,7 @@ async def get_player_info(slug: str) -> dict | None:
         "teams": timeline,
         "achievements": achievements,
     }
+    info["bio_text"] = _build_player_bio(info)
     logger.info("fetched player info: %s", slug)
     return _write_cache(key, info)
 

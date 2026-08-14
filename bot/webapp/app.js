@@ -520,6 +520,16 @@
     if (p.image) photos.appendChild(photoCard(p.image, p.nickname));
     if (p.team_image) photos.appendChild(photoCard(p.team_image, p.team || 'Команда'));
     if (!photos.children.length) photos.appendChild(el('p', 'muted-note', 'Фото недоступно'));
+
+    if (p.bio_text) {
+      const story = el('div', 'bio-story');
+      const storyTitle = el('div', 'bio-story-title');
+      storyTitle.appendChild(iconEl('users'));
+      storyTitle.appendChild(document.createTextNode('Жизненный путь и история успеха'));
+      story.appendChild(storyTitle);
+      story.appendChild(el('p', 'bio-story-text', p.bio_text));
+      bioBox.appendChild(story);
+    }
     bioBox.appendChild(photos);
 
     bioBox.appendChild(sectionTitle('users', 'Личные данные'));
