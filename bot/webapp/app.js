@@ -60,31 +60,53 @@
     return row;
   }
 
+  function renderSlide(sec) {
+    const slide = el('section', 'slide');
+    slide.appendChild(el('div', 'section-title', sec.title + (sec.subtitle ? ' · ' + sec.subtitle : '')));
+    if (sec.items && sec.items.length) {
+      sec.items.forEach(it => slide.appendChild(playerRow(it)));
+    } else {
+      slide.appendChild(el('p', 'section-text', 'Нет данных'));
+    }
+    return slide;
+  }
+
   async function renderStats() {
     clear();
     view.appendChild(sectionTitle('stats', 'Статистика'));
-    view.appendChild(el('div', 'spinner', 'ЗАГРУЗКА...'));
+    view.appendChild(el('p', 'muted-note', 'Свайп в сторону, чтобы сменить раздел'));
+    const spin = el('div', 'spinner', 'ЗАГРУЗКА...');
+    view.appendChild(spin);
     try {
       const res = await api.get('/api/stats');
       if (!res.ok) throw new Error('bad response');
-      const s = res.stats;
-      clear();
-      view.appendChild(sectionTitle('stats', 'Статистика'));
-      view.appendChild(el('p', 'muted-note', 'Источники: bo3.gg/HLTV · FACEIT · обновление каждые 15 мин.'));
-      const sections = s.sections || [];
+      const sections = (res.stats && res.stats.sections) || [];
+      spin.remove();
       if (!sections.length) {
         view.appendChild(el('p', 'section-text', 'Нет данных'));
         return;
       }
-      sections.forEach(sec => {
-        view.appendChild(el('div', 'section-title', sec.title + (sec.subtitle ? ' · ' + sec.subtitle : '')));
-        if (sec.items && sec.items.length) {
-          sec.items.forEach(it => view.appendChild(playerRow(it)));
-        } else {
-          view.appendChild(el('p', 'section-text', 'Нет данных'));
-        }
+      const carousel = el('div', 'carousel');
+      const dots = el('div', 'dots');
+      sections.forEach(sec => carousel.appendChild(renderSlide(sec)));
+      sections.forEach((_, i) => {
+        const dot = el('button', 'dot');
+        dot.addEventListener('click', () => {
+          carousel.scrollTo({ left: i * carousel.clientWidth, behavior: 'smooth' });
+        });
+        dots.appendChild(dot);
       });
+      const setActiveDot = idx => {
+        [...dots.children].forEach((d, i) => d.classList.toggle('active', i === idx));
+      };
+      setActiveDot(0);
+      carousel.addEventListener('scroll', () => {
+        setActiveDot(Math.round(carousel.scrollLeft / carousel.clientWidth));
+      });
+      view.appendChild(carousel);
+      view.appendChild(dots);
     } catch (err) {
+      spin.remove();
       view.appendChild(el('p', 'section-text', 'Не удалось загрузить статистику'));
     }
   }
