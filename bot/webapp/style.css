@@ -362,6 +362,17 @@ header h1 .brand .hl {
 .b-lab { font-size: 12px; color: var(--muted); }
 .b-val { font-size: 13px; font-weight: 600; color: #fff; text-align: right; }
 
+.f-links { display: flex; gap: 8px; flex-wrap: wrap; }
+.link-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: 'Orbitron', sans-serif; font-size: 11px; letter-spacing: 1px;
+  color: #fff; background: linear-gradient(160deg, var(--panel2), var(--panel));
+  border: 1px solid rgba(0,229,255,.45);
+  border-radius: 8px; padding: 8px 14px;
+  text-decoration: none; transition: transform .15s;
+}
+.link-btn:active { transform: scale(.96); }
+
 .s-grid {
   display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
 }

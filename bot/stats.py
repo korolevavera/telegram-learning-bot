@@ -120,6 +120,7 @@ async def get_faceit_ranking(region: str = "EU", limit: int = TOP_FACEIT) -> lis
             av = None
         result.append(
             {
+                "id": it.get("player_id"),
                 "position": it.get("position"),
                 "nickname": it.get("nickname"),
                 "country": it.get("country"),
@@ -130,6 +131,103 @@ async def get_faceit_ranking(region: str = "EU", limit: int = TOP_FACEIT) -> lis
         )
     logger.info("fetched faceit ranking %s: %s", region, len(result))
     return _write_cache(key, result)
+
+
+async def get_faceit_player_info(player_id: str) -> dict | None:
+    key = f"faceit:player:{player_id}"
+    cached = _read_cache(key, CACHE_TTL)
+    if cached is not None:
+        return cached
+    headers = _faceit_headers()
+    if headers is None:
+        return None
+    session = await _get_session()
+
+    async def _get(path: str) -> dict | None:
+        async with session.get(
+            f"{FACEIT_BASE}{path}", headers=headers, timeout=20
+        ) as response:
+            if response.status == 404:
+                return None
+            response.raise_for_status()
+            return await response.json()
+
+    p, st = await asyncio.gather(
+        _get(f"/players/{player_id}"),
+        _get(f"/players/{player_id}/stats/cs2"),
+        return_exceptions=True,
+    )
+    if isinstance(p, Exception):
+        p = None
+    if isinstance(st, Exception):
+        st = None
+    if not isinstance(p, dict):
+        return None
+
+    g = (p.get("games") or {}).get("cs2") or {}
+    life = {}
+    segs = []
+    if isinstance(st, dict):
+        life = st.get("lifetime") or {}
+        segs = st.get("segments") or []
+    matches = _fnum(life.get("Matches"))
+    wins = _fnum(life.get("Wins"))
+    losses = round(matches - wins, 1) if matches is not None and wins is not None else None
+
+    recent = []
+    for r in (life.get("Recent Results") or [])[:12]:
+        recent.append("W" if str(r) == "1" else "L")
+
+    maps_list = []
+    for seg in segs:
+        if seg.get("type") != "Map":
+            continue
+        sm = seg.get("stats") or {}
+        m_count = _fnum(sm.get("Matches"))
+        if not m_count:
+            continue
+        maps_list.append(
+            {
+                "map": (seg.get("label") or "").replace("_", " "),
+                "matches": m_count,
+                "winrate": _fnum(sm.get("Win Rate %")),
+                "kd": _fnum(sm.get("Average K/D Ratio")),
+                "hs": _fnum(sm.get("Average Headshots %")),
+            }
+        )
+    maps_list.sort(key=lambda m: -(m.get("matches") or 0))
+    maps_list = maps_list[:6]
+
+    info = {
+        "player_id": p.get("player_id"),
+        "nickname": p.get("nickname"),
+        "country_code": p.get("country"),
+        "verified": bool(p.get("verified")),
+        "region": g.get("region"),
+        "skill_level": g.get("skill_level"),
+        "elo": g.get("faceit_elo"),
+        "steam_id": p.get("steam_id_64"),
+        "steam_nickname": p.get("steam_nickname"),
+        "faceit_url": (p.get("faceit_url") or "").replace("{lang}", "en"),
+        "activated_at": (p.get("activated_at") or "")[:10],
+        "image": p.get("avatar"),
+        "stats": {
+            "matches": matches,
+            "wins": wins,
+            "losses": losses,
+            "winrate": _pct(wins, matches) or _fnum(life.get("Win Rate %")),
+            "kd": _fnum(life.get("Average K/D Ratio")),
+            "hs": _fnum(life.get("Average Headshots %")),
+            "adr": _fnum(life.get("ADR")),
+            "kills": _fnum(life.get("Total Kills with extended stats")),
+            "win_streak": _fnum(life.get("Current Win Streak")),
+            "longest_streak": _fnum(life.get("Longest Win Streak")),
+            "results": recent,
+        },
+        "maps": maps_list,
+    }
+    logger.info("fetched faceit player info: %s", player_id)
+    return _write_cache(key, info)
 
 
 async def _team_winrate(slug: str) -> float | None:
@@ -226,6 +324,15 @@ def _pct(won: Any, total: Any) -> float | None:
     if not total:
         return None
     return round(float(won) / float(total) * 100, 1)
+
+
+def _fnum(value: Any) -> float | None:
+    if value is None:
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
 
 
 async def _team_matches(

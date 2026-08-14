@@ -88,6 +88,7 @@
   function playerRow(p, unit, maxVal) {
     const row = el('div', 'player-row');
     if (p.slug) row.dataset.slug = p.slug;
+    if (p.id) row.dataset.id = p.id;
     const rank = el('div', 'player-rank');
     rank.textContent = p.rank != null ? p.rank : '—';
     if (p.rank === 1) rank.classList.add('top1');
@@ -172,6 +173,12 @@
       wrap.querySelectorAll('[data-slug]').forEach(node => {
         node.classList.add('clickable');
         node.addEventListener('click', () => openPlayer(node.dataset.slug));
+      });
+    }
+    if (sec.id === 'faceit') {
+      wrap.querySelectorAll('[data-id]').forEach(node => {
+        node.classList.add('clickable');
+        node.addEventListener('click', () => openFaceitPlayer(node.dataset.id));
       });
     }
     return wrap;
@@ -519,6 +526,134 @@
       loadbar.remove();
       if (!res.ok) throw new Error('bad response');
       renderPlayerDetail(res.player, pd);
+    } catch (err) {
+      loadbar.remove();
+      view.appendChild(el('p', 'section-text', 'Не удалось загрузить игрока'));
+    } finally {
+      loading = false;
+    }
+  }
+
+  function linkBtn(href, label) {
+    const a = document.createElement('a');
+    a.className = 'link-btn';
+    a.href = href;
+    a.target = '_blank';
+    a.rel = 'noopener';
+    a.textContent = label;
+    return a;
+  }
+
+  function faceitMapRow(m) {
+    const row = el('div', 'm-row');
+    const info = el('div', 'm-info');
+    info.appendChild(el('div', 'm-opp', m.map));
+    const sub = el('div', 'm-sub');
+    if (m.matches) sub.appendChild(el('span', null, 'Матчей: ' + formatNum(m.matches, 0)));
+    if (m.kd != null) sub.appendChild(el('span', null, 'K/D: ' + formatNum(m.kd, 2)));
+    info.appendChild(sub);
+    row.appendChild(info);
+    row.appendChild(el('div', 'm-score', m.winrate != null ? formatNum(m.winrate, 1) + '%' : '—'));
+    return row;
+  }
+
+  function renderFaceitPlayer(p, td) {
+    const hero = el('div', 't-hero');
+    const logo = avatarEl({ image: p.image, name: p.nickname });
+    logo.classList.add('hero-logo');
+    hero.appendChild(logo);
+    const hinfo = el('div', 't-hinfo');
+    hinfo.appendChild(el('div', 't-name', p.nickname));
+    const badges = el('div', 't-badges');
+    if (p.country_code) badges.appendChild(el('span', 'c-badge', p.country_code.toUpperCase()));
+    if (p.skill_level != null) badges.appendChild(el('span', 'rank-badge', 'Lv ' + p.skill_level));
+    if (p.verified) badges.appendChild(el('span', 'delta-badge', 'VERIFIED'));
+    hinfo.appendChild(badges);
+    const meta = el('div', 't-meta');
+    if (p.region) meta.appendChild(el('span', null, p.region));
+    if (p.elo != null) meta.appendChild(el('span', 'earn', 'ELO ' + formatNum(p.elo, 0)));
+    hinfo.appendChild(meta);
+    hero.appendChild(hinfo);
+    td.appendChild(hero);
+
+    td.appendChild(sectionTitle('users', 'Биография'));
+    const bio = el('div', 'b-list');
+    bio.appendChild(bioRow('Никнейм', p.nickname));
+    if (p.country_code) bio.appendChild(bioRow('Страна', p.country_code.toUpperCase()));
+    if (p.region) bio.appendChild(bioRow('Регион', p.region));
+    if (p.skill_level != null) bio.appendChild(bioRow('Уровень FACEIT', 'Lv ' + p.skill_level));
+    if (p.elo != null) bio.appendChild(bioRow('Рейтинг ELO', formatNum(p.elo, 0)));
+    if (p.steam_nickname) bio.appendChild(bioRow('Steam', p.steam_nickname));
+    if (p.activated_at) bio.appendChild(bioRow('Аккаунт с', p.activated_at));
+    td.appendChild(bio);
+
+    const s = p.stats || {};
+    td.appendChild(sectionTitle('stats', 'Статистика на FACEIT'));
+    const grid = el('div', 's-grid');
+    grid.appendChild(statCard('ELO', p.elo, 0, 'accent'));
+    grid.appendChild(statCard('Матчи', s.matches, 0));
+    grid.appendChild(statCard('Победы', s.wins, 0));
+    grid.appendChild(statCard('Поражения', s.losses, 0));
+    grid.appendChild(statCard('Винрейт', s.winrate, 1, 'accent'));
+    grid.appendChild(statCard('K/D', s.kd, 2));
+    grid.appendChild(statCard('HS%', s.hs, 1));
+    grid.appendChild(statCard('ADR', s.adr, 1));
+    grid.appendChild(statCard('Убийств', s.kills, 0));
+    grid.appendChild(statCard('Серия', s.win_streak, 0));
+    grid.appendChild(statCard('Макс. серия', s.longest_streak, 0));
+    td.appendChild(grid);
+
+    const results = s.results || [];
+    if (results.length) {
+      td.appendChild(sectionTitle('stats', 'Последние матчи'));
+      const chips = el('div', 'm-maps');
+      results.forEach(r => {
+        chips.appendChild(el('span', 'map-chip ' + (r === 'W' ? 'win' : 'loss'), r));
+      });
+      td.appendChild(chips);
+    }
+
+    const ml = p.maps || [];
+    if (ml.length) {
+      td.appendChild(sectionTitle('stats', 'Карты'));
+      const maps = el('div', 't-matches');
+      ml.forEach(m => maps.appendChild(faceitMapRow(m)));
+      td.appendChild(maps);
+    }
+
+    const links = el('div', 'f-links');
+    if (p.faceit_url) links.appendChild(linkBtn(p.faceit_url, 'FACEIT'));
+    if (p.steam_id) links.appendChild(linkBtn('https://steamcommunity.com/profiles/' + p.steam_id, 'Steam'));
+    if (links.children.length) {
+      td.appendChild(sectionTitle('users', 'Соц сети'));
+      td.appendChild(links);
+    }
+
+    view.querySelectorAll('.s-card').forEach((c, i) => {
+      const v = c.querySelector('.s-val');
+      setTimeout(() => countUp(v, +v.dataset.target, +v.dataset.decimals), 60 + i * 40);
+    });
+  }
+
+  async function openFaceitPlayer(id) {
+    if (!id || loading) return;
+    loading = true;
+    clear();
+    const pd = el('div', 't-detail');
+    const back = el('button', 'back-btn');
+    back.appendChild(iconEl('back'));
+    back.appendChild(document.createTextNode('Назад'));
+    back.addEventListener('click', () => renderStats(false));
+    pd.appendChild(back);
+    const loadbar = el('div', 'loadbar');
+    loadbar.appendChild(el('div', 'loadbar-fill'));
+    pd.appendChild(loadbar);
+    view.appendChild(pd);
+    try {
+      const res = await api.get('/api/faceit-player?id=' + encodeURIComponent(id));
+      loadbar.remove();
+      if (!res.ok) throw new Error('bad response');
+      renderFaceitPlayer(res.player, pd);
     } catch (err) {
       loadbar.remove();
       view.appendChild(el('p', 'section-text', 'Не удалось загрузить игрока'));
