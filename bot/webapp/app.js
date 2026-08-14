@@ -130,6 +130,7 @@
   function podiumCard(it, place, unit) {
     const card = el('div', 'p-card p' + place);
     if (it.slug) card.dataset.slug = it.slug;
+    if (it.id) card.dataset.id = it.id;
     card.appendChild(el('div', 'p-place', String(place)));
     card.appendChild(avatarEl(it));
     card.appendChild(el('div', 'p-name', it.name));
