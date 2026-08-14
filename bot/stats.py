@@ -19,6 +19,8 @@ BO3_HEADERS = {
 FACEIT_BASE = "https://open.faceit.com/data/v4"
 
 CACHE_TTL = 15 * 60
+PERIOD_DAYS = 180
+TEAM_MATCHES_LIMIT = 15
 
 TOP_TEAMS = 10
 TOP_FACEIT = 20
@@ -176,6 +178,7 @@ async def get_bo3_teams(limit: int = TOP_TEAMS) -> list[dict]:
             {
                 "rank": t.get("rank"),
                 "name": t.get("name"),
+                "slug": t.get("slug"),
                 "country_code": (t.get("country") or {}).get("code"),
                 "value": wr,
                 "decimals": 1,
@@ -216,6 +219,236 @@ async def get_bo3_players(limit: int = TOP_PRO) -> list[dict]:
         )
     logger.info("fetched bo3 players: %s", len(result))
     return _write_cache(key, result)
+
+
+def _pct(won: Any, total: Any) -> float | None:
+    if not total:
+        return None
+    return round(float(won) / float(total) * 100, 1)
+
+
+async def _team_matches(
+    session: aiohttp.ClientSession, team_id: int, limit: int = TEAM_MATCHES_LIMIT
+) -> list[dict]:
+    now = datetime.now(timezone.utc)
+    today = now.strftime("%Y-%m-%d")
+    start = (now - timedelta(days=PERIOD_DAYS)).strftime("%Y-%m-%d")
+    async with session.get(
+        f"{BO3_BASE}/matches",
+        params={
+            "page[offset]": 0,
+            "page[limit]": limit,
+            "sort": "-start_date",
+            "filter[matches.status][in]": "finished",
+            "filter[matches.team_ids][overlap]": team_id,
+            "filter[matches.start_date][gt]": start,
+            "filter[matches.start_date][lt]": today,
+            "filter[matches.discipline_id][eq]": 1,
+            "with": "teams,tournament,games",
+        },
+        headers=BO3_HEADERS,
+        timeout=20,
+    ) as response:
+        response.raise_for_status()
+        data = await response.json()
+    raw = data.get("results", data if isinstance(data, list) else [])
+    result = []
+    for m in raw:
+        t1 = m.get("team1") or {}
+        t2 = m.get("team2") or {}
+        t1_id = t1.get("id") or m.get("team1_id")
+        t2_id = t2.get("id") or m.get("team2_id")
+        if t1_id == team_id:
+            opp = t2
+            our, opp_scores = t1, (m.get("team1_score"), m.get("team2_score"))
+        elif t2_id == team_id:
+            opp = t1
+            our, opp_scores = t2, (m.get("team2_score"), m.get("team1_score"))
+        else:
+            continue
+        games = m.get("games") or []
+        our_score, opp_score = opp_scores
+        if our_score is None or opp_score is None:
+            if games:
+                our_score = sum(
+                    1
+                    for g in games
+                    if (g.get("winner_team_clan") or {}).get("team", {}).get("id") == team_id
+                )
+                opp_score = len(games) - our_score
+            else:
+                our_score = opp_score = 0
+        if our_score > opp_score:
+            res = "win"
+        elif our_score < opp_score:
+            res = "loss"
+        else:
+            res = "draw"
+        maps = []
+        for g in games:
+            winner_id = (g.get("winner_team_clan") or {}).get("team", {}).get("id")
+            if winner_id == team_id:
+                maps.append(
+                    {
+                        "map": g.get("map_name"),
+                        "our": g.get("winner_clan_score"),
+                        "opp": g.get("loser_clan_score"),
+                        "result": "win",
+                    }
+                )
+            else:
+                maps.append(
+                    {
+                        "map": g.get("map_name"),
+                        "our": g.get("loser_clan_score"),
+                        "opp": g.get("winner_clan_score"),
+                        "result": "loss",
+                    }
+                )
+        tournament = m.get("tournament") or {}
+        result.append(
+            {
+                "date": (m.get("start_date") or "")[:10],
+                "result": res,
+                "our_score": our_score,
+                "opp_score": opp_score,
+                "opponent": opp.get("name"),
+                "opponent_slug": opp.get("slug"),
+                "opponent_image": opp.get("image_url"),
+                "event": tournament.get("name"),
+                "tier": tournament.get("tier") or m.get("tier"),
+                "maps": maps,
+            }
+        )
+    return result
+
+
+async def get_team_info(slug: str) -> dict | None:
+    key = f"bo3:team:{slug}"
+    cached = _read_cache(key, CACHE_TTL)
+    if cached is not None:
+        return cached
+    session = await _get_session()
+    async with session.get(
+        f"{BO3_BASE}/teams/{slug}", params={"prefer_locale": "en"}, headers=BO3_HEADERS, timeout=20
+    ) as response:
+        if response.status == 404:
+            return None
+        response.raise_for_status()
+        data = await response.json()
+    now = datetime.now(timezone.utc)
+    today = now.strftime("%Y-%m-%d")
+    start = (now - timedelta(days=PERIOD_DAYS)).strftime("%Y-%m-%d")
+    team_id = data.get("id")
+
+    async def _general() -> dict:
+        async with session.get(
+            f"{BO3_BASE}/teams/{slug}/general_stats",
+            params={"filter[start_date_from]": start, "filter[start_date_to]": today},
+            headers=BO3_HEADERS,
+            timeout=20,
+        ) as response:
+            response.raise_for_status()
+            return await response.json()
+
+    async def _advanced() -> dict:
+        async with session.get(
+            f"{BO3_BASE}/teams/{slug}/advanced_stats",
+            params={"filter[begin_at_from]": start, "filter[begin_at_to]": today},
+            headers=BO3_HEADERS,
+            timeout=20,
+        ) as response:
+            response.raise_for_status()
+            d = await response.json()
+            if isinstance(d, list):
+                return d[0] if d else {}
+            return d
+
+    g, adv, matches = await asyncio.gather(
+        _general(),
+        _advanced(),
+        _team_matches(session, team_id) if team_id else asyncio.sleep(0, result=[]),
+        return_exceptions=True,
+    )
+    if isinstance(g, Exception):
+        g = {}
+    if isinstance(adv, Exception):
+        adv = {}
+    if isinstance(matches, Exception):
+        matches = []
+
+    games = g.get("games_count") or 0
+    wins = g.get("games_won_count") or 0
+    losses = g.get("games_lost_count") or 0
+    matches_n = g.get("matches_count") or 0
+    matches_won = g.get("matches_won_count") or 0
+    matches_lost = g.get("matches_lost_count") or 0
+    kills = g.get("kills_sum") or 0
+    deaths = g.get("deaths_sum") or 0
+    rounds = g.get("rounds_count") or 0
+    rounds_won = g.get("rounds_won_count") or 0
+
+    country = data.get("country") or {}
+    roster = []
+    for p in data.get("players") or []:
+        roster.append(
+            {
+                "nickname": p.get("nickname"),
+                "country_code": (p.get("country") or {}).get("code"),
+                "image": (p.get("image_versions") or {}).get("webp") or p.get("image_url"),
+                "is_coach": bool(p.get("is_coach")),
+                "role": p.get("role"),
+            }
+        )
+    achievements = []
+    for a in (data.get("achievements") or [])[:12]:
+        tr = a.get("tournament") or {}
+        achievements.append(
+            {
+                "date": a.get("date"),
+                "title": a.get("title"),
+                "tournament": tr.get("name"),
+                "tier": tr.get("tier"),
+                "prize": tr.get("prize"),
+            }
+        )
+    info = {
+        "slug": data.get("slug"),
+        "name": data.get("name"),
+        "acronym": data.get("acronym"),
+        "rank": data.get("rank"),
+        "rank_diff": data.get("rank_diff"),
+        "country_code": country.get("code"),
+        "country_name": country.get("name"),
+        "est_date": data.get("est_date"),
+        "six_month_earned": data.get("six_month_earned"),
+        "image": data.get("image_url"),
+        "stats": {
+            "games": games,
+            "wins": wins,
+            "losses": losses,
+            "winrate": _pct(wins, games),
+            "matches": matches_n,
+            "matches_won": matches_won,
+            "matches_lost": matches_lost,
+            "match_winrate": _pct(matches_won, matches_n),
+            "kills": kills,
+            "deaths": deaths,
+            "kd": round(kills / deaths, 2) if deaths else None,
+            "round_wr": _pct(rounds_won, rounds),
+            "t_wr": _pct(adv.get("t_round_wins_count"), adv.get("t_rounds_count")),
+            "ct_wr": _pct(adv.get("ct_round_wins_count"), adv.get("ct_rounds_count")),
+            "pistol_wr": _pct(adv.get("pistol_round_wins_count"), adv.get("pistol_rounds_count")),
+            "eco_wr": _pct(adv.get("eco_round_wins_count"), adv.get("eco_rounds_count")),
+            "force_wr": _pct(adv.get("force_round_wins_count"), adv.get("force_rounds_count")),
+            "buy_wr": _pct(adv.get("full_buy_round_wins_count"), adv.get("full_buy_rounds_count")),
+        },
+        "matches": matches,
+        "roster": roster,
+        "achievements": achievements,
+    }
+    logger.info("fetched team info: %s", slug)
+    return _write_cache(key, info)
 
 
 async def get_stats() -> dict:

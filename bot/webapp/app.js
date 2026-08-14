@@ -5,7 +5,10 @@
   const ICONS = {
     bolt: '<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>',
     stats: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>',
-    refresh: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><polyline points="21 3 21 9 15 9"/></svg>'
+    refresh: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><polyline points="21 3 21 9 15 9"/></svg>',
+    back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>',
+    trophy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>',
+    users: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>'
   };
 
   const view = document.getElementById('view');
@@ -46,6 +49,13 @@
     });
   }
 
+  function formatMoney(v) {
+    if (v == null || isNaN(v)) return '—';
+    if (v >= 1000000) return '$' + (v / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+    if (v >= 1000) return '$' + (v / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+    return '$' + v;
+  }
+
   function countUp(node, target, decimals, dur) {
     if (target == null || isNaN(target)) { node.textContent = '—'; return; }
     const t0 = performance.now();
@@ -77,6 +87,7 @@
 
   function playerRow(p, unit, maxVal) {
     const row = el('div', 'player-row');
+    if (p.slug) row.dataset.slug = p.slug;
     const rank = el('div', 'player-rank');
     rank.textContent = p.rank != null ? p.rank : '—';
     if (p.rank === 1) rank.classList.add('top1');
@@ -115,6 +126,7 @@
 
   function podiumCard(it, place, unit) {
     const card = el('div', 'p-card p' + place);
+    if (it.slug) card.dataset.slug = it.slug;
     card.appendChild(el('div', 'p-place', String(place)));
     card.appendChild(avatarEl(it));
     card.appendChild(el('div', 'p-name', it.name));
@@ -149,6 +161,12 @@
       }
     } else {
       wrap.appendChild(el('p', 'section-text', 'Нет данных'));
+    }
+    if (sec.id === 'teams') {
+      wrap.querySelectorAll('[data-slug]').forEach(node => {
+        node.classList.add('clickable');
+        node.addEventListener('click', () => openTeam(node.dataset.slug));
+      });
     }
     return wrap;
   }
@@ -207,6 +225,162 @@
       view.appendChild(el('p', 'section-text', 'Не удалось загрузить статистику'));
     } finally {
       refreshBtn.classList.remove('spin');
+      loading = false;
+    }
+  }
+
+  function statCard(label, value, decimals, cls) {
+    const card = el('div', 's-card' + (cls ? ' ' + cls : ''));
+    const v = el('div', 's-val');
+    v.dataset.target = value;
+    v.dataset.decimals = decimals;
+    v.textContent = '0';
+    card.appendChild(v);
+    card.appendChild(el('div', 's-lab', label));
+    return card;
+  }
+
+  function matchRow(m) {
+    const row = el('div', 'm-row');
+    const res = el('div', 'm-res ' + m.result);
+    res.textContent = m.result === 'win' ? 'W' : (m.result === 'loss' ? 'L' : 'N');
+    row.appendChild(res);
+    row.appendChild(avatarEl({ image: m.opponent_image, name: m.opponent }));
+    const info = el('div', 'm-info');
+    info.appendChild(el('div', 'm-opp', m.opponent));
+    const sub = el('div', 'm-sub');
+    if (m.date) sub.appendChild(el('span', null, m.date));
+    if (m.event) sub.appendChild(el('span', null, m.event));
+    if (m.tier) sub.appendChild(el('span', 'tier-badge', m.tier.toUpperCase()));
+    info.appendChild(sub);
+    row.appendChild(info);
+    row.appendChild(el('div', 'm-score', (m.our_score != null ? m.our_score : '?') + ' : ' + (m.opp_score != null ? m.opp_score : '?')));
+    if (m.maps && m.maps.length) {
+      const maps = el('div', 'm-maps');
+      m.maps.forEach(g => {
+        maps.appendChild(el('span', 'map-chip ' + g.result, (g.map || '').replace(/^de_/, '') + ' ' + g.our + '-' + g.opp));
+      });
+      row.appendChild(maps);
+    }
+    return row;
+  }
+
+  function rosterRow(p) {
+    const row = el('div', 'r-row');
+    row.appendChild(avatarEl({ image: p.image, name: p.nickname }));
+    const info = el('div', 'player-info');
+    info.appendChild(el('div', 'player-nick', p.nickname));
+    const meta = el('div', 'player-meta');
+    if (p.country_code) meta.appendChild(el('span', 'c-badge', p.country_code.toUpperCase()));
+    if (p.is_coach) meta.appendChild(el('span', 'coach-badge', 'COACH'));
+    if (p.role) meta.appendChild(el('span', null, p.role));
+    info.appendChild(meta);
+    row.appendChild(info);
+    return row;
+  }
+
+  function achRow(a) {
+    const row = el('div', 'a-row');
+    row.appendChild(iconEl('trophy'));
+    const info = el('div', 'a-info');
+    info.appendChild(el('div', 'a-title', (a.title || '') + (a.tournament ? ' · ' + a.tournament : '')));
+    const meta = el('div', 'player-meta');
+    if (a.date) meta.appendChild(el('span', null, a.date));
+    if (a.tier) meta.appendChild(el('span', 'tier-badge', a.tier.toUpperCase()));
+    if (a.prize) meta.appendChild(el('span', null, formatMoney(a.prize)));
+    info.appendChild(meta);
+    row.appendChild(info);
+    return row;
+  }
+
+  function renderTeamDetail(t, td) {
+    const hero = el('div', 't-hero');
+    const logo = avatarEl({ image: t.image, name: t.name });
+    logo.classList.add('hero-logo');
+    hero.appendChild(logo);
+    const hinfo = el('div', 't-hinfo');
+    hinfo.appendChild(el('div', 't-name', t.name + (t.acronym ? ' ' + t.acronym : '')));
+    const badges = el('div', 't-badges');
+    if (t.rank != null) badges.appendChild(el('span', 'rank-badge', '#' + t.rank));
+    if (t.rank_diff) badges.appendChild(el('span', 'delta-badge', (t.rank_diff > 0 ? '▲' : '▼') + ' ' + Math.abs(t.rank_diff)));
+    if (t.country_code) badges.appendChild(el('span', 'c-badge', t.country_code.toUpperCase()));
+    hinfo.appendChild(badges);
+    const meta = el('div', 't-meta');
+    if (t.country_name) meta.appendChild(el('span', null, t.country_name));
+    if (t.est_date) meta.appendChild(el('span', null, 'Основана: ' + t.est_date));
+    if (t.six_month_earned) meta.appendChild(el('span', 'earn', formatMoney(t.six_month_earned)));
+    hinfo.appendChild(meta);
+    hero.appendChild(hinfo);
+    td.appendChild(hero);
+
+    const s = t.stats || {};
+    td.appendChild(sectionTitle('stats', 'Статистика за 6 месяцев'));
+    const grid = el('div', 's-grid');
+    grid.appendChild(statCard('Матчи', s.matches, 0));
+    grid.appendChild(statCard('Победы', s.matches_won, 0));
+    grid.appendChild(statCard('Поражения', s.matches_lost, 0));
+    grid.appendChild(statCard('Винрейт', s.match_winrate, 1, 'accent'));
+    grid.appendChild(statCard('Игр', s.games, 0));
+    grid.appendChild(statCard('WR раундов', s.round_wr, 1));
+    grid.appendChild(statCard('T-side', s.t_wr, 1));
+    grid.appendChild(statCard('CT-side', s.ct_wr, 1));
+    grid.appendChild(statCard('Пистолетки', s.pistol_wr, 1));
+    grid.appendChild(statCard('Эко', s.eco_wr, 1));
+    grid.appendChild(statCard('Форс-бай', s.force_wr, 1));
+    grid.appendChild(statCard('Фулл-бай', s.buy_wr, 1));
+    grid.appendChild(statCard('K/D', s.kd, 2, 'accent'));
+    td.appendChild(grid);
+
+    td.appendChild(sectionTitle('stats', 'История · матчи за 6 мес.'));
+    const hist = el('div', 't-matches');
+    const ms = t.matches || [];
+    if (!ms.length) hist.appendChild(el('p', 'muted-note', 'Нет данных'));
+    ms.forEach(m => hist.appendChild(matchRow(m)));
+    td.appendChild(hist);
+
+    td.appendChild(sectionTitle('users', 'Состав'));
+    const rost = el('div', 't-roster');
+    const rl = t.roster || [];
+    if (!rl.length) rost.appendChild(el('p', 'muted-note', 'Нет данных'));
+    rl.forEach(p => rost.appendChild(rosterRow(p)));
+    td.appendChild(rost);
+
+    td.appendChild(sectionTitle('trophy', 'Достижения'));
+    const ach = el('div', 't-ach');
+    const al = t.achievements || [];
+    if (!al.length) ach.appendChild(el('p', 'muted-note', 'Нет данных'));
+    al.forEach(a => ach.appendChild(achRow(a)));
+    td.appendChild(ach);
+
+    view.querySelectorAll('.s-card').forEach((c, i) => {
+      const v = c.querySelector('.s-val');
+      setTimeout(() => countUp(v, +v.dataset.target, +v.dataset.decimals), 60 + i * 40);
+    });
+  }
+
+  async function openTeam(slug) {
+    if (!slug || loading) return;
+    loading = true;
+    clear();
+    const td = el('div', 't-detail');
+    const back = el('button', 'back-btn');
+    back.appendChild(iconEl('back'));
+    back.appendChild(document.createTextNode('Назад'));
+    back.addEventListener('click', () => renderStats(false));
+    td.appendChild(back);
+    const loadbar = el('div', 'loadbar');
+    loadbar.appendChild(el('div', 'loadbar-fill'));
+    td.appendChild(loadbar);
+    view.appendChild(td);
+    try {
+      const res = await api.get('/api/team?slug=' + encodeURIComponent(slug));
+      loadbar.remove();
+      if (!res.ok) throw new Error('bad response');
+      renderTeamDetail(res.team, td);
+    } catch (err) {
+      loadbar.remove();
+      view.appendChild(el('p', 'section-text', 'Не удалось загрузить команду'));
+    } finally {
       loading = false;
     }
   }
