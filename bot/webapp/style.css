@@ -167,39 +167,7 @@ header h1 .brand .hl {
   animation: load 1.1s ease-in-out infinite;
 }
 
-.carousel {
-  display: flex;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  margin: 0 -14px;
-  padding: 0 14px;
-}
-.carousel::-webkit-scrollbar { display: none; }
-.slide {
-  flex: 0 0 100%;
-  scroll-snap-align: start;
-  padding-right: 28px;
-}
-.slide .section-title { animation: none; }
-
-.dots {
-  display: flex; justify-content: center; gap: 8px;
-  margin-top: 14px;
-}
-.dot {
-  width: 8px; height: 8px; border-radius: 50%;
-  border: none; padding: 0;
-  background: var(--border);
-  cursor: pointer;
-  transition: background .2s, transform .2s, box-shadow .2s;
-}
-.dot.active {
-  background: var(--accent);
-  box-shadow: 0 0 10px var(--accent);
-  transform: scale(1.35);
-}
+.stat-section { margin-bottom: 24px; }
 
 .player-row {
   position: relative;
@@ -211,8 +179,8 @@ header h1 .brand .hl {
   margin-bottom: 8px;
   overflow: hidden;
 }
-.slide.show .player-row.anim,
-.slide.show .p-card.anim { animation: fadeUp .4s ease both; }
+.player-row.anim,
+.p-card.anim { animation: fadeUp .4s ease both; }
 .player-row:active { transform: scale(.98); }
 
 .avatar {

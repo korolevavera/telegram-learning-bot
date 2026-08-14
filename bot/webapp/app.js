@@ -132,38 +132,36 @@
     return podium;
   }
 
-  function renderSlide(sec) {
-    const slide = el('section', 'slide');
-    slide.appendChild(el('div', 'section-title', sec.title + (sec.subtitle ? ' · ' + sec.subtitle : '')));
+  function renderSection(sec) {
+    const wrap = el('div', 'stat-section');
+    wrap.appendChild(el('div', 'section-title', sec.title + (sec.subtitle ? ' · ' + sec.subtitle : '')));
     const items = sec.items || [];
     if (items.length) {
       const maxVal = Math.max(...items.map(i => (i.value != null ? i.value : 0)));
       if (items.length >= 3) {
-        slide.appendChild(renderPodium(items, sec.unit));
-        items.slice(3).forEach(it => slide.appendChild(playerRow(it, sec.unit, maxVal)));
+        wrap.appendChild(renderPodium(items, sec.unit));
+        items.slice(3).forEach(it => wrap.appendChild(playerRow(it, sec.unit, maxVal)));
       } else {
-        items.forEach(it => slide.appendChild(playerRow(it, sec.unit, maxVal)));
+        items.forEach(it => wrap.appendChild(playerRow(it, sec.unit, maxVal)));
       }
     } else {
-      slide.appendChild(el('p', 'section-text', 'Нет данных'));
+      wrap.appendChild(el('p', 'section-text', 'Нет данных'));
     }
-    return slide;
+    return wrap;
   }
 
-  function activateSlide(slide) {
-    if (!slide || slide.classList.contains('show')) return;
-    slide.classList.add('show');
-    const nodes = slide.querySelectorAll('.player-row, .p-card');
+  function animateAll() {
+    const nodes = view.querySelectorAll('.player-row, .p-card');
     nodes.forEach((node, i) => {
-      node.style.animationDelay = (i * 55) + 'ms';
+      node.style.animationDelay = (i * 40) + 'ms';
       node.classList.add('anim');
       const val = node.querySelector('.val, .p-val');
       if (val && val.dataset.target !== undefined) {
-        setTimeout(() => countUp(val, +val.dataset.target, +val.dataset.decimals), 120 + i * 55);
+        setTimeout(() => countUp(val, +val.dataset.target, +val.dataset.decimals), 100 + i * 40);
       }
       const fill = node.querySelector('.bar-fill');
       if (fill) {
-        setTimeout(() => { fill.style.width = fill.dataset.width + '%'; }, 160 + i * 55);
+        setTimeout(() => { fill.style.width = fill.dataset.width + '%'; }, 140 + i * 40);
       }
     });
   }
@@ -174,7 +172,7 @@
     clear();
     view.appendChild(sectionTitle('stats', 'Статистика'));
     const meta = el('div', 'stats-meta');
-    meta.appendChild(el('span', 'muted-note', 'Свайп в сторону — сменить раздел'));
+    meta.appendChild(el('span', 'muted-note', 'Источники: bo3.gg/HLTV · FACEIT'));
     const refreshBtn = el('button', 'refresh-btn');
     refreshBtn.innerHTML = ICONS.refresh;
     refreshBtn.setAttribute('aria-label', 'Обновить');
@@ -199,43 +197,8 @@
         view.appendChild(el('p', 'section-text', 'Нет данных'));
         return;
       }
-
-      const carousel = el('div', 'carousel');
-      const dots = el('div', 'dots');
-      sections.forEach(sec => carousel.appendChild(renderSlide(sec)));
-      sections.forEach((_, i) => {
-        const dot = el('button', 'dot');
-        dot.addEventListener('click', () => {
-          carousel.scrollTo({ left: i * carousel.clientWidth, behavior: 'smooth' });
-        });
-        dots.appendChild(dot);
-      });
-      const setActiveDot = idx => {
-        [...dots.children].forEach((d, i) => d.classList.toggle('active', i === idx));
-      };
-      const currentIdx = () => Math.round(carousel.scrollLeft / (carousel.clientWidth || 1)) || 0;
-      setActiveDot(0);
-      carousel.addEventListener('scroll', () => {
-        setActiveDot(currentIdx());
-        activateSlide(carousel.children[currentIdx()]);
-      });
-
-      activateSlide(carousel.children[0]);
-      if ('IntersectionObserver' in window) {
-        const io = new IntersectionObserver(entries => {
-          entries.forEach(en => {
-            if (en.isIntersecting) activateSlide(en.target);
-          });
-        }, { threshold: 0.4 });
-        [...carousel.children].forEach(s => io.observe(s));
-      }
-      setTimeout(() => {
-        const s = carousel.children[currentIdx()];
-        if (s) activateSlide(s);
-      }, 1500);
-
-      view.appendChild(carousel);
-      view.appendChild(dots);
+      sections.forEach(sec => view.appendChild(renderSection(sec)));
+      animateAll();
     } catch (err) {
       loadbar.remove();
       view.appendChild(el('p', 'section-text', 'Не удалось загрузить статистику'));
