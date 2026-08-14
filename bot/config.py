@@ -10,6 +10,7 @@ class Config:
         self.bot_token: str = os.getenv("BOT_TOKEN", "").strip()
         self.database_url: str = os.getenv("DATABASE_URL", "").strip()
         self.webapp_url: str = os.getenv("WEBAPP_URL", "").strip()
+        self.faceit_api_key: str = os.getenv("FACEIT_API_KEY", "").strip()
         self.port: int = int(os.getenv("PORT", "8080"))
 
 

@@ -491,7 +491,7 @@
         const s = res.stats;
         clear();
         view.appendChild(title);
-        view.appendChild(el('p', 'muted-note', 'Данные: bo3.gg · HLTV недоступен автоматически. Обновляется раз в 15 мин.'));
+        view.appendChild(el('p', 'muted-note', 'Данные: bo3.gg + FACEIT · HLTV недоступен автоматически. Обновляется раз в 15 мин.'));
         view.appendChild(el('div', 'section-title', '🥇 Рейтинг игроков (6 месяцев)'));
         (s.top_players || []).forEach(p => {
           view.appendChild(playerRow(p, 'rating', fmtRating(p.rating)));
@@ -501,6 +501,15 @@
           const item = Object.assign({}, p, { position: i + 1 });
           view.appendChild(playerRow(item, 'prize', fmtMoney(p.total_earnings)));
         });
+        view.appendChild(el('div', 'section-title', '🎮 FACEIT · ELO (' + (s.faceit && s.faceit.region ? s.faceit.region : 'EU') + ')'));
+        if (s.faceit && s.faceit.players && s.faceit.players.length) {
+          s.faceit.players.forEach(p => {
+            const item = Object.assign({}, p, { rank: p.position });
+            view.appendChild(playerRow(item, 'ELO', p.faceit_elo != null ? p.faceit_elo.toLocaleString('en-US') : '—'));
+          });
+        } else {
+          view.appendChild(el('p', 'section-text', 'FACEIT не подключён: добавь FACEIT_API_KEY'));
+        }
         if (!s.top_players || !s.top_players.length) {
           view.appendChild(el('p', 'section-text', 'Нет данных'));
         }

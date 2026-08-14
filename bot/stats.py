@@ -6,7 +6,10 @@ from typing import Any
 
 import aiohttp
 
+from .config_loader import CONFIG
+
 BO3_BASE = "https://api.bo3.gg/api/v1"
+FACEIT_BASE = "https://open.faceit.com/data/v4"
 _HEADERS = {
     "accept": "application/json, text/plain, */*",
     "origin": "https://bo3.gg",
@@ -16,6 +19,7 @@ _HEADERS = {
 
 TOP_PLAYERS_TTL = 15 * 60
 TOP_EARNERS_TTL = 15 * 60
+FACEIT_RANKING_TTL = 15 * 60
 
 _session: aiohttp.ClientSession | None = None
 _cache: dict[str, tuple[float, Any]] = {}
@@ -122,13 +126,55 @@ async def get_top_earners(limit: int = 10) -> list[dict]:
     return _write_cache(key, result)
 
 
+def _faceit_headers() -> dict[str, str] | None:
+    if not CONFIG.faceit_api_key:
+        return None
+    return {"Authorization": f"Bearer {CONFIG.faceit_api_key}", "Accept": "application/json"}
+
+
+async def get_faceit_ranking(region: str = "EU", limit: int = 20) -> list[dict]:
+    key = f"faceit:{region}:{limit}"
+    cached = _read_cache(key, FACEIT_RANKING_TTL)
+    if cached is not None:
+        return cached
+    headers = _faceit_headers()
+    if headers is None:
+        return []
+    session = await _get_session()
+    async with session.get(
+        f"{FACEIT_BASE}/rankings/games/cs2/regions/{region}",
+        params={"limit": limit},
+        headers=headers,
+        timeout=20,
+    ) as response:
+        response.raise_for_status()
+        data = await response.json()
+    result = [
+        {
+            "position": it.get("position"),
+            "nickname": it.get("nickname"),
+            "country": it.get("country"),
+            "faceit_elo": it.get("faceit_elo"),
+            "skill_level": it.get("game_skill_level"),
+        }
+        for it in data.get("items", [])
+    ]
+    logger.info("fetched faceit ranking %s: %s", region, len(result))
+    return _write_cache(key, result)
+
+
 async def get_stats() -> dict:
-    top_players, top_earners = await asyncio.gather(get_top_players(20), get_top_earners(10))
+    top_players, top_earners, faceit = await asyncio.gather(
+        get_top_players(20),
+        get_top_earners(10),
+        get_faceit_ranking("EU", 20),
+    )
     return {
-        "source": "bo3.gg",
+        "source": "bo3.gg + faceit",
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "top_players": top_players,
         "top_earners": top_earners,
+        "faceit": {"region": "EU", "players": faceit},
     }
 
 
