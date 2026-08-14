@@ -392,6 +392,39 @@ header h1 .brand .hl {
 .b-lab { font-size: 12px; color: var(--muted); }
 .b-val { font-size: 13px; font-weight: 600; color: #fff; text-align: right; }
 
+.sub-tabs {
+  display: flex; gap: 6px; margin-top: 14px;
+  background: var(--panel); border: 1px solid var(--border);
+  border-radius: 12px; padding: 4px;
+}
+.sub-tab {
+  flex: 1; font-family: 'Orbitron', sans-serif; font-size: 12px; letter-spacing: 1px;
+  color: var(--muted); background: transparent; border: none;
+  border-radius: 9px; padding: 9px 0; cursor: pointer; transition: all .2s;
+}
+.sub-tab.active {
+  color: #05070d; font-weight: 700;
+  background: linear-gradient(135deg, var(--accent), #00ffd5);
+}
+.sub-box { margin-top: 4px; }
+
+.p-photos { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+.p-photo {
+  margin: 0; background: linear-gradient(160deg, var(--panel2), var(--panel));
+  border: 1px solid var(--border); border-radius: 14px; overflow: hidden;
+}
+.p-photo img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; }
+.p-photo figcaption {
+  font-size: 12px; color: var(--muted); text-align: center;
+  padding: 8px 6px; letter-spacing: .4px;
+}
+.tag-badge {
+  font-family: 'Orbitron', sans-serif; font-size: 10px; letter-spacing: 1px;
+  color: var(--gold); background: rgba(255,194,60,.08);
+  border: 1px solid rgba(255,194,60,.35);
+  border-radius: 4px; padding: 2px 8px;
+}
+
 .f-links { display: flex; gap: 8px; flex-wrap: wrap; }
 .link-btn {
   display: inline-flex; align-items: center; gap: 6px;

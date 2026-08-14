@@ -435,6 +435,17 @@
     return row;
   }
 
+  function photoCard(src, caption) {
+    const card = el('figure', 'p-photo');
+    const img = document.createElement('img');
+    img.src = src;
+    img.alt = '';
+    img.loading = 'lazy';
+    card.appendChild(img);
+    if (caption) card.appendChild(el('figcaption', null, caption));
+    return card;
+  }
+
   function renderPlayerDetail(p, td) {
     const hero = el('div', 't-hero');
     const logo = avatarEl({ image: p.image, name: p.nickname });
@@ -455,19 +466,20 @@
     hero.appendChild(hinfo);
     td.appendChild(hero);
 
-    td.appendChild(sectionTitle('users', 'Информация'));
-    const bio = el('div', 'b-list');
-    const realName = [p.first_name, p.last_name].filter(Boolean).join(' ') || null;
-    bio.appendChild(bioRow('Имя', realName));
-    if (p.birthday) bio.appendChild(bioRow('Дата рождения', String(p.birthday).slice(0, 10)));
-    if (p.team) bio.appendChild(bioRow('Команда', p.team));
-    if (p.joined_team_at) bio.appendChild(bioRow('В команде с', String(p.joined_team_at).slice(0, 10)));
-    bio.appendChild(bioRow('Призовые', formatMoney(p.total_prize)));
-    bio.appendChild(bioRow('Рейтинг (6 мес.)', p.rating != null ? formatNum(p.rating, 2) : '—'));
-    td.appendChild(bio);
+    const subTabs = el('div', 'sub-tabs');
+    const statsTab = el('button', 'sub-tab active');
+    statsTab.appendChild(document.createTextNode('Статистика'));
+    const bioTab = el('button', 'sub-tab');
+    bioTab.appendChild(document.createTextNode('Биография'));
+    subTabs.appendChild(statsTab);
+    subTabs.appendChild(bioTab);
+    td.appendChild(subTabs);
+
+    const statsBox = el('div', 'sub-box');
+    const bioBox = el('div', 'sub-box hidden');
 
     const s = p.stats || {};
-    td.appendChild(sectionTitle('stats', 'Статистика за 6 месяцев'));
+    statsBox.appendChild(sectionTitle('stats', 'Статистика за 6 месяцев'));
     const grid = el('div', 's-grid');
     grid.appendChild(statCard('Рейтинг', p.rating, 2, 'accent'));
     grid.appendChild(statCard('Матчи', s.matches, 0));
@@ -481,28 +493,88 @@
     grid.appendChild(statCard('HS%', s.hs, 1));
     grid.appendChild(statCard('WR раундов', s.round_wr, 1));
     grid.appendChild(statCard('Ассистов', s.assists, 0));
-    td.appendChild(grid);
+    statsBox.appendChild(grid);
 
-    td.appendChild(sectionTitle('users', 'Карьера · команды'));
-    const teams = el('div', 't-roster');
-    const tl = p.teams || [];
-    if (!tl.length) teams.appendChild(el('p', 'muted-note', 'Нет данных'));
-    tl.forEach(t => teams.appendChild(teamRow(t)));
-    td.appendChild(teams);
-
-    td.appendChild(sectionTitle('stats', 'Карты · рейтинг за 6 мес.'));
+    statsBox.appendChild(sectionTitle('stats', 'Карты · рейтинг за 6 мес.'));
     const maps = el('div', 't-matches');
     const ml = p.maps || [];
     if (!ml.length) maps.appendChild(el('p', 'muted-note', 'Нет данных'));
     ml.forEach(m => maps.appendChild(mapRow(m)));
-    td.appendChild(maps);
+    statsBox.appendChild(maps);
 
-    td.appendChild(sectionTitle('trophy', 'Достижения'));
+    statsBox.appendChild(sectionTitle('users', 'Карьера · команды'));
+    const teams = el('div', 't-roster');
+    const tl = p.teams || [];
+    if (!tl.length) teams.appendChild(el('p', 'muted-note', 'Нет данных'));
+    tl.forEach(t => teams.appendChild(teamRow(t)));
+    statsBox.appendChild(teams);
+
+    statsBox.appendChild(sectionTitle('trophy', 'Достижения'));
     const ach = el('div', 't-ach');
     const al = p.achievements || [];
     if (!al.length) ach.appendChild(el('p', 'muted-note', 'Нет данных'));
     al.forEach(a => ach.appendChild(achRow(a)));
-    td.appendChild(ach);
+    statsBox.appendChild(ach);
+
+    const photos = el('div', 'p-photos');
+    if (p.image) photos.appendChild(photoCard(p.image, p.nickname));
+    if (p.team_image) photos.appendChild(photoCard(p.team_image, p.team || 'Команда'));
+    if (!photos.children.length) photos.appendChild(el('p', 'muted-note', 'Фото недоступно'));
+    bioBox.appendChild(photos);
+
+    bioBox.appendChild(sectionTitle('users', 'Личные данные'));
+    const bio = el('div', 'b-list');
+    const realName = [p.first_name, p.last_name].filter(Boolean).join(' ') || null;
+    bio.appendChild(bioRow('Псевдоним', p.nickname));
+    bio.appendChild(bioRow('Настоящее имя', realName));
+    if (p.aliases && p.aliases.length) bio.appendChild(bioRow('Псевдонимы', p.aliases.join(', ')));
+    if (p.birthday) {
+      const ageTxt = p.age != null ? ' (' + p.age + ' лет)' : '';
+      bio.appendChild(bioRow('Дата рождения', String(p.birthday).slice(0, 10) + ageTxt));
+    }
+    if (p.country_name) bio.appendChild(bioRow('Страна', p.country_name));
+    if (p.region) bio.appendChild(bioRow('Регион', p.region));
+    if (p.role) bio.appendChild(bioRow('Роль', p.role));
+    if (p.team) bio.appendChild(bioRow('Команда', p.team));
+    if (p.joined_team_at) bio.appendChild(bioRow('В команде с', String(p.joined_team_at).slice(0, 10)));
+    bio.appendChild(bioRow('Призовые', formatMoney(p.total_prize)));
+    bio.appendChild(bioRow('Рейтинг (6 мес.)', p.rating != null ? formatNum(p.rating, 2) : '—'));
+    bioBox.appendChild(bio);
+
+    const tags = p.tags || [];
+    if (tags.length) {
+      bioBox.appendChild(sectionTitle('users', 'Теги'));
+      const tagWrap = el('div', 't-badges');
+      tags.forEach(t => tagWrap.appendChild(el('span', 'tag-badge', t)));
+      bioBox.appendChild(tagWrap);
+    }
+
+    const socials = [];
+    if (p.twitter) socials.push([p.twitter, 'Twitter']);
+    if (p.twitch) socials.push([p.twitch, 'Twitch']);
+    if (p.facebook) socials.push([p.facebook, 'Facebook']);
+    if (socials.length) {
+      bioBox.appendChild(sectionTitle('users', 'Соцсети'));
+      const links = el('div', 'f-links');
+      socials.forEach(soc => links.appendChild(linkBtn(soc[0], soc[1])));
+      bioBox.appendChild(links);
+    }
+
+    td.appendChild(statsBox);
+    td.appendChild(bioBox);
+
+    statsTab.addEventListener('click', () => {
+      statsTab.classList.add('active');
+      bioTab.classList.remove('active');
+      statsBox.classList.remove('hidden');
+      bioBox.classList.add('hidden');
+    });
+    bioTab.addEventListener('click', () => {
+      bioTab.classList.add('active');
+      statsTab.classList.remove('active');
+      bioBox.classList.remove('hidden');
+      statsBox.classList.add('hidden');
+    });
 
     view.querySelectorAll('.s-card').forEach((c, i) => {
       const v = c.querySelector('.s-val');

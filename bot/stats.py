@@ -724,6 +724,13 @@ async def get_player_info(slug: str) -> dict | None:
         "total_prize": data.get("total_prize"),
         "rating": round(data.get("six_month_avg_rating") or 0, 2),
         "role": data.get("role"),
+        "aliases": [a.get("name") for a in (data.get("alternative_names") or []) if a.get("name")],
+        "tags": [t.get("name") for t in (data.get("tags") or []) if t.get("name")],
+        "region": (country.get("region") or {}).get("name"),
+        "twitter": data.get("twitter"),
+        "twitch": data.get("twitch"),
+        "facebook": data.get("facebook"),
+        "team_image": team.get("image_url"),
         "image": (data.get("image_versions") or {}).get("webp") or data.get("image_url"),
         "stats": {
             "matches": matches_n,
