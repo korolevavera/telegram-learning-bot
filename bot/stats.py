@@ -210,6 +210,7 @@ async def get_bo3_players(limit: int = TOP_PRO) -> list[dict]:
             {
                 "rank": p.get("rank"),
                 "name": p.get("nickname"),
+                "slug": p.get("slug"),
                 "team": (p.get("team") or {}).get("name"),
                 "country_code": (p.get("country") or {}).get("code"),
                 "value": rating,
@@ -448,6 +449,197 @@ async def get_team_info(slug: str) -> dict | None:
         "achievements": achievements,
     }
     logger.info("fetched team info: %s", slug)
+    return _write_cache(key, info)
+
+
+async def get_player_info(slug: str) -> dict | None:
+    key = f"bo3:player:{slug}"
+    cached = _read_cache(key, CACHE_TTL)
+    if cached is not None:
+        return cached
+    session = await _get_session()
+    async with session.get(
+        f"{BO3_BASE}/players/{slug}", params={"prefer_locale": "en"}, headers=BO3_HEADERS, timeout=20
+    ) as response:
+        if response.status == 404:
+            return None
+        response.raise_for_status()
+        data = await response.json()
+    now = datetime.now(timezone.utc)
+    today = now.strftime("%Y-%m-%d")
+    start = (now - timedelta(days=PERIOD_DAYS)).strftime("%Y-%m-%d")
+    player_id = data.get("id")
+
+    async def _general() -> dict:
+        async with session.get(
+            f"{BO3_BASE}/players/{slug}/general_stats",
+            params={"filter[start_date_from]": start, "filter[start_date_to]": today},
+            headers=BO3_HEADERS,
+            timeout=20,
+        ) as response:
+            response.raise_for_status()
+            return await response.json()
+
+    async def _maps() -> list[dict]:
+        async with session.get(
+            f"{BO3_BASE}/players/{slug}/map_stats",
+            params={"filter[begin_at_from]": start, "filter[begin_at_to]": today},
+            headers=BO3_HEADERS,
+            timeout=20,
+        ) as response:
+            response.raise_for_status()
+            d = await response.json()
+            return d if isinstance(d, list) else []
+
+    async def _accuracy() -> list[dict]:
+        async with session.get(
+            f"{BO3_BASE}/players/{slug}/accuracy_stats",
+            params={"filter[begin_at_from]": start, "filter[begin_at_to]": today},
+            headers=BO3_HEADERS,
+            timeout=20,
+        ) as response:
+            response.raise_for_status()
+            d = await response.json()
+            return d if isinstance(d, list) else []
+
+    async def _transfers() -> list[dict]:
+        async with session.get(
+            f"{BO3_BASE}/player_transfers",
+            params={
+                "filter[player_id][eq]": player_id,
+                "filter[is_coach][eq]": "false",
+                "sort": "-action_date",
+                "with": "teams,player",
+                "page[limit]": 40,
+            },
+            headers=BO3_HEADERS,
+            timeout=20,
+        ) as response:
+            response.raise_for_status()
+            d = await response.json()
+            return d.get("results", [])
+
+    g, maps, acc, transfers = await asyncio.gather(
+        _general(), _maps(), _accuracy(), _transfers(), return_exceptions=True
+    )
+    if not isinstance(g, dict):
+        g = {}
+    if not isinstance(maps, list):
+        maps = []
+    if not isinstance(acc, list):
+        acc = []
+    if not isinstance(transfers, list):
+        transfers = []
+
+    games = g.get("games_count") or 0
+    wins = g.get("games_won_count") or 0
+    losses = g.get("games_lost_count") or 0
+    matches_n = g.get("matches_count") or 0
+    matches_won = g.get("matches_won_count") or 0
+    matches_lost = g.get("matches_lost_count") or 0
+    kills = g.get("kills_sum") or 0
+    deaths = g.get("deaths_sum") or 0
+    assists = g.get("assists_sum") or 0
+    rounds = g.get("rounds_count") or 0
+    rounds_won = g.get("rounds_won_count") or 0
+
+    total_hits = sum((r.get("hits_sum") or 0) for r in acc)
+    head_hits = sum(
+        (r.get("hits_sum") or 0) for r in acc if (r.get("hit_group") or "").lower() == "head"
+    )
+    hs = round(head_hits / total_hits * 100, 1) if total_hits else None
+    adr = round((g.get("damage_sum") or 0) / rounds, 1) if rounds else None
+
+    country = data.get("country") or {}
+    team = data.get("team") or {}
+    birthday = data.get("birthday")
+    age = None
+    if birthday:
+        try:
+            bday = datetime.strptime(str(birthday)[:10], "%Y-%m-%d")
+            age = now.year - bday.year - ((now.month, now.day) < (bday.month, bday.day))
+        except ValueError:
+            age = None
+
+    maps_list = []
+    for row in sorted(maps, key=lambda r: -(r.get("maps_count") or 0)):
+        if not (row.get("maps_count") or 0):
+            continue
+        maps_list.append(
+            {
+                "map": row.get("map_name"),
+                "maps_count": row.get("maps_count"),
+                "avg_rating": round(row.get("avg_player_rating") or 0, 2),
+                "avg_kills": round(row.get("avg_kills") or 0, 2),
+                "avg_damage": round(row.get("avg_damage") or 0, 1),
+            }
+        )
+
+    timeline = []
+    for tr in reversed(transfers):
+        to = tr.get("team_to") or {}
+        if not to.get("name"):
+            continue
+        timeline.append(
+            {
+                "team": to.get("name"),
+                "slug": to.get("slug"),
+                "image": to.get("image_url"),
+                "date": (tr.get("action_date") or "")[:10],
+            }
+        )
+
+    achievements = []
+    for a in (data.get("achievements") or [])[:12]:
+        tr = a.get("tournament") or {}
+        achievements.append(
+            {
+                "date": a.get("date"),
+                "title": a.get("title"),
+                "tournament": tr.get("name"),
+                "tier": tr.get("tier"),
+                "prize": tr.get("prize"),
+            }
+        )
+
+    info = {
+        "slug": data.get("slug"),
+        "nickname": data.get("nickname"),
+        "first_name": data.get("first_name"),
+        "last_name": data.get("last_name"),
+        "birthday": birthday,
+        "age": age,
+        "country_code": country.get("code"),
+        "country_name": country.get("name"),
+        "team": team.get("name"),
+        "team_slug": team.get("slug"),
+        "joined_team_at": data.get("joined_team_at"),
+        "total_prize": data.get("total_prize"),
+        "rating": round(data.get("six_month_avg_rating") or 0, 2),
+        "role": data.get("role"),
+        "image": (data.get("image_versions") or {}).get("webp") or data.get("image_url"),
+        "stats": {
+            "matches": matches_n,
+            "matches_won": matches_won,
+            "matches_lost": matches_lost,
+            "match_winrate": _pct(matches_won, matches_n),
+            "games": games,
+            "wins": wins,
+            "losses": losses,
+            "winrate": _pct(wins, games),
+            "kills": kills,
+            "deaths": deaths,
+            "assists": assists,
+            "kd": round(kills / deaths, 2) if deaths else None,
+            "hs": hs,
+            "adr": adr,
+            "round_wr": _pct(rounds_won, rounds),
+        },
+        "maps": maps_list,
+        "teams": timeline,
+        "achievements": achievements,
+    }
+    logger.info("fetched player info: %s", slug)
     return _write_cache(key, info)
 
 

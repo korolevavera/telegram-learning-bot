@@ -336,6 +336,31 @@ header h1 .brand .hl {
 }
 .t-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; font-size: 12px; color: var(--muted); }
 .earn { color: var(--gold); font-weight: 700; }
+.team-badge {
+  font-family: 'Orbitron', sans-serif; font-size: 10px;
+  color: var(--accent); background: rgba(0,229,255,.1);
+  border: 1px solid rgba(0,229,255,.45);
+  border-radius: 4px; padding: 1px 6px;
+}
+.role-badge {
+  font-family: 'Orbitron', sans-serif; font-size: 9px; letter-spacing: 1px;
+  color: var(--muted); background: var(--panel);
+  border: 1px solid var(--border); border-radius: 4px; padding: 1px 6px;
+}
+
+.b-list {
+  background: linear-gradient(160deg, var(--panel2), var(--panel));
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 4px 14px;
+}
+.b-row {
+  display: flex; justify-content: space-between; gap: 12px;
+  padding: 9px 0; border-bottom: 1px solid var(--border);
+}
+.b-row:last-child { border-bottom: none; }
+.b-lab { font-size: 12px; color: var(--muted); }
+.b-val { font-size: 13px; font-weight: 600; color: #fff; text-align: right; }
 
 .s-grid {
   display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;

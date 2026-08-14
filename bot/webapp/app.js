@@ -168,6 +168,12 @@
         node.addEventListener('click', () => openTeam(node.dataset.slug));
       });
     }
+    if (sec.id === 'pro') {
+      wrap.querySelectorAll('[data-slug]').forEach(node => {
+        node.classList.add('clickable');
+        node.addEventListener('click', () => openPlayer(node.dataset.slug));
+      });
+    }
     return wrap;
   }
 
@@ -380,6 +386,142 @@
     } catch (err) {
       loadbar.remove();
       view.appendChild(el('p', 'section-text', 'Не удалось загрузить команду'));
+    } finally {
+      loading = false;
+    }
+  }
+
+  function bioRow(label, value) {
+    const row = el('div', 'b-row');
+    row.appendChild(el('div', 'b-lab', label));
+    row.appendChild(el('div', 'b-val', value != null && value !== '' ? value : '—'));
+    return row;
+  }
+
+  function teamRow(item) {
+    const row = el('div', 'r-row');
+    row.appendChild(avatarEl({ image: item.image, name: item.team }));
+    const info = el('div', 'player-info');
+    info.appendChild(el('div', 'player-nick', item.team));
+    const meta = el('div', 'player-meta');
+    if (item.date) meta.appendChild(el('span', null, item.date));
+    info.appendChild(meta);
+    row.appendChild(info);
+    if (item.slug) row.dataset.slug = item.slug;
+    return row;
+  }
+
+  function mapRow(m) {
+    const row = el('div', 'm-row');
+    const info = el('div', 'm-info');
+    info.appendChild(el('div', 'm-opp', (m.map || '').replace(/^de_/, '').toUpperCase()));
+    const sub = el('div', 'm-sub');
+    if (m.maps_count) sub.appendChild(el('span', null, 'Карт: ' + m.maps_count));
+    if (m.avg_kills != null) sub.appendChild(el('span', null, 'K: ' + formatNum(m.avg_kills, 2)));
+    if (m.avg_damage != null) sub.appendChild(el('span', null, 'ADR: ' + formatNum(m.avg_damage, 1)));
+    info.appendChild(sub);
+    row.appendChild(info);
+    row.appendChild(el('div', 'm-score', 'R ' + formatNum(m.avg_rating, 2)));
+    return row;
+  }
+
+  function renderPlayerDetail(p, td) {
+    const hero = el('div', 't-hero');
+    const logo = avatarEl({ image: p.image, name: p.nickname });
+    logo.classList.add('hero-logo');
+    hero.appendChild(logo);
+    const hinfo = el('div', 't-hinfo');
+    hinfo.appendChild(el('div', 't-name', p.nickname));
+    const badges = el('div', 't-badges');
+    if (p.country_code) badges.appendChild(el('span', 'c-badge', p.country_code.toUpperCase()));
+    if (p.team) badges.appendChild(el('span', 'team-badge', p.team));
+    if (p.role) badges.appendChild(el('span', 'role-badge', p.role));
+    hinfo.appendChild(badges);
+    const meta = el('div', 't-meta');
+    if (p.country_name) meta.appendChild(el('span', null, p.country_name));
+    if (p.age != null) meta.appendChild(el('span', null, p.age + ' лет'));
+    if (p.total_prize) meta.appendChild(el('span', 'earn', formatMoney(p.total_prize)));
+    hinfo.appendChild(meta);
+    hero.appendChild(hinfo);
+    td.appendChild(hero);
+
+    td.appendChild(sectionTitle('users', 'Информация'));
+    const bio = el('div', 'b-list');
+    const realName = [p.first_name, p.last_name].filter(Boolean).join(' ') || null;
+    bio.appendChild(bioRow('Имя', realName));
+    if (p.birthday) bio.appendChild(bioRow('Дата рождения', String(p.birthday).slice(0, 10)));
+    if (p.team) bio.appendChild(bioRow('Команда', p.team));
+    if (p.joined_team_at) bio.appendChild(bioRow('В команде с', String(p.joined_team_at).slice(0, 10)));
+    bio.appendChild(bioRow('Призовые', formatMoney(p.total_prize)));
+    bio.appendChild(bioRow('Рейтинг (6 мес.)', p.rating != null ? formatNum(p.rating, 2) : '—'));
+    td.appendChild(bio);
+
+    const s = p.stats || {};
+    td.appendChild(sectionTitle('stats', 'Статистика за 6 месяцев'));
+    const grid = el('div', 's-grid');
+    grid.appendChild(statCard('Рейтинг', p.rating, 2, 'accent'));
+    grid.appendChild(statCard('Матчи', s.matches, 0));
+    grid.appendChild(statCard('Победы', s.matches_won, 0));
+    grid.appendChild(statCard('Поражения', s.matches_lost, 0));
+    grid.appendChild(statCard('Винрейт матчей', s.match_winrate, 1));
+    grid.appendChild(statCard('Игр', s.games, 0));
+    grid.appendChild(statCard('Винрейт игр', s.winrate, 1));
+    grid.appendChild(statCard('K/D', s.kd, 2, 'accent'));
+    grid.appendChild(statCard('ADR', s.adr, 1));
+    grid.appendChild(statCard('HS%', s.hs, 1));
+    grid.appendChild(statCard('WR раундов', s.round_wr, 1));
+    grid.appendChild(statCard('Ассистов', s.assists, 0));
+    td.appendChild(grid);
+
+    td.appendChild(sectionTitle('users', 'Карьера · команды'));
+    const teams = el('div', 't-roster');
+    const tl = p.teams || [];
+    if (!tl.length) teams.appendChild(el('p', 'muted-note', 'Нет данных'));
+    tl.forEach(t => teams.appendChild(teamRow(t)));
+    td.appendChild(teams);
+
+    td.appendChild(sectionTitle('stats', 'Карты · рейтинг за 6 мес.'));
+    const maps = el('div', 't-matches');
+    const ml = p.maps || [];
+    if (!ml.length) maps.appendChild(el('p', 'muted-note', 'Нет данных'));
+    ml.forEach(m => maps.appendChild(mapRow(m)));
+    td.appendChild(maps);
+
+    td.appendChild(sectionTitle('trophy', 'Достижения'));
+    const ach = el('div', 't-ach');
+    const al = p.achievements || [];
+    if (!al.length) ach.appendChild(el('p', 'muted-note', 'Нет данных'));
+    al.forEach(a => ach.appendChild(achRow(a)));
+    td.appendChild(ach);
+
+    view.querySelectorAll('.s-card').forEach((c, i) => {
+      const v = c.querySelector('.s-val');
+      setTimeout(() => countUp(v, +v.dataset.target, +v.dataset.decimals), 60 + i * 40);
+    });
+  }
+
+  async function openPlayer(slug) {
+    if (!slug || loading) return;
+    loading = true;
+    clear();
+    const pd = el('div', 't-detail');
+    const back = el('button', 'back-btn');
+    back.appendChild(iconEl('back'));
+    back.appendChild(document.createTextNode('Назад'));
+    back.addEventListener('click', () => renderStats(false));
+    pd.appendChild(back);
+    const loadbar = el('div', 'loadbar');
+    loadbar.appendChild(el('div', 'loadbar-fill'));
+    pd.appendChild(loadbar);
+    view.appendChild(pd);
+    try {
+      const res = await api.get('/api/player?slug=' + encodeURIComponent(slug));
+      loadbar.remove();
+      if (!res.ok) throw new Error('bad response');
+      renderPlayerDetail(res.player, pd);
+    } catch (err) {
+      loadbar.remove();
+      view.appendChild(el('p', 'section-text', 'Не удалось загрузить игрока'));
     } finally {
       loading = false;
     }

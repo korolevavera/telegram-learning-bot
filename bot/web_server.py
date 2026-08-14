@@ -9,7 +9,7 @@ from aiohttp import web
 from .config_loader import CONFIG
 from .content import CARDS, LESSONS, QUIZZES
 from .services import get_progress, save_quiz_result, set_card_known, upsert_lesson_progress
-from .stats import clear_cache, get_stats, get_team_info
+from .stats import clear_cache, get_player_info, get_stats, get_team_info
 
 STATIC_DIR = Path(__file__).resolve().parent / "webapp"
 
@@ -135,6 +135,22 @@ async def api_team(request: web.Request) -> web.Response:
     return web.json_response({"ok": True, "team": info})
 
 
+async def api_player(request: web.Request) -> web.Response:
+    auth = _auth(request)
+    if auth is None:
+        return _unauthorized()
+    slug = request.query.get("slug", "").strip()
+    if not slug:
+        return web.json_response({"ok": False, "error": "missing slug"}, status=400)
+    try:
+        info = await get_player_info(slug)
+    except Exception:
+        return web.json_response({"ok": False, "error": "player unavailable"}, status=502)
+    if info is None:
+        return web.json_response({"ok": False, "error": "player not found"}, status=404)
+    return web.json_response({"ok": True, "player": info})
+
+
 def create_app() -> web.Application:
     app = web.Application()
     app.router.add_get("/", index_handler)
@@ -143,6 +159,7 @@ def create_app() -> web.Application:
     app.router.add_get("/api/progress", api_progress)
     app.router.add_get("/api/stats", api_stats)
     app.router.add_get("/api/team", api_team)
+    app.router.add_get("/api/player", api_player)
     app.router.add_post("/api/card", api_card)
     app.router.add_post("/api/lesson", api_lesson)
     app.router.add_post("/api/quiz", api_quiz)
