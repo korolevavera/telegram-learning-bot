@@ -54,7 +54,7 @@ async def show_progress(cb: CallbackQuery, state: FSMContext) -> None:
         f"🃏 Карточки: <b>{cards_known}/{len(CARDS)}</b> {_bar(cards_percent)} {cards_percent}%\n"
         f"🧪 Тестов пройдено: <b>{quizzes_taken}</b>\n"
         f"🏆 Лучший результат: <b>{best_text}</b>\n\n"
-        "Продолжай заниматься — ты молодец!"
+        "Продолжай тренироваться — скоро будешь клатчить как профи!"
     )
     await cb.message.edit_text(text, parse_mode="HTML", reply_markup=progress_keyboard())
     await cb.answer()

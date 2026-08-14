@@ -27,7 +27,7 @@ async def cmd_start(message: Message) -> None:
     name = message.from_user.first_name or "друг"
     await message.answer(
         f"👋 Привет, {name}!\n\n"
-        "Я помогу тебе учить английский. Выбирай, что хочешь делать:",
+        "Я помогу тебе прокачаться в Counter-Strike 2. Выбирай, что хочешь делать:",
         reply_markup=main_menu_keyboard(),
     )
 
