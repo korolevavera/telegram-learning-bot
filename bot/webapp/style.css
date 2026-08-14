@@ -174,7 +174,6 @@ header h1 .logo {
 }
 header h1 .logo svg { width: 16px; height: 16px; }
 header h1 .logo svg.bolt { display: block; }
-header h1 .logo svg.gurren { display: none; }
 header h1 .brand {
   font-family: 'Orbitron', sans-serif;
   font-weight: 700; letter-spacing: 3px; color: var(--text);
@@ -730,8 +729,6 @@ html[data-theme="gurren"] header h1 .logo {
   box-shadow: 0 0 14px rgba(255, 91, 43, .5);
   animation: gurrenPulse 1.3s ease-in-out infinite;
 }
-html[data-theme="gurren"] header h1 .logo svg.bolt { display: none; }
-html[data-theme="gurren"] header h1 .logo svg.gurren { display: block; width: 22px; height: 22px; }
 html[data-theme="gurren"] header h1 .brand .hl {
   background: linear-gradient(90deg, #ffd23f, #ff5b2b, #ff3b2f);
   -webkit-background-clip: text;
