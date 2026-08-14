@@ -18,6 +18,8 @@
   let currentUser = null;
   let currentRegion = 'EU';
   let currentPeriod = 180;
+  let currentTheme = 'dark';
+  let lang = 'ru';
   let sectionsCache = null;
   let currentPage = null;
   const backStack = [];
@@ -26,7 +28,119 @@
   const FAV_KEY = 'cs2coach.favs';
   const ONB_KEY = 'cs2coach.onboarded';
   const REGIONS = ['EU', 'NA', 'SA', 'AS', 'AU'];
-  const PERIODS = [[90, '3 месяца'], [180, '6 месяцев'], [365, '12 месяцев']];
+  const THEMES = ['dark', 'light', 'gurren'];
+  const PERIODS = [[90, 'p90'], [180, 'p180'], [365, 'p365']];
+
+  const I18N = {
+    ru: {
+      tab_stats: 'Статистика', tab_settings: 'Настройки', back: 'Назад',
+      src_note: 'Источники: bo3.gg · FACEIT', refresh: 'Обновить',
+      search_ph: 'Поиск по командам и игрокам…',
+      hint: 'Нажми на команду или игрока, чтобы открыть карточку', hint_close: 'Закрыть подсказку',
+      updated: 'Обновлено', period: 'период', region: 'регион',
+      not_found: 'Ничего не найдено по запросу', no_data: 'Нет данных',
+      fav_title: 'Избранное', type_team: 'Команда', type_player: 'Игрок', type_faceit: 'FACEIT',
+      fav_remove: 'Убрать из избранного', fav_add: 'В избранное',
+      p90: '3 месяца', p180: '6 месяцев', p365: '12 месяцев',
+      p90s: '3 мес.', p180s: '6 мес.', p365s: '12 мес.',
+      sec_teams: 'Команды', sec_pro: 'Про-сцена',
+      sub_teams: 'Топ-{0} · винрейт за {1}', sub_faceit: 'Топ-{0} · регион {1}', sub_pro: 'Топ-{0} · рейтинг за {1}',
+      err_stats: 'Не удалось загрузить статистику', err_team: 'Не удалось загрузить команду', err_player: 'Не удалось загрузить игрока',
+      retry: 'Повторить',
+      stats_6m: 'Статистика за 6 месяцев', history_6m: 'История · матчи за 6 мес.',
+      roster: 'Состав', achievements: 'Достижения', founded: 'Основана: ',
+      l_matches: 'Матчи', l_wins: 'Победы', l_losses: 'Поражения', l_winrate: 'Винрейт',
+      l_games: 'Игр', l_round_wr: 'WR раундов', l_t: 'T-side', l_ct: 'CT-side',
+      l_pistol: 'Пистолетки', l_eco: 'Эко', l_force: 'Форс-бай', l_buy: 'Фулл-бай', l_kd: 'K/D',
+      stat_for: 'Статистика ', maps_for: 'Карты · ', per_last: 'за последние шесть месяцев',
+      career: 'Карьера · команды',
+      story: 'Жизненный путь и история успеха', personal: 'Личные данные',
+      b_nick: 'Псевдоним', b_real: 'Настоящее имя', b_aliases: 'Псевдонимы', b_bday: 'Дата рождения',
+      b_country: 'Страна', b_region: 'Регион', b_role: 'Роль', b_team: 'Команда',
+      b_since: 'В команде с', b_prize: 'Призовые', b_rating: 'Рейтинг',
+      tags: 'Теги', socials: 'Соцсети', photo_unavail: 'Фото недоступно', years: ' лет',
+      l_maps_n: 'Карт: ', l_k: 'K: ', l_adr: 'ADR: ',
+      match_wr: 'Винрейт матчей', game_wr: 'Винрейт игр', l_hs: 'HS%', assists: 'Ассистов',
+      f_bio: 'Биография', f_nick: 'Никнейм', f_level: 'Уровень FACEIT', f_elo: 'Рейтинг ELO',
+      f_since: 'Аккаунт с', f_stats: 'Статистика на FACEIT', f_kills: 'Убийств',
+      f_streak: 'Серия', f_longest: 'Макс. серия', f_last: 'Последние матчи', f_maps: 'Карты',
+      f_matches_n: 'Матчей: ', f_socials: 'Соц сети',
+      set_theme: 'Тема оформления', set_lang: 'Язык',
+      theme_dark: 'Тёмная', theme_light: 'Светлая', theme_gurren: 'Gurren Lagann',
+      lang_ru: 'Русский', lang_en: 'English',
+      profile_tg: 'Профиль Telegram', app_label: 'Приложение', version: 'Версия',
+      src_data: 'Источники данных', set_region: 'Регион FACEIT', set_period: 'Период статистики',
+      fav_empty: 'Пока пусто — добавь звёздочкой из карточки игрока или команды',
+      fav_rm: 'Убрать', refresh_stats: 'Обновить статистику', user: 'Пользователь',
+      app_open: 'Открой приложение через бота', load_fail: 'Не удалось загрузить данные'
+    },
+    en: {
+      tab_stats: 'Stats', tab_settings: 'Settings', back: 'Back',
+      src_note: 'Sources: bo3.gg · FACEIT', refresh: 'Refresh',
+      search_ph: 'Search teams and players…',
+      hint: 'Tap a team or player to open their card', hint_close: 'Close hint',
+      updated: 'Updated', period: 'period', region: 'region',
+      not_found: 'Nothing found for', no_data: 'No data',
+      fav_title: 'Favorites', type_team: 'Team', type_player: 'Player', type_faceit: 'FACEIT',
+      fav_remove: 'Remove from favorites', fav_add: 'Add to favorites',
+      p90: '3 months', p180: '6 months', p365: '12 months',
+      p90s: '3 mo.', p180s: '6 mo.', p365s: '12 mo.',
+      sec_teams: 'Teams', sec_pro: 'Pro scene',
+      sub_teams: 'Top {0} · winrate {1}', sub_faceit: 'Top {0} · region {1}', sub_pro: 'Top {0} · rating {1}',
+      err_stats: 'Failed to load stats', err_team: 'Failed to load team', err_player: 'Failed to load player',
+      retry: 'Retry',
+      stats_6m: '6-month stats', history_6m: 'History · matches 6 mo.',
+      roster: 'Roster', achievements: 'Achievements', founded: 'Founded: ',
+      l_matches: 'Matches', l_wins: 'Wins', l_losses: 'Losses', l_winrate: 'Winrate',
+      l_games: 'Games', l_round_wr: 'Round WR', l_t: 'T-side', l_ct: 'CT-side',
+      l_pistol: 'Pistols', l_eco: 'Eco', l_force: 'Force', l_buy: 'Full buy', l_kd: 'K/D',
+      stat_for: 'Stats for ', maps_for: 'Maps · ', per_last: 'the last 6 months',
+      career: 'Career · teams',
+      story: 'Life story and path to success', personal: 'Personal info',
+      b_nick: 'Nickname', b_real: 'Real name', b_aliases: 'Aliases', b_bday: 'Date of birth',
+      b_country: 'Country', b_region: 'Region', b_role: 'Role', b_team: 'Team',
+      b_since: 'In team since', b_prize: 'Total winnings', b_rating: 'Rating',
+      tags: 'Tags', socials: 'Socials', photo_unavail: 'No photos available', years: ' y.o.',
+      l_maps_n: 'Maps: ', l_k: 'K: ', l_adr: 'ADR: ',
+      match_wr: 'Match WR', game_wr: 'Game WR', l_hs: 'HS%', assists: 'Assists',
+      f_bio: 'Bio', f_nick: 'Nickname', f_level: 'FACEIT level', f_elo: 'ELO rating',
+      f_since: 'Account since', f_stats: 'FACEIT stats', f_kills: 'Kills',
+      f_streak: 'Streak', f_longest: 'Longest streak', f_last: 'Recent matches', f_maps: 'Maps',
+      f_matches_n: 'Matches: ', f_socials: 'Social links',
+      set_theme: 'Theme', set_lang: 'Language',
+      theme_dark: 'Dark', theme_light: 'Light', theme_gurren: 'Gurren Lagann',
+      lang_ru: 'Russian', lang_en: 'English',
+      profile_tg: 'Telegram profile', app_label: 'App', version: 'Version',
+      src_data: 'Data sources', set_region: 'FACEIT region', set_period: 'Stats period',
+      fav_empty: 'Empty — add with the star on a player or team card',
+      fav_rm: 'Remove', refresh_stats: 'Refresh stats', user: 'User',
+      app_open: 'Open the app from the bot', load_fail: 'Failed to load data'
+    }
+  };
+
+  function t(key) {
+    const table = I18N[lang] || I18N.ru;
+    return table[key] != null ? table[key] : (I18N.ru[key] != null ? I18N.ru[key] : key);
+  }
+
+  function fmt(s) {
+    for (let i = 1; i < arguments.length; i++) s = s.split('{' + (i - 1) + '}').join(arguments[i]);
+    return s;
+  }
+
+  function applyTheme() {
+    const root = document.documentElement || document.body;
+    if (root) root.setAttribute('data-theme', currentTheme);
+  }
+
+  function secLocalized(sec) {
+    const n = (sec.items || []).length;
+    const m = periodShort();
+    if (sec.id === 'faceit') return { title: t('sec_faceit'), subtitle: fmt(t('sub_faceit'), n, currentRegion) };
+    if (sec.id === 'teams') return { title: t('sec_teams'), subtitle: fmt(t('sub_teams'), n, m) };
+    if (sec.id === 'pro') return { title: t('sec_pro'), subtitle: fmt(t('sub_pro'), n, m) };
+    return { title: sec.title, subtitle: sec.subtitle };
+  }
 
   const api = {
     headers: { 'x-init-data': tg ? tg.initData : '' },
@@ -116,11 +230,13 @@
       const s = JSON.parse(localStorage.getItem(SET_KEY) || '{}');
       if (REGIONS.indexOf(s.region) !== -1) currentRegion = s.region;
       if ([90, 180, 365].indexOf(s.period) !== -1) currentPeriod = s.period;
+      if (THEMES.indexOf(s.theme) !== -1) currentTheme = s.theme;
+      if (s.lang === 'en' || s.lang === 'ru') lang = s.lang;
     } catch (e) {}
   }
 
   function saveSettings() {
-    try { localStorage.setItem(SET_KEY, JSON.stringify({ region: currentRegion, period: currentPeriod })); } catch (e) {}
+    try { localStorage.setItem(SET_KEY, JSON.stringify({ region: currentRegion, period: currentPeriod, theme: currentTheme, lang: lang })); } catch (e) {}
   }
 
   function loadFavs() {
@@ -143,7 +259,8 @@
   }
 
   function periodShort() {
-    return { 90: '3 мес.', 180: '6 мес.', 365: '12 мес.' }[currentPeriod] || '6 мес.';
+    const key = { 90: 'p90s', 180: 'p180s', 365: 'p365s' }[currentPeriod] || 'p180s';
+    return t(key);
   }
 
   function statsUrl(force) {
@@ -169,7 +286,7 @@
   function backBtn() {
     const b = el('button', 'back-btn');
     b.appendChild(iconEl('back'));
-    b.appendChild(document.createTextNode('Назад'));
+    b.appendChild(document.createTextNode(t('back')));
     b.addEventListener('click', goBack);
     return b;
   }
@@ -177,7 +294,7 @@
   function favBtn(item) {
     const active = isFav(item.type, item.key);
     const b = el('button', 'star-btn' + (active ? ' active' : ''));
-    b.setAttribute('aria-label', 'В избранное');
+    b.setAttribute('aria-label', t('fav_add'));
     b.textContent = active ? '★' : '☆';
     b.addEventListener('click', () => {
       toggleFav(item);
@@ -275,7 +392,8 @@
   function renderSection(sec, flat) {
     const section = el('div', 'stat-section');
     const head = el('button', 'sec-head');
-    head.appendChild(el('div', 'section-title', sec.title + (sec.subtitle ? ' · ' + sec.subtitle : '')));
+    const lc = secLocalized(sec);
+    head.appendChild(el('div', 'section-title', lc.title + (lc.subtitle ? ' · ' + lc.subtitle : '')));
     const chev = el('span', 'chev');
     chev.innerHTML = ICONS.chevron;
     head.appendChild(chev);
@@ -292,7 +410,7 @@
         items.forEach(it => body.appendChild(playerRow(it, sec.unit, maxVal)));
       }
     } else {
-      body.appendChild(el('p', 'section-text', 'Нет данных'));
+      body.appendChild(el('p', 'section-text', t('no_data')));
     }
     bindClicks(body, sec.id);
     section.appendChild(body);
@@ -306,7 +424,7 @@
 
   function favSection(favs) {
     const sec = el('div', 'stat-section');
-    sec.appendChild(el('div', 'section-title', 'Избранное'));
+    sec.appendChild(el('div', 'section-title', t('fav_title')));
     const body = el('div');
     favs.forEach(f => {
       const row = el('div', 'player-row');
@@ -316,11 +434,11 @@
       const info = el('div', 'player-info');
       info.appendChild(el('div', 'player-nick', f.name));
       const meta = el('div', 'player-meta');
-      meta.appendChild(el('span', null, f.type === 'team' ? 'Команда' : f.type === 'faceit' ? 'FACEIT' : 'Игрок'));
+      meta.appendChild(el('span', null, f.type === 'team' ? t('type_team') : f.type === 'faceit' ? t('type_faceit') : t('type_player')));
       info.appendChild(meta);
       row.appendChild(info);
       const star = el('button', 'star-btn active');
-      star.setAttribute('aria-label', 'Убрать из избранного');
+      star.setAttribute('aria-label', t('fav_remove'));
       star.textContent = '★';
       star.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -344,7 +462,7 @@
     listWrap.innerHTML = '';
     const sections = (data && data.sections) || [];
     if (sections.length) {
-      listWrap.appendChild(el('p', 'updated-note', 'Обновлено: ' + new Date(data.generated_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }) + ' · период ' + periodShort() + ' · регион ' + (data.region || currentRegion)));
+      listWrap.appendChild(el('p', 'updated-note', t('updated') + ': ' + new Date(data.generated_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }) + ' · ' + t('period') + ' ' + periodShort() + ' · ' + t('region') + ' ' + (data.region || currentRegion)));
     }
     const q = (query || '').trim().toLowerCase();
     const favs = loadFavs();
@@ -357,7 +475,7 @@
       listWrap.appendChild(renderSection({ ...sec, items }, !!q));
     });
     if (!any) {
-      listWrap.appendChild(el('p', 'section-text', q ? 'Ничего не найдено по запросу «' + query + '»' : 'Нет данных'));
+      listWrap.appendChild(el('p', 'section-text', q ? t('not_found') + ' «' + query + '»' : t('no_data')));
     }
     if (animate !== false) animateAll();
   }
@@ -366,12 +484,12 @@
     if (loading) return;
     loading = true;
     clear();
-    view.appendChild(sectionTitle('stats', 'Статистика'));
+    view.appendChild(sectionTitle('stats', t('tab_stats')));
     const meta = el('div', 'stats-meta');
-    meta.appendChild(el('span', 'muted-note', 'Источники: bo3.gg · FACEIT'));
+    meta.appendChild(el('span', 'muted-note', t('src_note')));
     const refreshBtn = el('button', 'refresh-btn');
     refreshBtn.innerHTML = ICONS.refresh;
-    refreshBtn.setAttribute('aria-label', 'Обновить');
+    refreshBtn.setAttribute('aria-label', t('refresh'));
     refreshBtn.addEventListener('click', () => renderStats(true));
     meta.appendChild(refreshBtn);
     view.appendChild(meta);
@@ -379,7 +497,7 @@
     const searchBox = el('div', 'search-box');
     const search = el('input', 'search-input');
     search.setAttribute('type', 'search');
-    search.setAttribute('placeholder', 'Поиск по командам и игрокам…');
+    search.setAttribute('placeholder', t('search_ph'));
     searchBox.appendChild(search);
     view.appendChild(searchBox);
 
@@ -387,9 +505,9 @@
     try { onboarded = localStorage.getItem(ONB_KEY) === '1'; } catch (e) {}
     if (!onboarded) {
       const hint = el('div', 'hint-bar');
-      hint.appendChild(el('span', null, 'Нажми на команду или игрока, чтобы открыть карточку'));
+      hint.appendChild(el('span', null, t('hint')));
       const hintX = el('button', 'hint-x');
-      hintX.setAttribute('aria-label', 'Закрыть подсказку');
+      hintX.setAttribute('aria-label', t('hint_close'));
       hintX.textContent = '✕';
       hintX.addEventListener('click', () => {
         hint.remove();
@@ -428,10 +546,10 @@
     } catch (err) {
       loadbar.remove();
       const errBox = el('div', 'err-box');
-      errBox.appendChild(el('p', 'section-text', 'Не удалось загрузить статистику'));
+      errBox.appendChild(el('p', 'section-text', t('err_stats')));
       const retry = el('button', 'link-btn');
       retry.appendChild(iconEl('refresh'));
-      retry.appendChild(document.createTextNode('Повторить'));
+      retry.appendChild(document.createTextNode(t('retry')));
       retry.addEventListener('click', () => renderStats(true));
       errBox.appendChild(retry);
       listWrap.appendChild(errBox);
@@ -521,7 +639,7 @@
     hinfo.appendChild(badges);
     const meta = el('div', 't-meta');
     if (t.country_name) meta.appendChild(el('span', null, t.country_name));
-    if (t.est_date) meta.appendChild(el('span', null, 'Основана: ' + t.est_date));
+    if (t.est_date) meta.appendChild(el('span', null, t('founded') + t.est_date));
     if (t.six_month_earned) meta.appendChild(el('span', 'earn', formatMoney(t.six_month_earned)));
     hinfo.appendChild(meta);
     hero.appendChild(hinfo);
@@ -529,42 +647,42 @@
     td.appendChild(hero);
 
     const s = t.stats || {};
-    td.appendChild(sectionTitle('stats', 'Статистика за 6 месяцев'));
+    td.appendChild(sectionTitle('stats', t('stats_6m')));
     const grid = el('div', 's-grid');
-    grid.appendChild(statCard('Матчи', s.matches, 0));
-    grid.appendChild(statCard('Победы', s.matches_won, 0));
-    grid.appendChild(statCard('Поражения', s.matches_lost, 0));
-    grid.appendChild(statCard('Винрейт', s.match_winrate, 1, 'accent'));
-    grid.appendChild(statCard('Игр', s.games, 0));
-    grid.appendChild(statCard('WR раундов', s.round_wr, 1));
-    grid.appendChild(statCard('T-side', s.t_wr, 1));
-    grid.appendChild(statCard('CT-side', s.ct_wr, 1));
-    grid.appendChild(statCard('Пистолетки', s.pistol_wr, 1));
-    grid.appendChild(statCard('Эко', s.eco_wr, 1));
-    grid.appendChild(statCard('Форс-бай', s.force_wr, 1));
-    grid.appendChild(statCard('Фулл-бай', s.buy_wr, 1));
-    grid.appendChild(statCard('K/D', s.kd, 2, 'accent'));
+    grid.appendChild(statCard(t('l_matches'), s.matches, 0));
+    grid.appendChild(statCard(t('l_wins'), s.matches_won, 0));
+    grid.appendChild(statCard(t('l_losses'), s.matches_lost, 0));
+    grid.appendChild(statCard(t('l_winrate'), s.match_winrate, 1, 'accent'));
+    grid.appendChild(statCard(t('l_games'), s.games, 0));
+    grid.appendChild(statCard(t('l_round_wr'), s.round_wr, 1));
+    grid.appendChild(statCard(t('l_t'), s.t_wr, 1));
+    grid.appendChild(statCard(t('l_ct'), s.ct_wr, 1));
+    grid.appendChild(statCard(t('l_pistol'), s.pistol_wr, 1));
+    grid.appendChild(statCard(t('l_eco'), s.eco_wr, 1));
+    grid.appendChild(statCard(t('l_force'), s.force_wr, 1));
+    grid.appendChild(statCard(t('l_buy'), s.buy_wr, 1));
+    grid.appendChild(statCard(t('l_kd'), s.kd, 2, 'accent'));
     td.appendChild(grid);
 
-    td.appendChild(sectionTitle('stats', 'История · матчи за 6 мес.'));
+    td.appendChild(sectionTitle('stats', t('history_6m')));
     const hist = el('div', 't-matches');
     const ms = t.matches || [];
-    if (!ms.length) hist.appendChild(el('p', 'muted-note', 'Нет данных'));
+    if (!ms.length) hist.appendChild(el('p', 'muted-note', t('no_data')));
     ms.forEach(m => hist.appendChild(matchRow(m)));
     td.appendChild(hist);
 
-    td.appendChild(sectionTitle('users', 'Состав'));
+    td.appendChild(sectionTitle('users', t('roster')));
     const rost = el('div', 't-roster');
     const rl = t.roster || [];
-    if (!rl.length) rost.appendChild(el('p', 'muted-note', 'Нет данных'));
+    if (!rl.length) rost.appendChild(el('p', 'muted-note', t('no_data')));
     rl.forEach(p => rost.appendChild(rosterRow(p)));
     bindRows(rost, slug => openPlayer(slug));
     td.appendChild(rost);
 
-    td.appendChild(sectionTitle('trophy', 'Достижения'));
+    td.appendChild(sectionTitle('trophy', t('achievements')));
     const ach = el('div', 't-ach');
     const al = t.achievements || [];
-    if (!al.length) ach.appendChild(el('p', 'muted-note', 'Нет данных'));
+    if (!al.length) ach.appendChild(el('p', 'muted-note', t('no_data')));
     al.forEach(a => ach.appendChild(achRow(a)));
     td.appendChild(ach);
 
@@ -598,10 +716,10 @@
     } catch (err) {
       loadbar.remove();
       const errBox = el('div', 'err-box');
-      errBox.appendChild(el('p', 'section-text', 'Не удалось загрузить команду'));
+      errBox.appendChild(el('p', 'section-text', t('err_team')));
       const retry = el('button', 'link-btn');
       retry.appendChild(iconEl('refresh'));
-      retry.appendChild(document.createTextNode('Повторить'));
+      retry.appendChild(document.createTextNode(t('retry')));
       retry.addEventListener('click', () => renderTeam(slug, true));
       errBox.appendChild(retry);
       td.appendChild(errBox);
@@ -641,9 +759,9 @@
     const info = el('div', 'm-info');
     info.appendChild(el('div', 'm-opp', (m.map || '').replace(/^de_/, '').toUpperCase()));
     const sub = el('div', 'm-sub');
-    if (m.maps_count) sub.appendChild(el('span', null, 'Карт: ' + m.maps_count));
-    if (m.avg_kills != null) sub.appendChild(el('span', null, 'K: ' + formatNum(m.avg_kills, 2)));
-    if (m.avg_damage != null) sub.appendChild(el('span', null, 'ADR: ' + formatNum(m.avg_damage, 1)));
+    if (m.maps_count) sub.appendChild(el('span', null, t('l_maps_n') + m.maps_count));
+    if (m.avg_kills != null) sub.appendChild(el('span', null, t('l_k') + formatNum(m.avg_kills, 2)));
+    if (m.avg_damage != null) sub.appendChild(el('span', null, t('l_adr') + formatNum(m.avg_damage, 1)));
     info.appendChild(sub);
     row.appendChild(info);
     row.appendChild(el('div', 'm-score', m.avg_rating != null ? formatNum(m.avg_rating, 2) : '—'));
@@ -675,7 +793,7 @@
     hinfo.appendChild(badges);
     const meta = el('div', 't-meta');
     if (p.country_name) meta.appendChild(el('span', null, p.country_name));
-    if (p.age != null) meta.appendChild(el('span', null, p.age + ' лет'));
+    if (p.age != null) meta.appendChild(el('span', null, p.age + t('years')));
     if (p.total_prize) meta.appendChild(el('span', 'earn', formatMoney(p.total_prize)));
     hinfo.appendChild(meta);
     hero.appendChild(hinfo);
@@ -684,9 +802,9 @@
 
     const subTabs = el('div', 'sub-tabs');
     const statsTab = el('button', 'sub-tab active');
-    statsTab.appendChild(document.createTextNode('Статистика'));
+    statsTab.appendChild(document.createTextNode(t('tab_stats')));
     const bioTab = el('button', 'sub-tab');
-    bioTab.appendChild(document.createTextNode('Биография'));
+    bioTab.appendChild(document.createTextNode(t('f_bio')));
     subTabs.appendChild(statsTab);
     subTabs.appendChild(bioTab);
     td.appendChild(subTabs);
@@ -694,77 +812,77 @@
     const statsBox = el('div', 'sub-box');
     const bioBox = el('div', 'sub-box hidden');
 
-    const periodTxt = p.period_label || 'за последние шесть месяцев';
+    const periodTxt = lang === 'ru' ? (p.period_label || t('per_last')) : t('per_last');
     const s = p.stats || {};
-    statsBox.appendChild(sectionTitle('stats', 'Статистика ' + periodTxt));
+    statsBox.appendChild(sectionTitle('stats', t('stat_for') + periodTxt));
     const grid = el('div', 's-grid');
-    grid.appendChild(statCard('Рейтинг', p.rating, 2, 'accent'));
-    grid.appendChild(statCard('Матчи', s.matches, 0));
-    grid.appendChild(statCard('Победы', s.matches_won, 0));
-    grid.appendChild(statCard('Поражения', s.matches_lost, 0));
-    grid.appendChild(statCard('Винрейт матчей', s.match_winrate, 1));
-    grid.appendChild(statCard('Игр', s.games, 0));
-    grid.appendChild(statCard('Винрейт игр', s.winrate, 1));
-    grid.appendChild(statCard('K/D', s.kd, 2, 'accent'));
+    grid.appendChild(statCard(t('b_rating'), p.rating, 2, 'accent'));
+    grid.appendChild(statCard(t('l_matches'), s.matches, 0));
+    grid.appendChild(statCard(t('l_wins'), s.matches_won, 0));
+    grid.appendChild(statCard(t('l_losses'), s.matches_lost, 0));
+    grid.appendChild(statCard(t('match_wr'), s.match_winrate, 1));
+    grid.appendChild(statCard(t('l_games'), s.games, 0));
+    grid.appendChild(statCard(t('game_wr'), s.winrate, 1));
+    grid.appendChild(statCard(t('l_kd'), s.kd, 2, 'accent'));
     grid.appendChild(statCard('ADR', s.adr, 1));
-    grid.appendChild(statCard('HS%', s.hs, 1));
-    grid.appendChild(statCard('WR раундов', s.round_wr, 1));
-    grid.appendChild(statCard('Ассистов', s.assists, 0));
+    grid.appendChild(statCard(t('l_hs'), s.hs, 1));
+    grid.appendChild(statCard(t('l_round_wr'), s.round_wr, 1));
+    grid.appendChild(statCard(t('assists'), s.assists, 0));
     statsBox.appendChild(grid);
 
-    statsBox.appendChild(sectionTitle('stats', 'Карты · ' + periodTxt));
+    statsBox.appendChild(sectionTitle('stats', t('maps_for') + periodTxt));
     const maps = el('div', 't-matches');
     const ml = p.maps || [];
-    if (!ml.length) maps.appendChild(el('p', 'muted-note', 'Нет данных'));
+    if (!ml.length) maps.appendChild(el('p', 'muted-note', t('no_data')));
     ml.forEach(m => maps.appendChild(mapRow(m)));
     statsBox.appendChild(maps);
 
-    statsBox.appendChild(sectionTitle('users', 'Карьера · команды'));
+    statsBox.appendChild(sectionTitle('users', t('career')));
     const teams = el('div', 't-roster');
     const tl = p.teams || [];
-    if (!tl.length) teams.appendChild(el('p', 'muted-note', 'Нет данных'));
+    if (!tl.length) teams.appendChild(el('p', 'muted-note', t('no_data')));
     tl.forEach(t => teams.appendChild(teamRow(t)));
     bindRows(teams, slug => openTeam(slug));
     statsBox.appendChild(teams);
 
-    statsBox.appendChild(sectionTitle('trophy', 'Достижения'));
+    statsBox.appendChild(sectionTitle('trophy', t('achievements')));
     const ach = el('div', 't-ach');
     const al = p.achievements || [];
-    if (!al.length) ach.appendChild(el('p', 'muted-note', 'Нет данных'));
+    if (!al.length) ach.appendChild(el('p', 'muted-note', t('no_data')));
     al.forEach(a => ach.appendChild(achRow(a)));
     statsBox.appendChild(ach);
 
     const photos = el('div', 'p-photos');
     if (p.image) photos.appendChild(photoCard(p.image, p.nickname));
-    if (p.team_image) photos.appendChild(photoCard(p.team_image, p.team || 'Команда'));
-    if (!photos.children.length) photos.appendChild(el('p', 'muted-note', 'Фото недоступно'));
+    if (p.team_image) photos.appendChild(photoCard(p.team_image, p.team || t('type_team')));
+    if (!photos.children.length) photos.appendChild(el('p', 'muted-note', t('photo_unavail')));
 
     if (p.bio_text) {
       const story = el('div', 'bio-story');
       const storyTitle = el('div', 'bio-story-title');
       storyTitle.appendChild(iconEl('users'));
-      storyTitle.appendChild(document.createTextNode('Жизненный путь и история успеха'));
+      storyTitle.appendChild(document.createTextNode(t('story')));
       story.appendChild(storyTitle);
       story.appendChild(el('p', 'bio-story-text', p.bio_text));
       bioBox.appendChild(story);
     }
     bioBox.appendChild(photos);
 
-    bioBox.appendChild(sectionTitle('users', 'Личные данные'));
+    bioBox.appendChild(sectionTitle('users', t('personal')));
     const bio = el('div', 'b-list');
     const realName = [p.first_name, p.last_name].filter(Boolean).join(' ') || null;
-    bio.appendChild(bioRow('Псевдоним', p.nickname));
-    bio.appendChild(bioRow('Настоящее имя', realName));
-    if (p.aliases && p.aliases.length) bio.appendChild(bioRow('Псевдонимы', p.aliases.join(', ')));
+    bio.appendChild(bioRow(t('b_nick'), p.nickname));
+    bio.appendChild(bioRow(t('b_real'), realName));
+    if (p.aliases && p.aliases.length) bio.appendChild(bioRow(t('b_aliases'), p.aliases.join(', ')));
     if (p.birthday) {
-      const ageTxt = p.age != null ? ' (' + p.age + ' лет)' : '';
-      bio.appendChild(bioRow('Дата рождения', String(p.birthday).slice(0, 10) + ageTxt));
+      const ageTxt = p.age != null ? ' (' + p.age + t('years') + ')' : '';
+      bio.appendChild(bioRow(t('b_bday'), String(p.birthday).slice(0, 10) + ageTxt));
     }
-    if (p.country_name) bio.appendChild(bioRow('Страна', p.country_name));
-    if (p.region) bio.appendChild(bioRow('Регион', p.region));
-    if (p.role) bio.appendChild(bioRow('Роль', p.role));
+    if (p.country_name) bio.appendChild(bioRow(t('b_country'), p.country_name));
+    if (p.region) bio.appendChild(bioRow(t('b_region'), p.region));
+    if (p.role) bio.appendChild(bioRow(t('b_role'), p.role));
     if (p.team) {
-      const teamRow2 = bioRow('Команда', p.team);
+      const teamRow2 = bioRow(t('b_team'), p.team);
       if (p.team_slug) {
         teamRow2.classList.add('clickable');
         teamRow2.dataset.slug = p.team_slug;
@@ -772,14 +890,14 @@
       }
       bio.appendChild(teamRow2);
     }
-    if (p.joined_team_at) bio.appendChild(bioRow('В команде с', String(p.joined_team_at).slice(0, 10)));
-    bio.appendChild(bioRow('Призовые', formatMoney(p.total_prize)));
-    bio.appendChild(bioRow('Рейтинг', p.rating != null ? formatNum(p.rating, 2) : '—'));
+    if (p.joined_team_at) bio.appendChild(bioRow(t('b_since'), String(p.joined_team_at).slice(0, 10)));
+    bio.appendChild(bioRow(t('b_prize'), formatMoney(p.total_prize)));
+    bio.appendChild(bioRow(t('b_rating'), p.rating != null ? formatNum(p.rating, 2) : '—'));
     bioBox.appendChild(bio);
 
     const tags = p.tags || [];
     if (tags.length) {
-      bioBox.appendChild(sectionTitle('users', 'Теги'));
+      bioBox.appendChild(sectionTitle('users', t('tags')));
       const tagWrap = el('div', 't-badges');
       tags.forEach(t => tagWrap.appendChild(el('span', 'tag-badge', t)));
       bioBox.appendChild(tagWrap);
@@ -790,7 +908,7 @@
     if (p.twitch) socials.push([p.twitch, 'Twitch']);
     if (p.facebook) socials.push([p.facebook, 'Facebook']);
     if (socials.length) {
-      bioBox.appendChild(sectionTitle('users', 'Соцсети'));
+      bioBox.appendChild(sectionTitle('users', t('socials')));
       const links = el('div', 'f-links');
       socials.forEach(soc => links.appendChild(linkBtn(soc[0], soc[1])));
       bioBox.appendChild(links);
@@ -842,10 +960,10 @@
     } catch (err) {
       loadbar.remove();
       const errBox = el('div', 'err-box');
-      errBox.appendChild(el('p', 'section-text', 'Не удалось загрузить игрока'));
+      errBox.appendChild(el('p', 'section-text', t('err_player')));
       const retry = el('button', 'link-btn');
       retry.appendChild(iconEl('refresh'));
-      retry.appendChild(document.createTextNode('Повторить'));
+      retry.appendChild(document.createTextNode(t('retry')));
       retry.addEventListener('click', () => renderPlayer(slug, true));
       errBox.appendChild(retry);
       pd.appendChild(errBox);
@@ -875,7 +993,7 @@
     const info = el('div', 'm-info');
     info.appendChild(el('div', 'm-opp', m.map));
     const sub = el('div', 'm-sub');
-    if (m.matches) sub.appendChild(el('span', null, 'Матчей: ' + formatNum(m.matches, 0)));
+    if (m.matches) sub.appendChild(el('span', null, t('f_matches_n') + formatNum(m.matches, 0)));
     if (m.kd != null) sub.appendChild(el('span', null, 'K/D: ' + formatNum(m.kd, 2)));
     info.appendChild(sub);
     row.appendChild(info);
@@ -903,36 +1021,36 @@
     if (p.id) hero.appendChild(favBtn({ type: 'faceit', key: p.id, name: p.nickname, image: p.image }));
     td.appendChild(hero);
 
-    td.appendChild(sectionTitle('users', 'Биография'));
+    td.appendChild(sectionTitle('users', t('f_bio')));
     const bio = el('div', 'b-list');
-    bio.appendChild(bioRow('Никнейм', p.nickname));
-    if (p.country_code) bio.appendChild(bioRow('Страна', p.country_code.toUpperCase()));
-    if (p.region) bio.appendChild(bioRow('Регион', p.region));
-    if (p.skill_level != null) bio.appendChild(bioRow('Уровень FACEIT', 'Lv ' + p.skill_level));
-    if (p.elo != null) bio.appendChild(bioRow('Рейтинг ELO', formatNum(p.elo, 0)));
+    bio.appendChild(bioRow(t('f_nick'), p.nickname));
+    if (p.country_code) bio.appendChild(bioRow(t('b_country'), p.country_code.toUpperCase()));
+    if (p.region) bio.appendChild(bioRow(t('b_region'), p.region));
+    if (p.skill_level != null) bio.appendChild(bioRow(t('f_level'), 'Lv ' + p.skill_level));
+    if (p.elo != null) bio.appendChild(bioRow(t('f_elo'), formatNum(p.elo, 0)));
     if (p.steam_nickname) bio.appendChild(bioRow('Steam', p.steam_nickname));
-    if (p.activated_at) bio.appendChild(bioRow('Аккаунт с', p.activated_at));
+    if (p.activated_at) bio.appendChild(bioRow(t('f_since'), p.activated_at));
     td.appendChild(bio);
 
     const s = p.stats || {};
-    td.appendChild(sectionTitle('stats', 'Статистика на FACEIT'));
+    td.appendChild(sectionTitle('stats', t('f_stats')));
     const grid = el('div', 's-grid');
     grid.appendChild(statCard('ELO', p.elo, 0, 'accent'));
-    grid.appendChild(statCard('Матчи', s.matches, 0));
-    grid.appendChild(statCard('Победы', s.wins, 0));
-    grid.appendChild(statCard('Поражения', s.losses, 0));
-    grid.appendChild(statCard('Винрейт', s.winrate, 1, 'accent'));
-    grid.appendChild(statCard('K/D', s.kd, 2));
-    grid.appendChild(statCard('HS%', s.hs, 1));
+    grid.appendChild(statCard(t('l_matches'), s.matches, 0));
+    grid.appendChild(statCard(t('l_wins'), s.wins, 0));
+    grid.appendChild(statCard(t('l_losses'), s.losses, 0));
+    grid.appendChild(statCard(t('l_winrate'), s.winrate, 1, 'accent'));
+    grid.appendChild(statCard(t('l_kd'), s.kd, 2));
+    grid.appendChild(statCard(t('l_hs'), s.hs, 1));
     grid.appendChild(statCard('ADR', s.adr, 1));
-    grid.appendChild(statCard('Убийств', s.kills, 0));
-    grid.appendChild(statCard('Серия', s.win_streak, 0));
-    grid.appendChild(statCard('Макс. серия', s.longest_streak, 0));
+    grid.appendChild(statCard(t('f_kills'), s.kills, 0));
+    grid.appendChild(statCard(t('f_streak'), s.win_streak, 0));
+    grid.appendChild(statCard(t('f_longest'), s.longest_streak, 0));
     td.appendChild(grid);
 
     const results = s.results || [];
     if (results.length) {
-      td.appendChild(sectionTitle('stats', 'Последние матчи'));
+      td.appendChild(sectionTitle('stats', t('f_last')));
       const chips = el('div', 'm-maps');
       results.forEach(r => {
         chips.appendChild(el('span', 'map-chip ' + (r === 'W' ? 'win' : 'loss'), r));
@@ -942,7 +1060,7 @@
 
     const ml = p.maps || [];
     if (ml.length) {
-      td.appendChild(sectionTitle('stats', 'Карты'));
+      td.appendChild(sectionTitle('stats', t('f_maps')));
       const maps = el('div', 't-matches');
       ml.forEach(m => maps.appendChild(faceitMapRow(m)));
       td.appendChild(maps);
@@ -952,7 +1070,7 @@
     if (p.faceit_url) links.appendChild(linkBtn(p.faceit_url, 'FACEIT'));
     if (p.steam_id) links.appendChild(linkBtn('https://steamcommunity.com/profiles/' + p.steam_id, 'Steam'));
     if (links.children.length) {
-      td.appendChild(sectionTitle('users', 'Соц сети'));
+      td.appendChild(sectionTitle('users', t('f_socials')));
       td.appendChild(links);
     }
 
@@ -986,10 +1104,10 @@
     } catch (err) {
       loadbar.remove();
       const errBox = el('div', 'err-box');
-      errBox.appendChild(el('p', 'section-text', 'Не удалось загрузить игрока'));
+      errBox.appendChild(el('p', 'section-text', t('err_player')));
       const retry = el('button', 'link-btn');
       retry.appendChild(iconEl('refresh'));
-      retry.appendChild(document.createTextNode('Повторить'));
+      retry.appendChild(document.createTextNode(t('retry')));
       retry.addEventListener('click', () => renderFaceit(id, true));
       errBox.appendChild(retry);
       pd.appendChild(errBox);
@@ -1038,28 +1156,49 @@
     if (loading) return;
     loading = true;
     clear();
-    view.appendChild(sectionTitle('settings', 'Настройки'));
+    view.appendChild(sectionTitle('settings', t('tab_settings')));
 
     const prof = el('div', 't-hero');
     const ava = el('div', 'avatar hero-logo');
     ava.appendChild(el('span', null, (currentUser ? currentUser.first_name : '?').charAt(0).toUpperCase()));
     prof.appendChild(ava);
     const hinfo = el('div', 't-hinfo');
-    hinfo.appendChild(el('div', 't-name', currentUser ? currentUser.first_name : 'Пользователь'));
+    hinfo.appendChild(el('div', 't-name', currentUser ? currentUser.first_name : t('user')));
     const meta = el('div', 't-meta');
-    meta.appendChild(el('span', null, 'Профиль Telegram'));
+    meta.appendChild(el('span', null, t('profile_tg')));
     meta.appendChild(el('span', 'rank-badge', 'ID ' + (currentUser ? currentUser.id : '—')));
     hinfo.appendChild(meta);
     prof.appendChild(hinfo);
     view.appendChild(prof);
 
     const info = el('div', 'b-list');
-    info.appendChild(bioRow('Приложение', 'CS2 COACH'));
-    info.appendChild(bioRow('Версия', '1.1'));
-    info.appendChild(bioRow('Источники данных', 'bo3.gg · FACEIT'));
+    info.appendChild(bioRow(t('app_label'), 'CS2 COACH'));
+    info.appendChild(bioRow(t('version'), '1.1'));
+    info.appendChild(bioRow(t('src_data'), 'bo3.gg · FACEIT'));
     view.appendChild(info);
 
-    view.appendChild(sectionTitle('settings', 'Регион FACEIT'));
+    view.appendChild(sectionTitle('settings', t('set_theme')));
+    const themeRow = el('div', 'set-row');
+    themeRow.appendChild(sel(THEMES.map(v => [v, t('theme_' + v)]), currentTheme, v => {
+      currentTheme = v;
+      saveSettings();
+      applyTheme();
+    }));
+    view.appendChild(themeRow);
+
+    view.appendChild(sectionTitle('settings', t('set_lang')));
+    const langRow = el('div', 'set-row');
+    langRow.appendChild(sel([['ru', t('lang_ru')], ['en', t('lang_en')]], lang, v => {
+      lang = v;
+      saveSettings();
+      document.querySelectorAll('#tabBar .tab').forEach(b => {
+        if (b.lastChild) b.lastChild.textContent = b.dataset.tab === 'stats' ? t('tab_stats') : t('tab_settings');
+      });
+      renderSettings();
+    }));
+    view.appendChild(langRow);
+
+    view.appendChild(sectionTitle('settings', t('set_region')));
     const regionRow = el('div', 'set-row');
     regionRow.appendChild(sel(REGIONS, currentRegion, v => {
       currentRegion = v;
@@ -1068,9 +1207,9 @@
     }));
     view.appendChild(regionRow);
 
-    view.appendChild(sectionTitle('stats', 'Период статистики'));
+    view.appendChild(sectionTitle('stats', t('set_period')));
     const periodRow = el('div', 'set-row');
-    periodRow.appendChild(sel(PERIODS, currentPeriod, v => {
+    periodRow.appendChild(sel(PERIODS.map(p => [p[0], t(p[1])]), currentPeriod, v => {
       currentPeriod = +v;
       saveSettings();
       sectionsCache = null;
@@ -1078,21 +1217,21 @@
     }));
     view.appendChild(periodRow);
 
-    view.appendChild(sectionTitle('users', 'Избранное'));
+    view.appendChild(sectionTitle('users', t('fav_title')));
     const favList = el('div', 't-roster');
     const favs = loadFavs();
-    if (!favs.length) favList.appendChild(el('p', 'muted-note', 'Пока пусто — добавь звёздочкой из карточки игрока или команды'));
+    if (!favs.length) favList.appendChild(el('p', 'muted-note', t('fav_empty')));
     favs.forEach(f => {
       const row = el('div', 'r-row');
       row.appendChild(avatarEl({ image: f.image, name: f.name }));
       const finfo = el('div', 'player-info');
       finfo.appendChild(el('div', 'player-nick', f.name));
       const fmeta = el('div', 'player-meta');
-      fmeta.appendChild(el('span', null, f.type === 'team' ? 'Команда' : f.type === 'faceit' ? 'FACEIT' : 'Игрок'));
+      fmeta.appendChild(el('span', null, f.type === 'team' ? t('type_team') : f.type === 'faceit' ? t('type_faceit') : t('type_player')));
       finfo.appendChild(fmeta);
       row.appendChild(finfo);
       const rm = el('button', 'link-btn');
-      rm.textContent = 'Убрать';
+      rm.textContent = t('fav_rm');
       rm.addEventListener('click', () => {
         toggleFav(f);
         renderSettings();
@@ -1104,7 +1243,7 @@
 
     const refresh = el('button', 'link-btn');
     refresh.appendChild(iconEl('refresh'));
-    refresh.appendChild(document.createTextNode('Обновить статистику'));
+    refresh.appendChild(document.createTextNode(t('refresh_stats')));
     refresh.addEventListener('click', () => {
       sectionsCache = null;
       detailCache.team = {};
@@ -1140,8 +1279,8 @@
       document.body.appendChild(tabBar);
     }
     [
-      { name: 'stats', label: 'Статистика', icon: 'stats' },
-      { name: 'settings', label: 'Настройки', icon: 'settings' }
+      { name: 'stats', label: t('tab_stats'), icon: 'stats' },
+      { name: 'settings', label: t('tab_settings'), icon: 'settings' }
     ].forEach(td => {
       const btn = document.createElement('button');
       btn.className = 'tab' + (td.name === 'stats' ? ' active' : '');
@@ -1156,12 +1295,13 @@
 
     try {
       const initRes = await api.get('/api/init');
-      if (!initRes.ok) { view.appendChild(el('p', 'section-text', 'Открой приложение через бота')); return; }
+      if (!initRes.ok) { view.appendChild(el('p', 'section-text', t('app_open'))); return; }
       currentUser = initRes.user;
       document.getElementById('userName').textContent = initRes.user.first_name;
+      applyTheme();
       await renderStats(false);
     } catch (err) {
-      view.appendChild(el('p', 'section-text', 'Не удалось загрузить данные'));
+      view.appendChild(el('p', 'section-text', t('load_fail')));
     }
   }
 
