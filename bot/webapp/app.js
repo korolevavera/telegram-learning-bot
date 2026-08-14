@@ -728,7 +728,13 @@
       '<h1><span class="logo">' + ICONS.bolt + '</span><span class="brand">CS2 <span class="hl">COACH</span></span></h1>' +
       '<span id="userName"></span>';
 
-    const tabBar = document.getElementById('tabBar');
+    let tabBar = document.getElementById('tabBar');
+    if (!tabBar) {
+      tabBar = document.createElement('nav');
+      tabBar.id = 'tabBar';
+      tabBar.className = 'tabbar';
+      document.body.appendChild(tabBar);
+    }
     [
       { name: 'stats', label: 'Статистика', icon: 'stats' },
       { name: 'settings', label: 'Настройки', icon: 'settings' }

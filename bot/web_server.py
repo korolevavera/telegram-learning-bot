@@ -2,6 +2,7 @@ import hashlib
 import hmac
 import json
 from pathlib import Path
+from typing import Any
 from urllib.parse import parse_qsl
 
 from aiohttp import web
@@ -173,8 +174,15 @@ async def api_faceit_player(request: web.Request) -> web.Response:
     return web.json_response({"ok": True, "player": info})
 
 
+@web.middleware
+async def _cache_control(request: web.Request, handler: Any) -> web.StreamResponse:
+    response = await handler(request)
+    response.headers.setdefault("Cache-Control", "no-cache")
+    return response
+
+
 def create_app() -> web.Application:
-    app = web.Application()
+    app = web.Application(middlewares=[_cache_control])
     app.router.add_get("/", index_handler)
     app.router.add_get("/api/init", api_init)
     app.router.add_get("/api/content", api_content)

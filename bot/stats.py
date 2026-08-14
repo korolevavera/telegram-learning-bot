@@ -773,6 +773,7 @@ async def get_stats() -> dict:
             {
                 "rank": it.get("position"),
                 "name": it.get("nickname"),
+                "id": it.get("id"),
                 "country_code": it.get("country"),
                 "value": it.get("faceit_elo"),
                 "decimals": 0,
