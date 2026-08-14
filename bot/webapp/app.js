@@ -24,18 +24,12 @@
   let lang = 'ru';
   let sectionsCache = null;
   let currentPage = null;
-  let guidesCache = null;
-  let progressCache = null;
-  let guidesTab = 'lessons';
-  let lessonState = null;
-  let cardState = null;
-  let quizState = null;
+  let guidesTab = 'maps';
   const backStack = [];
   const detailCache = { team: {}, player: {}, faceit: {} };
   const SET_KEY = 'cs2coach.settings';
   const FAV_KEY = 'cs2coach.favs';
   const ONB_KEY = 'cs2coach.onboarded';
-  const DONE_KEY = 'cs2coach.done_lessons';
   const REGIONS = ['EU', 'NA', 'SA', 'AS', 'AU'];
   const THEMES = ['dark', 'light', 'gurren'];
   const PERIODS = [[90, 'p90'], [180, 'p180'], [365, 'p365']];
@@ -87,17 +81,8 @@
       fav_rm: 'Убрать', refresh_stats: 'Обновить статистику', user: 'Пользователь',
       app_open: 'Открой приложение через бота', load_fail: 'Не удалось загрузить данные',
       tab_guides: 'Гайды',
-      g_tab_lessons: 'Уроки', g_tab_cards: 'Карточки', g_tab_quizzes: 'Тесты',
-      g_lessons_done: 'Уроков пройдено', g_cards_known: 'Карточек изучено', g_quizzes_taken: 'Тестов пройдено',
-      g_sections: 'разделов', g_questions: 'вопросов', g_lesson_done: 'Пройдено',
-      g_next: 'Далее', g_to_questions: 'К вопросам', g_show_answer: 'Показать ответ', g_answer: 'Ответ',
-      g_finish: 'Завершить урок', g_finished: 'Урок пройден!', g_again: 'Ещё раз',
-      g_card_flip: 'Показать ответ', g_known: 'Знаю', g_unknown: 'Не знаю',
-      g_start_cards: 'Начать тренировку',
-      g_cards_done: 'Колода пройдена!', g_cards_known_n: 'Знаю {0} из {1}', g_cards_pos: 'Карточка {0} из {1}',
-      g_quiz_question: 'Вопрос {0} из {1}', g_quiz_score: 'Правильно: {0} из {1}', g_quiz_result: 'Результат',
-      g_quiz_end: 'Тест завершён', g_your_score: 'Твой счёт', g_quiz_again: 'Пройти ещё раз',
-      g_err_content: 'Не удалось загрузить обучение', g_back_guides: 'В гайды'
+      g_tab_maps: 'Карты', g_tab_mikra: 'Микра',
+      g_sections: 'разделов', g_back_guides: 'В гайды', g_soon: 'Скоро здесь появится контент'
     },
     en: {
       tab_stats: 'Stats', tab_settings: 'Settings', back: 'Back',
@@ -145,17 +130,8 @@
       fav_rm: 'Remove', refresh_stats: 'Refresh stats', user: 'User',
       app_open: 'Open the app from the bot', load_fail: 'Failed to load data',
       tab_guides: 'Guides',
-      g_tab_lessons: 'Lessons', g_tab_cards: 'Cards', g_tab_quizzes: 'Quizzes',
-      g_lessons_done: 'Lessons done', g_cards_known: 'Cards learned', g_quizzes_taken: 'Quizzes taken',
-      g_sections: 'sections', g_questions: 'questions', g_lesson_done: 'Done',
-      g_next: 'Next', g_to_questions: 'To questions', g_show_answer: 'Show answer', g_answer: 'Answer',
-      g_finish: 'Finish lesson', g_finished: 'Lesson finished!', g_again: 'Again',
-      g_card_flip: 'Show answer', g_known: 'I know it', g_unknown: "Don't know",
-      g_start_cards: 'Start practice',
-      g_cards_done: 'Deck finished!', g_cards_known_n: 'Know {0} of {1}', g_cards_pos: 'Card {0} of {1}',
-      g_quiz_question: 'Question {0} of {1}', g_quiz_score: 'Correct: {0} of {1}', g_quiz_result: 'Result',
-      g_quiz_end: 'Quiz finished', g_your_score: 'Your score', g_quiz_again: 'Try again',
-      g_err_content: 'Failed to load learning', g_back_guides: 'Back to guides'
+      g_tab_maps: 'Maps', g_tab_mikra: 'Micro',
+      g_sections: 'sections', g_back_guides: 'Back to guides', g_soon: 'Content coming soon'
     }
   };
 
@@ -185,14 +161,7 @@
 
   const api = {
     headers: { 'x-init-data': tg ? tg.initData : '' },
-    get(path) { return fetch(path, { headers: this.headers }).then(r => r.json()); },
-    post(path, data) {
-      return fetch(path, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...this.headers },
-        body: JSON.stringify(data || {})
-      }).then(r => r.json());
-    }
+    get(path) { return fetch(path, { headers: this.headers }).then(r => r.json()); }
   };
 
   function el(tag, cls, text) {
@@ -1327,15 +1296,25 @@
     loading = false;
   }
 
-  function loadDone() {
-    try { const l = JSON.parse(localStorage.getItem(DONE_KEY) || '[]'); return Array.isArray(l) ? l : []; } catch (e) { return []; }
-  }
+  const GUIDES_MAPS = [
+    { id: 'dust2', name: 'Dust II' },
+    { id: 'mirage', name: 'Mirage' },
+    { id: 'inferno', name: 'Inferno' },
+    { id: 'nuke', name: 'Nuke' },
+    { id: 'ancient', name: 'Ancient' },
+    { id: 'overpass', name: 'Overpass' },
+    { id: 'anubis', name: 'Anubis' },
+    { id: 'vertigo', name: 'Vertigo' }
+  ];
 
-  function markDone(id) {
-    const list = loadDone();
-    if (list.indexOf(id) === -1) list.push(id);
-    try { localStorage.setItem(DONE_KEY, JSON.stringify(list)); } catch (e) {}
-  }
+  const GUIDES_MIKRA = [
+    { id: 'mirage-smokes', name: 'Дымы на Mirage' },
+    { id: 'dust2-flashes', name: 'Флешки на Dust II' },
+    { id: 'inferno-molotovs', name: 'Молотовы на Inferno' },
+    { id: 'nuke-smokes', name: 'Дымы на Nuke' },
+    { id: 'ancient-molotovs', name: 'Молотовы на Ancient' },
+    { id: 'overpass-smokes', name: 'Дымы на Overpass' }
+  ];
 
   function gBackBtn() {
     const back = el('button', 'back-btn');
@@ -1343,22 +1322,6 @@
     back.appendChild(document.createTextNode(t('g_back_guides')));
     back.addEventListener('click', () => renderGuides());
     return back;
-  }
-
-  function gHero(p) {
-    const grid = el('div', 's-grid');
-    const cells = [
-      { v: p.lessons_done + '/' + p.lessons_total, l: t('g_lessons_done') },
-      { v: p.cards_known + '/' + p.cards_total, l: t('g_cards_known') },
-      { v: p.quizzes_taken || 0, l: t('g_quizzes_taken') }
-    ];
-    cells.forEach(c => {
-      const card = el('div', 's-card accent');
-      card.appendChild(el('div', 's-val', c.v));
-      card.appendChild(el('div', 's-lab', c.l));
-      grid.appendChild(card);
-    });
-    return grid;
   }
 
   function gTabBtn(tab, label) {
@@ -1369,255 +1332,53 @@
     return b;
   }
 
-  function gRow(icon, title, meta, done, onClick) {
+  function gRow(icon, title, meta, onClick) {
     const row = el('div', 'g-row');
     row.appendChild(el('div', 'g-ico', icon));
     const info = el('div', 'player-info');
     info.appendChild(el('div', 'player-nick', title));
     if (meta) info.appendChild(el('div', 'player-meta', meta));
     row.appendChild(info);
-    if (done) row.appendChild(el('span', 'g-badge', t('g_lesson_done')));
     row.appendChild(el('span', 'g-chev', '›'));
     row.addEventListener('click', onClick);
     return row;
   }
 
-  async function renderGuides() {
+  function renderGuides() {
     if (loading) return;
     loading = true;
     clear();
     view.appendChild(sectionTitle('guides', t('tab_guides')));
-    try {
-      if (!guidesCache) {
-        const res = await api.get('/api/content');
-        if (res && res.lessons) guidesCache = res;
-      }
-      if (!progressCache) {
-        const pRes = await api.get('/api/progress');
-        if (pRes && pRes.ok) progressCache = pRes.progress;
-      }
-    } catch (e) {}
-    if (!guidesCache) {
-      view.appendChild(el('p', 'section-text', t('g_err_content')));
-      loading = false;
-      return;
-    }
-    view.appendChild(gHero(progressCache || { lessons_done: 0, lessons_total: guidesCache.lessons.length, cards_known: 0, cards_total: guidesCache.cards.length, quizzes_taken: 0 }));
     const sub = el('div', 'sub-tabs');
-    sub.appendChild(gTabBtn('lessons', t('g_tab_lessons')));
-    sub.appendChild(gTabBtn('cards', t('g_tab_cards')));
-    sub.appendChild(gTabBtn('quizzes', t('g_tab_quizzes')));
+    sub.appendChild(gTabBtn('maps', t('g_tab_maps')));
+    sub.appendChild(gTabBtn('mikra', t('g_tab_mikra')));
     view.appendChild(sub);
     const box = el('div', 'sub-box');
     view.appendChild(box);
-    if (guidesTab === 'lessons') renderLessonsList(box);
-    else if (guidesTab === 'cards') renderCardsList(box);
-    else renderQuizzesList(box);
+    if (guidesTab === 'maps') renderMapsList(box);
+    else renderMikraList(box);
     loading = false;
   }
 
-  function renderLessonsList(box) {
-    const done = loadDone();
-    guidesCache.lessons.forEach((lesson, i) => {
-      const meta = lesson.sections.length + ' ' + t('g_sections') + ' · ' + lesson.questions.length + ' ' + t('g_questions');
-      box.appendChild(gRow(String(i + 1), lesson.title, meta, done.indexOf(lesson.id) !== -1, () => renderLessonDetail(lesson)));
+  function renderMapsList(box) {
+    GUIDES_MAPS.forEach((map, i) => {
+      box.appendChild(gRow(String(i + 1), map.name, null, () => renderGuideDetail(map)));
     });
   }
 
-  function renderCardsList(box) {
-    const intro = el('div', 'b-list');
-    intro.appendChild(bioRow(t('g_cards_known'), (progressCache ? progressCache.cards_known : 0) + ' / ' + guidesCache.cards.length));
-    box.appendChild(intro);
-    const start = el('button', 'link-btn g-start');
-    start.appendChild(iconEl('bolt'));
-    start.appendChild(document.createTextNode(t('g_start_cards')));
-    start.addEventListener('click', startCards);
-    box.appendChild(start);
-  }
-
-  function renderQuizzesList(box) {
-    guidesCache.quizzes.forEach((quiz, i) => {
-      const meta = quiz.questions.length + ' ' + t('g_questions');
-      box.appendChild(gRow(String(i + 1), quiz.title, meta, false, () => startQuiz(quiz)));
+  function renderMikraList(box) {
+    GUIDES_MIKRA.forEach((item, i) => {
+      box.appendChild(gRow(String(i + 1), item.name, null, () => renderGuideDetail(item)));
     });
   }
 
-  function renderLessonDetail(lesson) {
-    lessonState = { lesson: lesson, idx: 0, showQ: false };
-    renderLessonStep();
-  }
-
-  function renderLessonStep() {
+  function renderGuideDetail(item) {
     clear();
     view.appendChild(gBackBtn());
-    view.appendChild(sectionTitle('drill', lessonState.lesson.title));
-    const total = lessonState.lesson.sections.length + lessonState.lesson.questions.length;
-    if (lessonState.idx < lessonState.lesson.sections.length) {
-      view.appendChild(el('p', 'section-text', lessonState.lesson.sections[lessonState.idx]));
-      const nbtn = el('button', 'link-btn');
-      nbtn.appendChild(document.createTextNode(lessonState.idx + 1 === lessonState.lesson.sections.length ? t('g_to_questions') : t('g_next')));
-      nbtn.addEventListener('click', () => { lessonState.idx++; renderLessonStep(); });
-      view.appendChild(nbtn);
-      return;
-    }
-    const qIdx = lessonState.idx - lessonState.lesson.sections.length;
-    const q = lessonState.lesson.questions[qIdx];
-    if (!q) { completeLesson(); return; }
-    view.appendChild(el('div', 'q-title', (qIdx + 1) + '. ' + q.q));
-    if (!lessonState.showQ) {
-      const aBtn = el('button', 'link-btn');
-      aBtn.appendChild(iconEl('bolt'));
-      aBtn.appendChild(document.createTextNode(t('g_show_answer')));
-      aBtn.addEventListener('click', () => { lessonState.showQ = true; renderLessonStep(); });
-      view.appendChild(aBtn);
-    } else {
-      const ans = el('div', 'q-answer');
-      ans.appendChild(el('div', 'q-answer-lab', t('g_answer')));
-      ans.appendChild(el('div', 'q-answer-txt', q.a));
-      view.appendChild(ans);
-    }
-    const nbtn = el('button', 'link-btn');
-    nbtn.appendChild(document.createTextNode(qIdx + 1 === lessonState.lesson.questions.length ? t('g_finish') : t('g_next')));
-    nbtn.addEventListener('click', () => {
-      if (qIdx + 1 === lessonState.lesson.questions.length) completeLesson();
-      else { lessonState.idx++; lessonState.showQ = false; renderLessonStep(); }
-    });
-    view.appendChild(nbtn);
+    view.appendChild(sectionTitle('guides', item.name));
+    view.appendChild(el('p', 'section-text', t('g_soon')));
   }
 
-  async function completeLesson() {
-    const lesson = lessonState.lesson;
-    lessonState = null;
-    markDone(lesson.id);
-    if (progressCache) progressCache.lessons_done = Math.min((progressCache.lessons_total || guidesCache.lessons.length), (progressCache.lessons_done || 0) + 1);
-    try { await api.post('/api/lesson', { lesson_id: lesson.id }); } catch (e) {}
-    guidesTab = 'lessons';
-    await renderGuides();
-    view.appendChild(el('p', 'section-text', '✓ ' + t('g_finished')));
-  }
-
-  function renderCardStep() {
-    clear();
-    view.appendChild(gBackBtn());
-    view.appendChild(sectionTitle('bolt', t('g_tab_cards')));
-    const s = cardState;
-    const total = s.deck.length;
-    if (s.idx >= total) {
-      view.appendChild(el('div', 'flip-card', '✓'));
-      view.appendChild(el('div', 'q-answer-lab', t('g_cards_done')));
-      view.appendChild(el('div', 'q-answer-txt', fmt(t('g_cards_known_n'), s.known, total)));
-      const retry = el('button', 'link-btn');
-      retry.appendChild(iconEl('refresh'));
-      retry.appendChild(document.createTextNode(t('g_again')));
-      retry.addEventListener('click', startCards);
-      view.appendChild(retry);
-      return;
-    }
-    const card = s.deck[s.idx];
-    const fcard = el('div', 'flip-card');
-    fcard.appendChild(el('div', 'flip-front', card.front));
-    if (s.revealed) fcard.appendChild(el('div', 'flip-back', card.back));
-    view.appendChild(fcard);
-    const row = el('div', 'f-row');
-    if (s.revealed) {
-      const know = el('button', 'link-btn');
-      know.appendChild(iconEl('trophy'));
-      know.appendChild(document.createTextNode(t('g_known')));
-      know.addEventListener('click', () => postCard(true));
-      const unk = el('button', 'link-btn');
-      unk.appendChild(iconEl('bolt'));
-      unk.appendChild(document.createTextNode(t('g_unknown')));
-      unk.addEventListener('click', () => postCard(false));
-      row.appendChild(know);
-      row.appendChild(unk);
-    } else {
-      const flip = el('button', 'link-btn');
-      flip.appendChild(iconEl('bolt'));
-      flip.appendChild(document.createTextNode(t('g_card_flip')));
-      flip.addEventListener('click', () => { cardState.revealed = true; renderCardStep(); });
-      row.appendChild(flip);
-    }
-    view.appendChild(row);
-    view.appendChild(el('div', 'q-answer-lab', fmt(t('g_cards_pos'), s.idx + 1, total)));
-  }
-
-  function startCards() {
-    cardState = { deck: guidesCache.cards.slice(), idx: 0, known: 0, revealed: false };
-    renderCardStep();
-  }
-
-  function postCard(known) {
-    const s = cardState;
-    if (known) s.known++;
-    try { api.post('/api/card', { index: s.idx, known: known }); } catch (e) {}
-    if (progressCache) progressCache.cards_known = Math.min((progressCache.cards_total || guidesCache.cards.length), (progressCache.cards_known || 0) + (known ? 1 : 0));
-    s.idx++;
-    s.revealed = false;
-    renderCardStep();
-  }
-
-  function startQuiz(quiz) {
-    quizState = { quiz: quiz, idx: 0, score: 0, picked: -1 };
-    renderQuizStep();
-  }
-
-  function renderQuizStep() {
-    clear();
-    view.appendChild(gBackBtn());
-    const s = quizState;
-    view.appendChild(sectionTitle('trophy', s.quiz.title));
-    const q = s.quiz.questions[s.idx];
-    if (!q) { finishQuiz(); return; }
-    view.appendChild(el('div', 'q-title', fmt(t('g_quiz_question'), s.idx + 1, s.quiz.questions.length)));
-    view.appendChild(el('div', 'q-answer-txt', q.q));
-    const opts = el('div', 'q-opts');
-    q.options.forEach((opt, i) => {
-      const b = document.createElement('button');
-      b.className = 'q-opt';
-      b.textContent = String.fromCharCode(65 + i) + '. ' + opt;
-      if (s.picked !== -1) {
-        if (i === q.answer) b.classList.add('correct');
-        else if (i === s.picked) b.classList.add('wrong');
-        b.classList.add('disabled');
-      }
-      b.addEventListener('click', () => {
-        if (s.picked !== -1) return;
-        s.picked = i;
-        if (i === q.answer) s.score++;
-        renderQuizStep();
-      });
-      opts.appendChild(b);
-    });
-    view.appendChild(opts);
-    if (s.picked !== -1) {
-      const nbtn = el('button', 'link-btn');
-      nbtn.appendChild(document.createTextNode(s.idx + 1 === s.quiz.questions.length ? t('g_quiz_result') : t('g_next')));
-      nbtn.addEventListener('click', () => { s.idx++; s.picked = -1; renderQuizStep(); });
-      view.appendChild(nbtn);
-    }
-  }
-
-  async function finishQuiz() {
-    const s = quizState;
-    quizState = null;
-    if (progressCache) {
-      progressCache.quizzes_taken = (progressCache.quizzes_taken || 0) + 1;
-      progressCache.best_score = Math.max(progressCache.best_score || 0, s.score);
-    }
-    try { await api.post('/api/quiz', { quiz_id: s.quiz.id, score: s.score, total: s.quiz.questions.length }); } catch (e) {}
-    clear();
-    view.appendChild(gBackBtn());
-    view.appendChild(sectionTitle('trophy', t('g_quiz_end')));
-    const res = el('div', 'q-answer');
-    res.appendChild(el('div', 'q-answer-lab', t('g_your_score')));
-    res.appendChild(el('div', 'q-answer-txt', s.score + ' / ' + s.quiz.questions.length));
-    view.appendChild(res);
-    const again = el('button', 'link-btn');
-    again.appendChild(iconEl('refresh'));
-    again.appendChild(document.createTextNode(t('g_quiz_again')));
-    again.addEventListener('click', () => startQuiz(s.quiz));
-    view.appendChild(again);
-  }
 
   async function init() {
     loadSettings();
