@@ -8,11 +8,13 @@
     refresh: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><polyline points="21 3 21 9 15 9"/></svg>',
     back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>',
     trophy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>',
-    users: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>'
+    users: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+    settings: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>'
   };
 
   const view = document.getElementById('view');
   let loading = false;
+  let currentUser = null;
 
   const api = {
     headers: { 'x-init-data': tg ? tg.initData : '' },
@@ -379,7 +381,7 @@
     const back = el('button', 'back-btn');
     back.appendChild(iconEl('back'));
     back.appendChild(document.createTextNode('Назад'));
-    back.addEventListener('click', () => renderStats(false));
+    back.addEventListener('click', () => switchTab('stats'));
     td.appendChild(back);
     const loadbar = el('div', 'loadbar');
     loadbar.appendChild(el('div', 'loadbar-fill'));
@@ -515,7 +517,7 @@
     const back = el('button', 'back-btn');
     back.appendChild(iconEl('back'));
     back.appendChild(document.createTextNode('Назад'));
-    back.addEventListener('click', () => renderStats(false));
+    back.addEventListener('click', () => switchTab('stats'));
     pd.appendChild(back);
     const loadbar = el('div', 'loadbar');
     loadbar.appendChild(el('div', 'loadbar-fill'));
@@ -643,7 +645,7 @@
     const back = el('button', 'back-btn');
     back.appendChild(iconEl('back'));
     back.appendChild(document.createTextNode('Назад'));
-    back.addEventListener('click', () => renderStats(false));
+    back.addEventListener('click', () => switchTab('stats'));
     pd.appendChild(back);
     const loadbar = el('div', 'loadbar');
     loadbar.appendChild(el('div', 'loadbar-fill'));
@@ -662,6 +664,58 @@
     }
   }
 
+  function activateTab(name) {
+    document.querySelectorAll('#tabBar .tab').forEach(b => {
+      b.classList.toggle('active', b.dataset.tab === name);
+    });
+  }
+
+  function switchTab(name) {
+    activateTab(name);
+    if (name === 'stats') {
+      renderStats(false);
+    } else if (name === 'settings') {
+      renderSettings();
+    }
+  }
+
+  function renderSettings() {
+    if (loading) return;
+    loading = true;
+    clear();
+    view.appendChild(sectionTitle('settings', 'Настройки'));
+
+    const prof = el('div', 't-hero');
+    const ava = el('div', 'avatar hero-logo');
+    ava.appendChild(el('span', null, (currentUser ? currentUser.first_name : '?').charAt(0).toUpperCase()));
+    prof.appendChild(ava);
+    const hinfo = el('div', 't-hinfo');
+    hinfo.appendChild(el('div', 't-name', currentUser ? currentUser.first_name : 'Пользователь'));
+    const meta = el('div', 't-meta');
+    meta.appendChild(el('span', null, 'Профиль Telegram'));
+    meta.appendChild(el('span', 'rank-badge', 'ID ' + (currentUser ? currentUser.id : '—')));
+    hinfo.appendChild(meta);
+    prof.appendChild(hinfo);
+    view.appendChild(prof);
+
+    const info = el('div', 'b-list');
+    info.appendChild(bioRow('Приложение', 'CS2 COACH'));
+    info.appendChild(bioRow('Версия', '1.0'));
+    info.appendChild(bioRow('Источники данных', 'bo3.gg · FACEIT'));
+    view.appendChild(info);
+
+    const refresh = el('button', 'link-btn');
+    refresh.appendChild(iconEl('refresh'));
+    refresh.appendChild(document.createTextNode('Обновить статистику'));
+    refresh.addEventListener('click', () => {
+      activateTab('stats');
+      renderStats(true);
+    });
+    view.appendChild(refresh);
+
+    loading = false;
+  }
+
   async function init() {
     const orb1 = document.createElement('div');
     orb1.className = 'orb orb1';
@@ -674,9 +728,26 @@
       '<h1><span class="logo">' + ICONS.bolt + '</span><span class="brand">CS2 <span class="hl">COACH</span></span></h1>' +
       '<span id="userName"></span>';
 
+    const tabBar = document.getElementById('tabBar');
+    [
+      { name: 'stats', label: 'Статистика', icon: 'stats' },
+      { name: 'settings', label: 'Настройки', icon: 'settings' }
+    ].forEach(td => {
+      const btn = document.createElement('button');
+      btn.className = 'tab' + (td.name === 'stats' ? ' active' : '');
+      btn.dataset.tab = td.name;
+      const ico = iconEl(td.icon);
+      ico.className = 'tab-ico';
+      btn.appendChild(ico);
+      btn.appendChild(document.createTextNode(td.label));
+      btn.addEventListener('click', () => switchTab(td.name));
+      tabBar.appendChild(btn);
+    });
+
     try {
       const initRes = await api.get('/api/init');
       if (!initRes.ok) { view.appendChild(el('p', 'section-text', 'Открой приложение через бота')); return; }
+      currentUser = initRes.user;
       document.getElementById('userName').textContent = initRes.user.first_name;
       await renderStats(false);
     } catch (err) {
