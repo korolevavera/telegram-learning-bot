@@ -1179,3 +1179,5 @@ html[data-theme="gurren"] .tab.active .tab-ico { filter: drop-shadow(0 0 8px rgb
   0%, 100% { transform: scale(1); box-shadow: 0 0 10px rgba(255, 91, 43, .35); }
   50% { transform: scale(1.06); box-shadow: 0 0 20px rgba(255, 209, 63, .65); }
 }
+
+# pink-theme-trigger: v2026-08-15
