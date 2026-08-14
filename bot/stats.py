@@ -26,6 +26,7 @@ TOP_PRO = 30
 
 _session: aiohttp.ClientSession | None = None
 _cache: dict[str, tuple[float, Any]] = {}
+_avatar_semaphore = asyncio.Semaphore(5)
 
 logger = logging.getLogger(__name__)
 
@@ -71,6 +72,24 @@ async def _bo3_json(path: str, params: dict[str, Any]) -> list[dict]:
     return data.get("results", [])
 
 
+async def _faceit_player_avatar(
+    session: aiohttp.ClientSession, headers: dict[str, str], player_id: str
+) -> str | None:
+    if not player_id:
+        return None
+    async with _avatar_semaphore:
+        try:
+            async with session.get(
+                f"{FACEIT_BASE}/players/{player_id}", headers=headers, timeout=15
+            ) as response:
+                if response.status != 200:
+                    return None
+                data = await response.json()
+                return data.get("avatar")
+        except Exception:
+            return None
+
+
 async def get_faceit_ranking(region: str = "EU", limit: int = TOP_FACEIT) -> list[dict]:
     key = f"faceit:{region}:{limit}"
     cached = _read_cache(key, CACHE_TTL)
@@ -88,16 +107,25 @@ async def get_faceit_ranking(region: str = "EU", limit: int = TOP_FACEIT) -> lis
     ) as response:
         response.raise_for_status()
         data = await response.json()
-    result = [
-        {
-            "position": it.get("position"),
-            "nickname": it.get("nickname"),
-            "country": it.get("country"),
-            "faceit_elo": it.get("faceit_elo"),
-            "skill_level": it.get("game_skill_level"),
-        }
-        for it in data.get("items", [])
-    ]
+    items = data.get("items", [])
+    avatars = await asyncio.gather(
+        *[_faceit_player_avatar(session, headers, it.get("player_id")) for it in items],
+        return_exceptions=True,
+    )
+    result = []
+    for it, av in zip(items, avatars):
+        if isinstance(av, Exception):
+            av = None
+        result.append(
+            {
+                "position": it.get("position"),
+                "nickname": it.get("nickname"),
+                "country": it.get("country"),
+                "faceit_elo": it.get("faceit_elo"),
+                "skill_level": it.get("game_skill_level"),
+                "image": av,
+            }
+        )
     logger.info("fetched faceit ranking %s: %s", region, len(result))
     return _write_cache(key, result)
 
@@ -216,7 +244,7 @@ async def get_stats() -> dict:
                 "country_code": it.get("country"),
                 "value": it.get("faceit_elo"),
                 "decimals": 0,
-                "image": None,
+                "image": it.get("image"),
             }
             for it in faceit
         ]
