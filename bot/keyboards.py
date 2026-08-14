@@ -6,9 +6,9 @@ from .content import CARDS, LESSONS, QUIZZES
 
 def main_menu_keyboard() -> InlineKeyboardMarkup:
     rows = [
-        [InlineKeyboardButton(text="📚 Уроки", callback_data="lessons")],
-        [InlineKeyboardButton(text="🃏 Карточки", callback_data="cards")],
-        [InlineKeyboardButton(text="🧪 Тесты", callback_data="quizzes")],
+        [InlineKeyboardButton(text="🌸 Уроки", callback_data="lessons")],
+        [InlineKeyboardButton(text="🩷 Карточки", callback_data="cards")],
+        [InlineKeyboardButton(text="💖 Тесты", callback_data="quizzes")],
         [InlineKeyboardButton(text="📊 Прогресс", callback_data="progress")],
     ]
     if CONFIG.webapp_url:
@@ -25,19 +25,19 @@ def main_menu_keyboard() -> InlineKeyboardMarkup:
 
 def lessons_keyboard() -> InlineKeyboardMarkup:
     rows = [
-        [InlineKeyboardButton(text=lesson["title"], callback_data=f"lesson:{lesson['id']}")]
+        [InlineKeyboardButton(text="🌸 " + lesson["title"], callback_data=f"lesson:{lesson['id']}")]
         for lesson in LESSONS
     ]
-    rows.append([InlineKeyboardButton(text="⬅️ Назад", callback_data="menu")])
+    rows.append([InlineKeyboardButton(text="🩷 Назад", callback_data="menu")])
     return InlineKeyboardMarkup(inline_keyboard=rows)
 
 
 def quizzes_keyboard() -> InlineKeyboardMarkup:
     rows = [
-        [InlineKeyboardButton(text=quiz["title"], callback_data=f"quiz:{quiz['id']}")]
+        [InlineKeyboardButton(text="💖 " + quiz["title"], callback_data=f"quiz:{quiz['id']}")]
         for quiz in QUIZZES
     ]
-    rows.append([InlineKeyboardButton(text="⬅️ Назад", callback_data="menu")])
+    rows.append([InlineKeyboardButton(text="🩷 Назад", callback_data="menu")])
     return InlineKeyboardMarkup(inline_keyboard=rows)
 
 
