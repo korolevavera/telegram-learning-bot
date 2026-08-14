@@ -174,7 +174,7 @@ header h1 .logo {
 }
 header h1 .logo svg { width: 16px; height: 16px; }
 header h1 .logo svg.bolt { display: block; }
-header h1 .logo svg.kamina { display: none; }
+header h1 .logo svg.gurren { display: none; }
 header h1 .brand {
   font-family: 'Orbitron', sans-serif;
   font-weight: 700; letter-spacing: 3px; color: var(--text);
@@ -731,7 +731,7 @@ html[data-theme="gurren"] header h1 .logo {
   animation: gurrenPulse 1.3s ease-in-out infinite;
 }
 html[data-theme="gurren"] header h1 .logo svg.bolt { display: none; }
-html[data-theme="gurren"] header h1 .logo svg.kamina { display: block; width: 20px; height: 20px; }
+html[data-theme="gurren"] header h1 .logo svg.gurren { display: block; width: 22px; height: 22px; }
 html[data-theme="gurren"] header h1 .brand .hl {
   background: linear-gradient(90deg, #ffd23f, #ff5b2b, #ff3b2f);
   -webkit-background-clip: text;
@@ -767,16 +767,28 @@ html[data-theme="gurren"] .tab.active .tab-ico { filter: drop-shadow(0 0 8px rgb
 
 .gurren-quote {
   margin: 10px 0 14px;
-  padding: 9px 12px 9px 14px;
+  padding: 10px 12px;
+  display: flex; flex-direction: column; gap: 6px;
+  background: linear-gradient(90deg, rgba(255, 59, 47, .12), rgba(255, 179, 0, .04), transparent);
+  border-left: 3px solid #ff5b2b;
+  border-radius: 6px;
+}
+.gurren-quote-line {
+  display: flex; align-items: center; gap: 8px;
   font-size: 13px;
   font-style: italic;
   letter-spacing: .3px;
   color: var(--gold);
-  background: linear-gradient(90deg, rgba(255, 59, 47, .12), rgba(255, 179, 0, .04), transparent);
-  border-left: 3px solid #ff5b2b;
-  border-radius: 6px;
   text-shadow: 0 0 12px rgba(255, 209, 102, .4);
 }
+.gq-drill {
+  flex: 0 0 auto;
+  display: grid; place-items: center;
+  width: 16px; height: 16px;
+  color: var(--accent2);
+  filter: drop-shadow(0 0 6px rgba(255, 91, 43, .8));
+}
+.gq-drill svg { width: 13px; height: 13px; }
 
 .gurren-note {
   margin: 8px 0 16px;
