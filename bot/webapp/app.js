@@ -1304,7 +1304,9 @@
     { id: 'ancient', name: 'Ancient' },
     { id: 'overpass', name: 'Overpass' },
     { id: 'anubis', name: 'Anubis' },
-    { id: 'vertigo', name: 'Vertigo' }
+    { id: 'vertigo', name: 'Vertigo' },
+    { id: 'train', name: 'Train' },
+    { id: 'cache', name: 'Cache' }
   ];
 
   const GUIDES_MIKRA = [
