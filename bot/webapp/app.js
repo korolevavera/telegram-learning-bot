@@ -151,6 +151,7 @@
   }
 
   function activateSlide(slide) {
+    if (!slide || slide.classList.contains('show')) return;
     slide.classList.add('show');
     const nodes = slide.querySelectorAll('.player-row, .p-card');
     nodes.forEach((node, i) => {
@@ -201,20 +202,7 @@
 
       const carousel = el('div', 'carousel');
       const dots = el('div', 'dots');
-      const io = new IntersectionObserver(entries => {
-        entries.forEach(en => {
-          if (en.isIntersecting) {
-            activateSlide(en.target);
-            io.unobserve(en.target);
-          }
-        });
-      }, { threshold: 0.55 });
-
-      sections.forEach(sec => {
-        const slide = renderSlide(sec);
-        carousel.appendChild(slide);
-        io.observe(slide);
-      });
+      sections.forEach(sec => carousel.appendChild(renderSlide(sec)));
       sections.forEach((_, i) => {
         const dot = el('button', 'dot');
         dot.addEventListener('click', () => {
@@ -225,10 +213,26 @@
       const setActiveDot = idx => {
         [...dots.children].forEach((d, i) => d.classList.toggle('active', i === idx));
       };
+      const currentIdx = () => Math.round(carousel.scrollLeft / (carousel.clientWidth || 1)) || 0;
       setActiveDot(0);
       carousel.addEventListener('scroll', () => {
-        setActiveDot(Math.round(carousel.scrollLeft / carousel.clientWidth));
+        setActiveDot(currentIdx());
+        activateSlide(carousel.children[currentIdx()]);
       });
+
+      activateSlide(carousel.children[0]);
+      if ('IntersectionObserver' in window) {
+        const io = new IntersectionObserver(entries => {
+          entries.forEach(en => {
+            if (en.isIntersecting) activateSlide(en.target);
+          });
+        }, { threshold: 0.4 });
+        [...carousel.children].forEach(s => io.observe(s));
+      }
+      setTimeout(() => {
+        const s = carousel.children[currentIdx()];
+        if (s) activateSlide(s);
+      }, 1500);
 
       view.appendChild(carousel);
       view.appendChild(dots);

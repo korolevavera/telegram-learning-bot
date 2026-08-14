@@ -181,16 +181,8 @@ header h1 .brand .hl {
   flex: 0 0 100%;
   scroll-snap-align: start;
   padding-right: 28px;
-  opacity: 0;
-  transition: opacity .25s ease;
 }
-.slide.show { opacity: 1; }
-.slide .section-title {
-  animation: none;
-  opacity: 0; transform: translateY(6px);
-  transition: opacity .35s ease .12s, transform .35s ease .12s;
-}
-.slide.show .section-title { opacity: 1; transform: none; }
+.slide .section-title { animation: none; }
 
 .dots {
   display: flex; justify-content: center; gap: 8px;
@@ -218,7 +210,6 @@ header h1 .brand .hl {
   padding: 9px 12px 11px;
   margin-bottom: 8px;
   overflow: hidden;
-  opacity: 0;
 }
 .slide.show .player-row.anim,
 .slide.show .p-card.anim { animation: fadeUp .4s ease both; }
@@ -299,7 +290,6 @@ header h1 .brand .hl {
   padding: 10px 6px 8px;
   display: flex; flex-direction: column; align-items: center; gap: 5px;
   text-align: center;
-  opacity: 0;
 }
 .p-card.p2 { border-top-color: #cfe0f5; margin-bottom: 16px; }
 .p-card.p1 {
