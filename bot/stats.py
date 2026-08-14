@@ -230,9 +230,9 @@ async def get_faceit_player_info(player_id: str) -> dict | None:
     return _write_cache(key, info)
 
 
-async def _team_winrate(slug: str) -> float | None:
+async def _team_winrate(slug: str, days: int = PERIOD_DAYS) -> float | None:
     today = datetime.now(timezone.utc)
-    start = (today - timedelta(days=180)).strftime("%Y-%m-%d")
+    start = (today - timedelta(days=days)).strftime("%Y-%m-%d")
     end = today.strftime("%Y-%m-%d")
     session = await _get_session()
     async with session.get(
@@ -250,8 +250,8 @@ async def _team_winrate(slug: str) -> float | None:
     return round(won / games * 100, 1)
 
 
-async def get_bo3_teams(limit: int = TOP_TEAMS) -> list[dict]:
-    key = f"bo3:teams:{limit}"
+async def get_bo3_teams(limit: int = TOP_TEAMS, days: int = PERIOD_DAYS) -> list[dict]:
+    key = f"bo3:teams:{limit}:{days}"
     cached = _read_cache(key, CACHE_TTL)
     if cached is not None:
         return cached
@@ -266,7 +266,7 @@ async def get_bo3_teams(limit: int = TOP_TEAMS) -> list[dict]:
         },
     )
     winrates = await asyncio.gather(
-        *[_team_winrate(t["slug"]) for t in raw], return_exceptions=True
+        *[_team_winrate(t["slug"], days) for t in raw], return_exceptions=True
     )
     result = []
     for t, wr in zip(raw, winrates):
@@ -287,8 +287,8 @@ async def get_bo3_teams(limit: int = TOP_TEAMS) -> list[dict]:
     return _write_cache(key, result)
 
 
-async def get_bo3_players(limit: int = TOP_PRO) -> list[dict]:
-    key = f"bo3:players:{limit}"
+async def get_bo3_players(limit: int = TOP_PRO, days: int = PERIOD_DAYS) -> list[dict]:
+    key = f"bo3:players:{limit}:{days}"
     cached = _read_cache(key, CACHE_TTL)
     if cached is not None:
         return cached
@@ -477,7 +477,8 @@ def _build_player_bio(p: dict) -> str:
             extras.append(f"средний урон за раунд — {stats['adr']:.1f}")
         if stats.get("hs") is not None:
             extras.append(f"точность попаданий в голову — {stats['hs']:.1f}%")
-        tail = f"За последние шесть месяцев рейтинг {nickname} составил {rating:.2f}"
+        period_txt = p.get("period_label") or "за последние шесть месяцев"
+        tail = f"{period_txt.capitalize()} рейтинг {nickname} составил {rating:.2f}"
         if extras:
             tail += " (" + ", ".join(extras) + ")"
         tail += " — это подтверждает его статус одного из самых ярких игроков современной сцены."
@@ -719,8 +720,8 @@ async def get_team_info(slug: str) -> dict | None:
     return _write_cache(key, info)
 
 
-async def get_player_info(slug: str) -> dict | None:
-    key = f"bo3:player:{slug}"
+async def get_player_info(slug: str, period_days: int = PERIOD_DAYS) -> dict | None:
+    key = f"bo3:player:{slug}:{period_days}"
     cached = _read_cache(key, CACHE_TTL)
     if cached is not None:
         return cached
@@ -734,7 +735,7 @@ async def get_player_info(slug: str) -> dict | None:
         data = await response.json()
     now = datetime.now(timezone.utc)
     today = now.strftime("%Y-%m-%d")
-    start = (now - timedelta(days=PERIOD_DAYS)).strftime("%Y-%m-%d")
+    start = (now - timedelta(days=period_days)).strftime("%Y-%m-%d")
     player_id = data.get("id")
 
     async def _general() -> dict:
@@ -913,25 +914,48 @@ async def get_player_info(slug: str) -> dict | None:
         "teams": timeline,
         "achievements": achievements,
     }
+    info["period_days"] = period_days
+    info["period_label"] = "за последние " + _months_full(period_days)
     info["bio_text"] = _build_player_bio(info)
     logger.info("fetched player info: %s", slug)
     return _write_cache(key, info)
 
 
-async def get_stats() -> dict:
+def _months_label(days: int) -> str:
+    if days <= 90:
+        return "3 мес."
+    if days <= 180:
+        return "6 мес."
+    return "12 мес."
+
+
+def _months_full(days: int) -> str:
+    if days <= 90:
+        return "три месяца"
+    if days <= 180:
+        return "шесть месяцев"
+    return "двенадцать месяцев"
+
+
+async def get_stats(region: str = "EU", period_days: int = PERIOD_DAYS) -> dict:
+    key = f"stats:{region}:{period_days}"
+    cached = _read_cache(key, CACHE_TTL)
+    if cached is not None:
+        return cached
     faceit, teams, pro = await asyncio.gather(
-        get_faceit_ranking("EU", TOP_FACEIT),
-        get_bo3_teams(TOP_TEAMS),
-        get_bo3_players(TOP_PRO),
+        get_faceit_ranking(region, TOP_FACEIT),
+        get_bo3_teams(TOP_TEAMS, period_days),
+        get_bo3_players(TOP_PRO, period_days),
         return_exceptions=True,
     )
+    months = _months_label(period_days)
     sections = []
     if isinstance(teams, list):
         sections.append(
             {
                 "id": "teams",
                 "title": "Команды",
-                "subtitle": f"Топ-{len(teams)} · рейтинг про-сцены",
+                "subtitle": f"Топ-{len(teams)} · винрейт за {months}",
                 "unit": "WIN%",
                 "items": teams,
             }
@@ -942,6 +966,7 @@ async def get_stats() -> dict:
                 "rank": it.get("position"),
                 "name": it.get("nickname"),
                 "id": it.get("id"),
+                "level": it.get("skill_level"),
                 "country_code": it.get("country"),
                 "value": it.get("faceit_elo"),
                 "decimals": 0,
@@ -953,7 +978,7 @@ async def get_stats() -> dict:
             {
                 "id": "faceit",
                 "title": "FACEIT",
-                "subtitle": f"Топ-{len(items)} · регион EU",
+                "subtitle": f"Топ-{len(items)} · регион {region}",
                 "unit": "ELO",
                 "items": items,
             }
@@ -963,16 +988,19 @@ async def get_stats() -> dict:
             {
                 "id": "pro",
                 "title": "Про-сцена",
-                "subtitle": f"Топ-{len(pro)} · рейтинг за 6 мес.",
+                "subtitle": f"Топ-{len(pro)} · рейтинг за {months}",
                 "unit": "RATING",
                 "items": pro,
             }
         )
-    return {
+    result = {
         "source": "faceit+bo3",
         "generated_at": datetime.now(timezone.utc).isoformat(),
+        "period_days": period_days,
+        "region": region,
         "sections": sections,
     }
+    return _write_cache(key, result)
 
 
 async def close() -> None:

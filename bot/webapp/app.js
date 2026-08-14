@@ -9,12 +9,24 @@
     back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>',
     trophy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>',
     users: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
-    settings: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>'
+    settings: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',
+    chevron: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>'
   };
 
   const view = document.getElementById('view');
   let loading = false;
   let currentUser = null;
+  let currentRegion = 'EU';
+  let currentPeriod = 180;
+  let sectionsCache = null;
+  let currentPage = null;
+  const backStack = [];
+  const detailCache = { team: {}, player: {}, faceit: {} };
+  const SET_KEY = 'cs2coach.settings';
+  const FAV_KEY = 'cs2coach.favs';
+  const ONB_KEY = 'cs2coach.onboarded';
+  const REGIONS = ['EU', 'NA', 'SA', 'AS', 'AU'];
+  const PERIODS = [[90, '3 месяца'], [180, '6 месяцев'], [365, '12 месяцев']];
 
   const api = {
     headers: { 'x-init-data': tg ? tg.initData : '' },
@@ -71,6 +83,18 @@
     requestAnimationFrame(frame);
   }
 
+  function animateAll() {
+    view.querySelectorAll('.player-row, .p-card').forEach((n, i) => {
+      setTimeout(() => n.classList.add('anim'), 40 + i * 30);
+    });
+    view.querySelectorAll('.val').forEach(v => {
+      countUp(v, +v.dataset.target, +v.dataset.decimals);
+    });
+    view.querySelectorAll('.bar-fill').forEach(f => {
+      f.style.width = (f.dataset.width || 0) + '%';
+    });
+  }
+
   function avatarEl(item) {
     const box = el('div', 'avatar');
     if (item.image) {
@@ -85,6 +109,96 @@
       box.appendChild(el('span', null, (item.name || '?').charAt(0).toUpperCase()));
     }
     return box;
+  }
+
+  function loadSettings() {
+    try {
+      const s = JSON.parse(localStorage.getItem(SET_KEY) || '{}');
+      if (REGIONS.indexOf(s.region) !== -1) currentRegion = s.region;
+      if ([90, 180, 365].indexOf(s.period) !== -1) currentPeriod = s.period;
+    } catch (e) {}
+  }
+
+  function saveSettings() {
+    try { localStorage.setItem(SET_KEY, JSON.stringify({ region: currentRegion, period: currentPeriod })); } catch (e) {}
+  }
+
+  function loadFavs() {
+    try { const l = JSON.parse(localStorage.getItem(FAV_KEY) || '[]'); return Array.isArray(l) ? l : []; } catch (e) { return []; }
+  }
+
+  function saveFavs(list) {
+    try { localStorage.setItem(FAV_KEY, JSON.stringify(list)); } catch (e) {}
+  }
+
+  function isFav(type, key) {
+    return loadFavs().some(f => f.type === type && f.key === key);
+  }
+
+  function toggleFav(item) {
+    const list = loadFavs();
+    const i = list.findIndex(f => f.type === item.type && f.key === item.key);
+    if (i >= 0) list.splice(i, 1); else list.push(item);
+    saveFavs(list);
+  }
+
+  function periodShort() {
+    return { 90: '3 мес.', 180: '6 мес.', 365: '12 мес.' }[currentPeriod] || '6 мес.';
+  }
+
+  function statsUrl(force) {
+    let u = '/api/stats?region=' + encodeURIComponent(currentRegion) + '&period=' + currentPeriod;
+    if (force) u += '&refresh=1';
+    return u;
+  }
+
+  function pushPage() {
+    backStack.push({ render: currentPage, scroll: window.scrollY || 0 });
+  }
+
+  function goBack() {
+    if (backStack.length) {
+      const page = backStack.pop();
+      page.render();
+      window.scrollTo(0, page.scroll || 0);
+    } else {
+      switchTab('stats');
+    }
+  }
+
+  function backBtn() {
+    const b = el('button', 'back-btn');
+    b.appendChild(iconEl('back'));
+    b.appendChild(document.createTextNode('Назад'));
+    b.addEventListener('click', goBack);
+    return b;
+  }
+
+  function favBtn(item) {
+    const active = isFav(item.type, item.key);
+    const b = el('button', 'star-btn' + (active ? ' active' : ''));
+    b.setAttribute('aria-label', 'В избранное');
+    b.textContent = active ? '★' : '☆';
+    b.addEventListener('click', () => {
+      toggleFav(item);
+      b.textContent = isFav(item.type, item.key) ? '★' : '☆';
+      b.classList.toggle('active');
+    });
+    return b;
+  }
+
+  function bindRows(container, handler) {
+    container.querySelectorAll('[data-slug]').forEach(node => {
+      node.classList.add('clickable');
+      node.addEventListener('click', () => handler(node.dataset.slug));
+    });
+  }
+
+  function bindIdRows(container, handler) {
+    container.querySelectorAll('[data-id]').forEach(node => {
+      node.classList.add('clickable');
+      node.addEventListener('click', () => handler(node.dataset.id));
+    });
   }
 
   function playerRow(p, unit, maxVal) {
@@ -103,6 +217,7 @@
     const meta = el('div', 'player-meta');
     if (p.team) meta.appendChild(el('span', null, p.team));
     if (p.country_code) meta.appendChild(el('span', 'c-badge', p.country_code.toUpperCase()));
+    if (p.level) meta.appendChild(el('span', 'rank-badge', 'Lv ' + p.level));
     info.appendChild(meta);
     row.appendChild(info);
 
@@ -151,56 +266,100 @@
     return podium;
   }
 
-  function renderSection(sec) {
-    const wrap = el('div', 'stat-section');
-    wrap.appendChild(el('div', 'section-title', sec.title + (sec.subtitle ? ' · ' + sec.subtitle : '')));
+  function bindClicks(container, id) {
+    if (id === 'teams') bindRows(container, slug => openTeam(slug));
+    else if (id === 'pro') bindRows(container, slug => openPlayer(slug));
+    else if (id === 'faceit') bindIdRows(container, id2 => openFaceitPlayer(id2));
+  }
+
+  function renderSection(sec, flat) {
+    const section = el('div', 'stat-section');
+    const head = el('button', 'sec-head');
+    head.appendChild(el('div', 'section-title', sec.title + (sec.subtitle ? ' · ' + sec.subtitle : '')));
+    const chev = el('span', 'chev');
+    chev.innerHTML = ICONS.chevron;
+    head.appendChild(chev);
+    section.appendChild(head);
+
+    const body = el('div', 'sec-body');
     const items = sec.items || [];
     if (items.length) {
       const maxVal = Math.max(...items.map(i => (i.value != null ? i.value : 0)));
-      if (items.length >= 3) {
-        wrap.appendChild(renderPodium(items, sec.unit));
-        items.slice(3).forEach(it => wrap.appendChild(playerRow(it, sec.unit, maxVal)));
+      if (items.length >= 3 && !flat) {
+        body.appendChild(renderPodium(items, sec.unit));
+        items.slice(3).forEach(it => body.appendChild(playerRow(it, sec.unit, maxVal)));
       } else {
-        items.forEach(it => wrap.appendChild(playerRow(it, sec.unit, maxVal)));
+        items.forEach(it => body.appendChild(playerRow(it, sec.unit, maxVal)));
       }
     } else {
-      wrap.appendChild(el('p', 'section-text', 'Нет данных'));
+      body.appendChild(el('p', 'section-text', 'Нет данных'));
     }
-    if (sec.id === 'teams') {
-      wrap.querySelectorAll('[data-slug]').forEach(node => {
-        node.classList.add('clickable');
-        node.addEventListener('click', () => openTeam(node.dataset.slug));
-      });
-    }
-    if (sec.id === 'pro') {
-      wrap.querySelectorAll('[data-slug]').forEach(node => {
-        node.classList.add('clickable');
-        node.addEventListener('click', () => openPlayer(node.dataset.slug));
-      });
-    }
-    if (sec.id === 'faceit') {
-      wrap.querySelectorAll('[data-id]').forEach(node => {
-        node.classList.add('clickable');
-        node.addEventListener('click', () => openFaceitPlayer(node.dataset.id));
-      });
-    }
-    return wrap;
+    bindClicks(body, sec.id);
+    section.appendChild(body);
+
+    head.addEventListener('click', () => {
+      body.classList.toggle('hidden');
+      chev.classList.toggle('closed');
+    });
+    return section;
   }
 
-  function animateAll() {
-    const nodes = view.querySelectorAll('.player-row, .p-card');
-    nodes.forEach((node, i) => {
-      node.style.animationDelay = (i * 40) + 'ms';
-      node.classList.add('anim');
-      const val = node.querySelector('.val, .p-val');
-      if (val && val.dataset.target !== undefined) {
-        setTimeout(() => countUp(val, +val.dataset.target, +val.dataset.decimals), 100 + i * 40);
-      }
-      const fill = node.querySelector('.bar-fill');
-      if (fill) {
-        setTimeout(() => { fill.style.width = fill.dataset.width + '%'; }, 140 + i * 40);
-      }
+  function favSection(favs) {
+    const sec = el('div', 'stat-section');
+    sec.appendChild(el('div', 'section-title', 'Избранное'));
+    const body = el('div');
+    favs.forEach(f => {
+      const row = el('div', 'player-row');
+      row.dataset.slug = f.key;
+      if (f.type === 'faceit') row.dataset.id = f.key;
+      row.appendChild(avatarEl({ image: f.image, name: f.name }));
+      const info = el('div', 'player-info');
+      info.appendChild(el('div', 'player-nick', f.name));
+      const meta = el('div', 'player-meta');
+      meta.appendChild(el('span', null, f.type === 'team' ? 'Команда' : f.type === 'faceit' ? 'FACEIT' : 'Игрок'));
+      info.appendChild(meta);
+      row.appendChild(info);
+      const star = el('button', 'star-btn active');
+      star.setAttribute('aria-label', 'Убрать из избранного');
+      star.textContent = '★';
+      star.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleFav(f);
+        renderStats(false);
+      });
+      row.appendChild(star);
+      row.classList.add('clickable');
+      row.addEventListener('click', () => {
+        if (f.type === 'team') openTeam(f.key);
+        else if (f.type === 'player') openPlayer(f.key);
+        else openFaceitPlayer(f.key);
+      });
+      body.appendChild(row);
     });
+    sec.appendChild(body);
+    return sec;
+  }
+
+  function renderList(listWrap, data, query, animate) {
+    listWrap.innerHTML = '';
+    const sections = (data && data.sections) || [];
+    if (sections.length) {
+      listWrap.appendChild(el('p', 'updated-note', 'Обновлено: ' + new Date(data.generated_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }) + ' · период ' + periodShort() + ' · регион ' + (data.region || currentRegion)));
+    }
+    const q = (query || '').trim().toLowerCase();
+    const favs = loadFavs();
+    if (favs.length && !q) listWrap.appendChild(favSection(favs));
+    let any = false;
+    sections.forEach(sec => {
+      const items = q ? (sec.items || []).filter(it => (it.name || '').toLowerCase().indexOf(q) !== -1) : sec.items;
+      if (!items || !items.length) return;
+      any = true;
+      listWrap.appendChild(renderSection({ ...sec, items }, !!q));
+    });
+    if (!any) {
+      listWrap.appendChild(el('p', 'section-text', q ? 'Ничего не найдено по запросу «' + query + '»' : 'Нет данных'));
+    }
+    if (animate !== false) animateAll();
   }
 
   async function renderStats(force) {
@@ -209,7 +368,7 @@
     clear();
     view.appendChild(sectionTitle('stats', 'Статистика'));
     const meta = el('div', 'stats-meta');
-    meta.appendChild(el('span', 'muted-note', 'Источники: bo3.gg/HLTV · FACEIT'));
+    meta.appendChild(el('span', 'muted-note', 'Источники: bo3.gg · FACEIT'));
     const refreshBtn = el('button', 'refresh-btn');
     refreshBtn.innerHTML = ICONS.refresh;
     refreshBtn.setAttribute('aria-label', 'Обновить');
@@ -217,30 +376,68 @@
     meta.appendChild(refreshBtn);
     view.appendChild(meta);
 
+    const searchBox = el('div', 'search-box');
+    const search = el('input', 'search-input');
+    search.setAttribute('type', 'search');
+    search.setAttribute('placeholder', 'Поиск по командам и игрокам…');
+    searchBox.appendChild(search);
+    view.appendChild(searchBox);
+
+    let onboarded = true;
+    try { onboarded = localStorage.getItem(ONB_KEY) === '1'; } catch (e) {}
+    if (!onboarded) {
+      const hint = el('div', 'hint-bar');
+      hint.appendChild(el('span', null, 'Нажми на команду или игрока, чтобы открыть карточку'));
+      const hintX = el('button', 'hint-x');
+      hintX.setAttribute('aria-label', 'Закрыть подсказку');
+      hintX.textContent = '✕';
+      hintX.addEventListener('click', () => {
+        hint.remove();
+        try { localStorage.setItem(ONB_KEY, '1'); } catch (e) {}
+      });
+      hint.appendChild(hintX);
+      view.appendChild(hint);
+    }
+
+    const listWrap = el('div', 'stats-list');
+    view.appendChild(listWrap);
+
+    search.addEventListener('input', () => {
+      if (!sectionsCache) return;
+      renderList(listWrap, sectionsCache, search.value, false);
+    });
+
+    if (sectionsCache && !force) {
+      renderList(listWrap, sectionsCache, '', true);
+      currentPage = () => renderStats(false);
+      loading = false;
+      return;
+    }
+
     const loadbar = el('div', 'loadbar');
     loadbar.appendChild(el('div', 'loadbar-fill'));
-    view.appendChild(loadbar);
+    listWrap.appendChild(loadbar);
     refreshBtn.classList.add('spin');
 
     try {
-      const res = await api.get(force ? '/api/stats?refresh=1' : '/api/stats');
+      const res = await api.get(statsUrl(force));
       if (!res.ok) throw new Error('bad response');
-      const sections = (res.stats && res.stats.sections) || [];
+      sectionsCache = res.stats || {};
       loadbar.remove();
-      if (sections.length) {
-        view.appendChild(el('p', 'updated-note', 'Обновлено: ' + new Date(res.stats.generated_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })));
-      }
-      if (!sections.length) {
-        view.appendChild(el('p', 'section-text', 'Нет данных'));
-        return;
-      }
-      sections.forEach(sec => view.appendChild(renderSection(sec)));
-      animateAll();
+      renderList(listWrap, sectionsCache, '', true);
     } catch (err) {
       loadbar.remove();
-      view.appendChild(el('p', 'section-text', 'Не удалось загрузить статистику'));
+      const errBox = el('div', 'err-box');
+      errBox.appendChild(el('p', 'section-text', 'Не удалось загрузить статистику'));
+      const retry = el('button', 'link-btn');
+      retry.appendChild(iconEl('refresh'));
+      retry.appendChild(document.createTextNode('Повторить'));
+      retry.addEventListener('click', () => renderStats(true));
+      errBox.appendChild(retry);
+      listWrap.appendChild(errBox);
     } finally {
       refreshBtn.classList.remove('spin');
+      currentPage = () => renderStats(false);
       loading = false;
     }
   }
@@ -283,6 +480,7 @@
 
   function rosterRow(p) {
     const row = el('div', 'r-row');
+    if (p.slug) row.dataset.slug = p.slug;
     row.appendChild(avatarEl({ image: p.image, name: p.nickname }));
     const info = el('div', 'player-info');
     info.appendChild(el('div', 'player-nick', p.nickname));
@@ -327,6 +525,7 @@
     if (t.six_month_earned) meta.appendChild(el('span', 'earn', formatMoney(t.six_month_earned)));
     hinfo.appendChild(meta);
     hero.appendChild(hinfo);
+    if (t.slug) hero.appendChild(favBtn({ type: 'team', key: t.slug, name: t.name, image: t.image }));
     td.appendChild(hero);
 
     const s = t.stats || {};
@@ -359,6 +558,7 @@
     const rl = t.roster || [];
     if (!rl.length) rost.appendChild(el('p', 'muted-note', 'Нет данных'));
     rl.forEach(p => rost.appendChild(rosterRow(p)));
+    bindRows(rost, slug => openPlayer(slug));
     td.appendChild(rost);
 
     td.appendChild(sectionTitle('trophy', 'Достижения'));
@@ -374,31 +574,46 @@
     });
   }
 
-  async function openTeam(slug) {
-    if (!slug || loading) return;
+  async function renderTeam(slug, useCache) {
+    if (loading) return;
     loading = true;
     clear();
     const td = el('div', 't-detail');
-    const back = el('button', 'back-btn');
-    back.appendChild(iconEl('back'));
-    back.appendChild(document.createTextNode('Назад'));
-    back.addEventListener('click', () => switchTab('stats'));
-    td.appendChild(back);
+    td.appendChild(backBtn());
     const loadbar = el('div', 'loadbar');
     loadbar.appendChild(el('div', 'loadbar-fill'));
     td.appendChild(loadbar);
     view.appendChild(td);
     try {
-      const res = await api.get('/api/team?slug=' + encodeURIComponent(slug));
+      let t = useCache ? detailCache.team[slug] : null;
+      if (!t) {
+        const res = await api.get('/api/team?slug=' + encodeURIComponent(slug));
+        if (!res.ok) throw new Error('bad response');
+        t = res.team;
+        detailCache.team[slug] = t;
+      }
       loadbar.remove();
-      if (!res.ok) throw new Error('bad response');
-      renderTeamDetail(res.team, td);
+      renderTeamDetail(t, td);
+      currentPage = () => renderTeam(slug, true);
     } catch (err) {
       loadbar.remove();
-      view.appendChild(el('p', 'section-text', 'Не удалось загрузить команду'));
+      const errBox = el('div', 'err-box');
+      errBox.appendChild(el('p', 'section-text', 'Не удалось загрузить команду'));
+      const retry = el('button', 'link-btn');
+      retry.appendChild(iconEl('refresh'));
+      retry.appendChild(document.createTextNode('Повторить'));
+      retry.addEventListener('click', () => renderTeam(slug, true));
+      errBox.appendChild(retry);
+      td.appendChild(errBox);
     } finally {
       loading = false;
     }
+  }
+
+  function openTeam(slug) {
+    if (!slug || loading) return;
+    pushPage();
+    renderTeam(slug, false);
   }
 
   function bioRow(label, value) {
@@ -431,7 +646,7 @@
     if (m.avg_damage != null) sub.appendChild(el('span', null, 'ADR: ' + formatNum(m.avg_damage, 1)));
     info.appendChild(sub);
     row.appendChild(info);
-    row.appendChild(el('div', 'm-score', 'R ' + formatNum(m.avg_rating, 2)));
+    row.appendChild(el('div', 'm-score', m.avg_rating != null ? formatNum(m.avg_rating, 2) : '—'));
     return row;
   }
 
@@ -464,6 +679,7 @@
     if (p.total_prize) meta.appendChild(el('span', 'earn', formatMoney(p.total_prize)));
     hinfo.appendChild(meta);
     hero.appendChild(hinfo);
+    if (p.slug) hero.appendChild(favBtn({ type: 'player', key: p.slug, name: p.nickname, image: p.image }));
     td.appendChild(hero);
 
     const subTabs = el('div', 'sub-tabs');
@@ -478,8 +694,9 @@
     const statsBox = el('div', 'sub-box');
     const bioBox = el('div', 'sub-box hidden');
 
+    const periodTxt = p.period_label || 'за последние шесть месяцев';
     const s = p.stats || {};
-    statsBox.appendChild(sectionTitle('stats', 'Статистика за 6 месяцев'));
+    statsBox.appendChild(sectionTitle('stats', 'Статистика ' + periodTxt));
     const grid = el('div', 's-grid');
     grid.appendChild(statCard('Рейтинг', p.rating, 2, 'accent'));
     grid.appendChild(statCard('Матчи', s.matches, 0));
@@ -495,7 +712,7 @@
     grid.appendChild(statCard('Ассистов', s.assists, 0));
     statsBox.appendChild(grid);
 
-    statsBox.appendChild(sectionTitle('stats', 'Карты · рейтинг за 6 мес.'));
+    statsBox.appendChild(sectionTitle('stats', 'Карты · ' + periodTxt));
     const maps = el('div', 't-matches');
     const ml = p.maps || [];
     if (!ml.length) maps.appendChild(el('p', 'muted-note', 'Нет данных'));
@@ -507,6 +724,7 @@
     const tl = p.teams || [];
     if (!tl.length) teams.appendChild(el('p', 'muted-note', 'Нет данных'));
     tl.forEach(t => teams.appendChild(teamRow(t)));
+    bindRows(teams, slug => openTeam(slug));
     statsBox.appendChild(teams);
 
     statsBox.appendChild(sectionTitle('trophy', 'Достижения'));
@@ -545,10 +763,18 @@
     if (p.country_name) bio.appendChild(bioRow('Страна', p.country_name));
     if (p.region) bio.appendChild(bioRow('Регион', p.region));
     if (p.role) bio.appendChild(bioRow('Роль', p.role));
-    if (p.team) bio.appendChild(bioRow('Команда', p.team));
+    if (p.team) {
+      const teamRow2 = bioRow('Команда', p.team);
+      if (p.team_slug) {
+        teamRow2.classList.add('clickable');
+        teamRow2.dataset.slug = p.team_slug;
+        teamRow2.addEventListener('click', () => openTeam(p.team_slug));
+      }
+      bio.appendChild(teamRow2);
+    }
     if (p.joined_team_at) bio.appendChild(bioRow('В команде с', String(p.joined_team_at).slice(0, 10)));
     bio.appendChild(bioRow('Призовые', formatMoney(p.total_prize)));
-    bio.appendChild(bioRow('Рейтинг (6 мес.)', p.rating != null ? formatNum(p.rating, 2) : '—'));
+    bio.appendChild(bioRow('Рейтинг', p.rating != null ? formatNum(p.rating, 2) : '—'));
     bioBox.appendChild(bio);
 
     const tags = p.tags || [];
@@ -592,31 +818,46 @@
     });
   }
 
-  async function openPlayer(slug) {
-    if (!slug || loading) return;
+  async function renderPlayer(slug, useCache) {
+    if (loading) return;
     loading = true;
     clear();
     const pd = el('div', 't-detail');
-    const back = el('button', 'back-btn');
-    back.appendChild(iconEl('back'));
-    back.appendChild(document.createTextNode('Назад'));
-    back.addEventListener('click', () => switchTab('stats'));
-    pd.appendChild(back);
+    pd.appendChild(backBtn());
     const loadbar = el('div', 'loadbar');
     loadbar.appendChild(el('div', 'loadbar-fill'));
     pd.appendChild(loadbar);
     view.appendChild(pd);
     try {
-      const res = await api.get('/api/player?slug=' + encodeURIComponent(slug));
+      let p = useCache ? detailCache.player[slug] : null;
+      if (!p) {
+        const res = await api.get('/api/player?slug=' + encodeURIComponent(slug) + '&period=' + currentPeriod);
+        if (!res.ok) throw new Error('bad response');
+        p = res.player;
+        detailCache.player[slug] = p;
+      }
       loadbar.remove();
-      if (!res.ok) throw new Error('bad response');
-      renderPlayerDetail(res.player, pd);
+      renderPlayerDetail(p, pd);
+      currentPage = () => renderPlayer(slug, true);
     } catch (err) {
       loadbar.remove();
-      view.appendChild(el('p', 'section-text', 'Не удалось загрузить игрока'));
+      const errBox = el('div', 'err-box');
+      errBox.appendChild(el('p', 'section-text', 'Не удалось загрузить игрока'));
+      const retry = el('button', 'link-btn');
+      retry.appendChild(iconEl('refresh'));
+      retry.appendChild(document.createTextNode('Повторить'));
+      retry.addEventListener('click', () => renderPlayer(slug, true));
+      errBox.appendChild(retry);
+      pd.appendChild(errBox);
     } finally {
       loading = false;
     }
+  }
+
+  function openPlayer(slug) {
+    if (!slug || loading) return;
+    pushPage();
+    renderPlayer(slug, false);
   }
 
   function linkBtn(href, label) {
@@ -659,6 +900,7 @@
     if (p.elo != null) meta.appendChild(el('span', 'earn', 'ELO ' + formatNum(p.elo, 0)));
     hinfo.appendChild(meta);
     hero.appendChild(hinfo);
+    if (p.id) hero.appendChild(favBtn({ type: 'faceit', key: p.id, name: p.nickname, image: p.image }));
     td.appendChild(hero);
 
     td.appendChild(sectionTitle('users', 'Биография'));
@@ -720,31 +962,61 @@
     });
   }
 
-  async function openFaceitPlayer(id) {
-    if (!id || loading) return;
+  async function renderFaceit(id, useCache) {
+    if (loading) return;
     loading = true;
     clear();
     const pd = el('div', 't-detail');
-    const back = el('button', 'back-btn');
-    back.appendChild(iconEl('back'));
-    back.appendChild(document.createTextNode('Назад'));
-    back.addEventListener('click', () => switchTab('stats'));
-    pd.appendChild(back);
+    pd.appendChild(backBtn());
     const loadbar = el('div', 'loadbar');
     loadbar.appendChild(el('div', 'loadbar-fill'));
     pd.appendChild(loadbar);
     view.appendChild(pd);
     try {
-      const res = await api.get('/api/faceit-player?id=' + encodeURIComponent(id));
+      let p = useCache ? detailCache.faceit[id] : null;
+      if (!p) {
+        const res = await api.get('/api/faceit-player?id=' + encodeURIComponent(id));
+        if (!res.ok) throw new Error('bad response');
+        p = res.player;
+        detailCache.faceit[id] = p;
+      }
       loadbar.remove();
-      if (!res.ok) throw new Error('bad response');
-      renderFaceitPlayer(res.player, pd);
+      renderFaceitPlayer(p, pd);
+      currentPage = () => renderFaceit(id, true);
     } catch (err) {
       loadbar.remove();
-      view.appendChild(el('p', 'section-text', 'Не удалось загрузить игрока'));
+      const errBox = el('div', 'err-box');
+      errBox.appendChild(el('p', 'section-text', 'Не удалось загрузить игрока'));
+      const retry = el('button', 'link-btn');
+      retry.appendChild(iconEl('refresh'));
+      retry.appendChild(document.createTextNode('Повторить'));
+      retry.addEventListener('click', () => renderFaceit(id, true));
+      errBox.appendChild(retry);
+      pd.appendChild(errBox);
     } finally {
       loading = false;
     }
+  }
+
+  function openFaceitPlayer(id) {
+    if (!id || loading) return;
+    pushPage();
+    renderFaceit(id, false);
+  }
+
+  function sel(options, current, onChange) {
+    const s = document.createElement('select');
+    s.className = 'set-select';
+    options.forEach((opt) => {
+      const pair = Array.isArray(opt) ? opt : [opt, opt];
+      const o = document.createElement('option');
+      o.value = String(pair[0]);
+      o.textContent = pair[1];
+      if (String(current) === String(pair[0])) o.selected = true;
+      s.appendChild(o);
+    });
+    s.addEventListener('change', () => onChange(s.value));
+    return s;
   }
 
   function activateTab(name) {
@@ -783,23 +1055,72 @@
 
     const info = el('div', 'b-list');
     info.appendChild(bioRow('Приложение', 'CS2 COACH'));
-    info.appendChild(bioRow('Версия', '1.0'));
+    info.appendChild(bioRow('Версия', '1.1'));
     info.appendChild(bioRow('Источники данных', 'bo3.gg · FACEIT'));
     view.appendChild(info);
+
+    view.appendChild(sectionTitle('settings', 'Регион FACEIT'));
+    const regionRow = el('div', 'set-row');
+    regionRow.appendChild(sel(REGIONS, currentRegion, v => {
+      currentRegion = v;
+      saveSettings();
+      sectionsCache = null;
+    }));
+    view.appendChild(regionRow);
+
+    view.appendChild(sectionTitle('stats', 'Период статистики'));
+    const periodRow = el('div', 'set-row');
+    periodRow.appendChild(sel(PERIODS, currentPeriod, v => {
+      currentPeriod = +v;
+      saveSettings();
+      sectionsCache = null;
+      detailCache.player = {};
+    }));
+    view.appendChild(periodRow);
+
+    view.appendChild(sectionTitle('users', 'Избранное'));
+    const favList = el('div', 't-roster');
+    const favs = loadFavs();
+    if (!favs.length) favList.appendChild(el('p', 'muted-note', 'Пока пусто — добавь звёздочкой из карточки игрока или команды'));
+    favs.forEach(f => {
+      const row = el('div', 'r-row');
+      row.appendChild(avatarEl({ image: f.image, name: f.name }));
+      const finfo = el('div', 'player-info');
+      finfo.appendChild(el('div', 'player-nick', f.name));
+      const fmeta = el('div', 'player-meta');
+      fmeta.appendChild(el('span', null, f.type === 'team' ? 'Команда' : f.type === 'faceit' ? 'FACEIT' : 'Игрок'));
+      finfo.appendChild(fmeta);
+      row.appendChild(finfo);
+      const rm = el('button', 'link-btn');
+      rm.textContent = 'Убрать';
+      rm.addEventListener('click', () => {
+        toggleFav(f);
+        renderSettings();
+      });
+      row.appendChild(rm);
+      favList.appendChild(row);
+    });
+    view.appendChild(favList);
 
     const refresh = el('button', 'link-btn');
     refresh.appendChild(iconEl('refresh'));
     refresh.appendChild(document.createTextNode('Обновить статистику'));
     refresh.addEventListener('click', () => {
+      sectionsCache = null;
+      detailCache.team = {};
+      detailCache.player = {};
+      detailCache.faceit = {};
       activateTab('stats');
       renderStats(true);
     });
     view.appendChild(refresh);
 
+    currentPage = () => renderSettings();
     loading = false;
   }
 
   async function init() {
+    loadSettings();
     const orb1 = document.createElement('div');
     orb1.className = 'orb orb1';
     const orb2 = document.createElement('div');

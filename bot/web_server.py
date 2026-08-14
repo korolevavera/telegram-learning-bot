@@ -119,8 +119,15 @@ async def api_stats(request: web.Request) -> web.Response:
         return _unauthorized()
     if request.query.get("refresh"):
         clear_cache()
+    region = (request.query.get("region") or "EU").upper()
     try:
-        stats = await get_stats()
+        period = int(request.query.get("period") or 180)
+    except (TypeError, ValueError):
+        period = 180
+    if period not in (90, 180, 365):
+        period = 180
+    try:
+        stats = await get_stats(region=region, period_days=period)
     except Exception:
         return web.json_response({"ok": False, "error": "stats unavailable"}, status=502)
     return web.json_response({"ok": True, "stats": stats})
@@ -150,7 +157,13 @@ async def api_player(request: web.Request) -> web.Response:
     if not slug:
         return web.json_response({"ok": False, "error": "missing slug"}, status=400)
     try:
-        info = await get_player_info(slug)
+        period = int(request.query.get("period") or 180)
+    except (TypeError, ValueError):
+        period = 180
+    if period not in (90, 180, 365):
+        period = 180
+    try:
+        info = await get_player_info(slug, period_days=period)
     except Exception:
         return web.json_response({"ok": False, "error": "player unavailable"}, status=502)
     if info is None:
