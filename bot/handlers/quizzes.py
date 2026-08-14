@@ -3,13 +3,8 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery
 
 from ..content import QUIZZES
-from ..db import SessionLocal
-from ..keyboards import (
-    main_menu_keyboard,
-    quiz_question_keyboard,
-    quizzes_keyboard,
-)
-from ..models import QuizResult
+from ..keyboards import quiz_question_keyboard, quizzes_keyboard
+from ..services import save_quiz_result
 from ..states import QuizState
 
 router = Router()
@@ -82,16 +77,7 @@ async def quiz_answer(cb: CallbackQuery, state: FSMContext) -> None:
 
     await state.clear()
 
-    async with SessionLocal() as session:
-        session.add(
-            QuizResult(
-                user_id=cb.from_user.id,
-                quiz_id=quiz_id,
-                score=score,
-                total=len(quiz["questions"]),
-            )
-        )
-        await session.commit()
+    await save_quiz_result(cb.from_user.id, quiz_id, score, len(quiz["questions"]))
 
     percent = score * 100 // len(quiz["questions"])
     emoji = "🏆" if percent >= 80 else "👍" if percent >= 50 else "💪"

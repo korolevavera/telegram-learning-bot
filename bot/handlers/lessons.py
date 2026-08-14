@@ -1,14 +1,10 @@
-from datetime import datetime, timezone
-
 from aiogram import F, Router
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
-from sqlalchemy import select
 
 from ..content import LESSONS
-from ..db import SessionLocal
 from ..keyboards import lesson_actions_keyboard, lessons_keyboard
-from ..models import LessonProgress
+from ..services import upsert_lesson_progress
 from ..states import LessonState
 
 router = Router()
@@ -54,26 +50,7 @@ async def _ask_question(message: Message, lesson: dict, q_index: int) -> None:
 
 
 async def _finish_lesson(message: Message, lesson_id: str) -> None:
-    async with SessionLocal() as session:
-        existing = await session.scalar(
-            select(LessonProgress).where(
-                LessonProgress.user_id == message.from_user.id,
-                LessonProgress.lesson_id == lesson_id,
-            )
-        )
-        if existing is None:
-            session.add(
-                LessonProgress(
-                    user_id=message.from_user.id,
-                    lesson_id=lesson_id,
-                    completed=True,
-                    completed_at=datetime.now(timezone.utc),
-                )
-            )
-        else:
-            existing.completed = True
-            existing.completed_at = datetime.now(timezone.utc)
-        await session.commit()
+    await upsert_lesson_progress(message.from_user.id, lesson_id)
 
     await message.answer(
         "🎉 Урок завершён! Отлично поработал.\n\n"

@@ -1,17 +1,26 @@
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
 
+from .config_loader import CONFIG
 from .content import CARDS, LESSONS, QUIZZES
 
 
 def main_menu_keyboard() -> InlineKeyboardMarkup:
-    return InlineKeyboardMarkup(
-        inline_keyboard=[
-            [InlineKeyboardButton(text="📚 Уроки", callback_data="lessons")],
-            [InlineKeyboardButton(text="🃏 Карточки", callback_data="cards")],
-            [InlineKeyboardButton(text="🧪 Тесты", callback_data="quizzes")],
-            [InlineKeyboardButton(text="📊 Прогресс", callback_data="progress")],
-        ]
-    )
+    rows = [
+        [InlineKeyboardButton(text="📚 Уроки", callback_data="lessons")],
+        [InlineKeyboardButton(text="🃏 Карточки", callback_data="cards")],
+        [InlineKeyboardButton(text="🧪 Тесты", callback_data="quizzes")],
+        [InlineKeyboardButton(text="📊 Прогресс", callback_data="progress")],
+    ]
+    if CONFIG.webapp_url:
+        rows.append(
+            [
+                InlineKeyboardButton(
+                    text="🎮 Открыть приложение",
+                    web_app=WebAppInfo(url=CONFIG.webapp_url),
+                )
+            ]
+        )
+    return InlineKeyboardMarkup(inline_keyboard=rows)
 
 
 def lessons_keyboard() -> InlineKeyboardMarkup:

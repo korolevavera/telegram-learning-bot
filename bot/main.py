@@ -6,6 +6,7 @@ from aiogram import Bot, Dispatcher
 from .config_loader import CONFIG
 from .db import init_db
 from .handlers import cards, lessons, progress, quizzes, start
+from .web_server import start_web_server
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
 
@@ -17,6 +18,7 @@ async def main() -> None:
         )
 
     await init_db()
+    await start_web_server()
 
     bot = Bot(token=CONFIG.bot_token)
     dp = Dispatcher()
