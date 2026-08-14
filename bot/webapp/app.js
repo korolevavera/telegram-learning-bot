@@ -61,13 +61,16 @@
 
   function avatarEl(item) {
     const box = el('div', 'avatar');
-    box.appendChild(el('span', null, (item.name || '?').charAt(0).toUpperCase()));
     if (item.image) {
       const img = document.createElement('img');
       img.src = item.image;
       img.alt = '';
-      img.addEventListener('error', () => img.remove());
+      img.addEventListener('error', () => {
+        box.appendChild(el('span', null, (item.name || '?').charAt(0).toUpperCase()));
+      });
       box.appendChild(img);
+    } else {
+      box.appendChild(el('span', null, (item.name || '?').charAt(0).toUpperCase()));
     }
     return box;
   }
