@@ -158,6 +158,31 @@
       border-radius: 6px; padding: 1px 7px; font-size: 11px; font-weight: 700;
     }
     #score { color: var(--accent); font-weight: 700; }
+
+    .section-title { color: var(--accent); font-size: 14px; font-weight: 700; margin: 14px 0 8px; }
+    .player-row {
+      display: flex; align-items: center; gap: 10px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin-bottom: 8px;
+    }
+    .player-rank {
+      min-width: 34px; text-align: center;
+      font-weight: 800; font-size: 15px;
+      color: var(--muted);
+    }
+    .player-rank.top1 { color: var(--accent); }
+    .player-rank.top2, .player-rank.top3 { color: #c9d1dc; }
+    .player-info { flex: 1; min-width: 0; }
+    .player-nick { font-size: 15px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .player-meta { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .player-stat { text-align: right; min-width: 64px; }
+    .player-stat .val { font-size: 14px; font-weight: 700; color: var(--accent); }
+    .player-stat .lab { font-size: 10px; color: var(--muted); text-transform: uppercase; }
+    .muted-note { color: var(--muted); font-size: 12px; margin-bottom: 10px; }
+    .spinner { text-align: center; color: var(--muted); padding: 30px 0; }
   </style>
 </head>
 <body>
@@ -175,6 +200,7 @@
     <button data-tab="cards"><span class="ico">🃏</span>Карточки</button>
     <button data-tab="quizzes"><span class="ico">🧪</span>Тесты</button>
     <button data-tab="progress"><span class="ico">📊</span>Прогресс</button>
+    <button data-tab="stats"><span class="ico">🏆</span>Статистика</button>
   </nav>
 
   <script>
@@ -420,6 +446,69 @@
       return wrap;
     }
 
+    function flagEmoji(code) {
+      if (!code || code.length !== 2) return '🌐';
+      const A = 0x1f1e6, a = 'A'.charCodeAt(0);
+      const up = code.toUpperCase().split('').map(c => String.fromCodePoint(A + (c.charCodeAt(0) - a)));
+      return up.join('');
+    }
+    function fmtMoney(v) {
+      if (v === null || v === undefined) return '—';
+      return '$' + Math.round(v).toLocaleString('en-US');
+    }
+    function fmtRating(v) {
+      if (v === null || v === undefined) return '—';
+      return v.toFixed(2);
+    }
+
+    function playerRow(player, label, value) {
+      const row = el('div', 'player-row');
+      const rank = el('div', 'player-rank');
+      rank.textContent = player.rank != null ? player.rank : player.position != null ? player.position : '—';
+      if (rank.textContent === '1') rank.classList.add('top1');
+      else if (rank.textContent === '2' || rank.textContent === '3') rank.classList.add('top2');
+      const info = el('div', 'player-info');
+      info.appendChild(el('div', 'player-nick', player.nickname));
+      const meta = [];
+      if (player.team) meta.push(player.team);
+      if (player.country || player.country_code) meta.push(flagEmoji(player.country_code) + ' ' + (player.country || ''));
+      info.appendChild(el('div', 'player-meta', meta.join(' · ')));
+      const stat = el('div', 'player-stat');
+      stat.appendChild(el('div', 'val', value));
+      stat.appendChild(el('div', 'lab', label));
+      row.appendChild(rank); row.appendChild(info); row.appendChild(stat);
+      return row;
+    }
+
+    async function renderStats() {
+      clear();
+      const title = el('h2', 'lesson-title', '🏆 Статистика');
+      view.appendChild(title);
+      view.appendChild(el('div', 'spinner', 'Загрузка...'));
+      try {
+        const res = await api.get('/api/stats');
+        if (!res.ok) throw new Error('bad response');
+        const s = res.stats;
+        clear();
+        view.appendChild(title);
+        view.appendChild(el('p', 'muted-note', 'Данные: bo3.gg · HLTV недоступен автоматически. Обновляется раз в 15 мин.'));
+        view.appendChild(el('div', 'section-title', '🥇 Рейтинг игроков (6 месяцев)'));
+        (s.top_players || []).forEach(p => {
+          view.appendChild(playerRow(p, 'rating', fmtRating(p.rating)));
+        });
+        view.appendChild(el('div', 'section-title', '💰 Топ по призовым'));
+        (s.top_earners || []).forEach((p, i) => {
+          const item = Object.assign({}, p, { position: i + 1 });
+          view.appendChild(playerRow(item, 'prize', fmtMoney(p.total_earnings)));
+        });
+        if (!s.top_players || !s.top_players.length) {
+          view.appendChild(el('p', 'section-text', 'Нет данных'));
+        }
+      } catch (err) {
+        view.appendChild(el('p', 'section-text', '⚠️ Не удалось загрузить статистику'));
+      }
+    }
+
     document.getElementById('tabs').addEventListener('click', (e) => {
       const btn = e.target.closest('button[data-tab]');
       if (!btn) return;
@@ -429,6 +518,7 @@
       if (tab === 'lessons') renderLessons();
       else if (tab === 'cards') renderCards();
       else if (tab === 'quizzes') renderQuizzes();
+      else if (tab === 'stats') renderStats();
       else renderProgress();
     });
 

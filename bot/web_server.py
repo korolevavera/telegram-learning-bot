@@ -9,6 +9,7 @@ from aiohttp import web
 from .config_loader import CONFIG
 from .content import CARDS, LESSONS, QUIZZES
 from .services import get_progress, save_quiz_result, set_card_known, upsert_lesson_progress
+from .stats import get_stats
 
 STATIC_DIR = Path(__file__).resolve().parent / "webapp"
 
@@ -105,12 +106,24 @@ async def api_quiz(request: web.Request) -> web.Response:
     return web.json_response({"ok": True})
 
 
+async def api_stats(request: web.Request) -> web.Response:
+    auth = _auth(request)
+    if auth is None:
+        return _unauthorized()
+    try:
+        stats = await get_stats()
+    except Exception:
+        return web.json_response({"ok": False, "error": "stats unavailable"}, status=502)
+    return web.json_response({"ok": True, "stats": stats})
+
+
 def create_app() -> web.Application:
     app = web.Application()
     app.router.add_get("/", index_handler)
     app.router.add_get("/api/init", api_init)
     app.router.add_get("/api/content", api_content)
     app.router.add_get("/api/progress", api_progress)
+    app.router.add_get("/api/stats", api_stats)
     app.router.add_post("/api/card", api_card)
     app.router.add_post("/api/lesson", api_lesson)
     app.router.add_post("/api/quiz", api_quiz)
