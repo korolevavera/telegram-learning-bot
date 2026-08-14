@@ -87,7 +87,7 @@
     view.querySelectorAll('.player-row, .p-card').forEach((n, i) => {
       setTimeout(() => n.classList.add('anim'), 40 + i * 30);
     });
-    view.querySelectorAll('.val').forEach(v => {
+    view.querySelectorAll('.val, .p-val').forEach(v => {
       countUp(v, +v.dataset.target, +v.dataset.decimals);
     });
     view.querySelectorAll('.bar-fill').forEach(f => {
