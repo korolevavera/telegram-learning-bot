@@ -11,7 +11,8 @@
     trophy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>',
     users: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
     settings: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',
-    chevron: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>'
+    chevron: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>',
+    guides: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>'
   };
 
   const view = document.getElementById('view');
@@ -23,11 +24,18 @@
   let lang = 'ru';
   let sectionsCache = null;
   let currentPage = null;
+  let guidesCache = null;
+  let progressCache = null;
+  let guidesTab = 'lessons';
+  let lessonState = null;
+  let cardState = null;
+  let quizState = null;
   const backStack = [];
   const detailCache = { team: {}, player: {}, faceit: {} };
   const SET_KEY = 'cs2coach.settings';
   const FAV_KEY = 'cs2coach.favs';
   const ONB_KEY = 'cs2coach.onboarded';
+  const DONE_KEY = 'cs2coach.done_lessons';
   const REGIONS = ['EU', 'NA', 'SA', 'AS', 'AU'];
   const THEMES = ['dark', 'light', 'gurren'];
   const PERIODS = [[90, 'p90'], [180, 'p180'], [365, 'p365']];
@@ -77,7 +85,19 @@
       src_data: 'Источники данных', set_region: 'Регион FACEIT', set_period: 'Период статистики',
       fav_empty: 'Пока пусто — добавь звёздочкой из карточки игрока или команды',
       fav_rm: 'Убрать', refresh_stats: 'Обновить статистику', user: 'Пользователь',
-      app_open: 'Открой приложение через бота', load_fail: 'Не удалось загрузить данные'
+      app_open: 'Открой приложение через бота', load_fail: 'Не удалось загрузить данные',
+      tab_guides: 'Гайды',
+      g_tab_lessons: 'Уроки', g_tab_cards: 'Карточки', g_tab_quizzes: 'Тесты',
+      g_lessons_done: 'Уроков пройдено', g_cards_known: 'Карточек изучено', g_quizzes_taken: 'Тестов пройдено',
+      g_sections: 'разделов', g_questions: 'вопросов', g_lesson_done: 'Пройдено',
+      g_next: 'Далее', g_to_questions: 'К вопросам', g_show_answer: 'Показать ответ', g_answer: 'Ответ',
+      g_finish: 'Завершить урок', g_finished: 'Урок пройден!', g_again: 'Ещё раз',
+      g_card_flip: 'Показать ответ', g_known: 'Знаю', g_unknown: 'Не знаю',
+      g_start_cards: 'Начать тренировку',
+      g_cards_done: 'Колода пройдена!', g_cards_known_n: 'Знаю {0} из {1}', g_cards_pos: 'Карточка {0} из {1}',
+      g_quiz_question: 'Вопрос {0} из {1}', g_quiz_score: 'Правильно: {0} из {1}', g_quiz_result: 'Результат',
+      g_quiz_end: 'Тест завершён', g_your_score: 'Твой счёт', g_quiz_again: 'Пройти ещё раз',
+      g_err_content: 'Не удалось загрузить обучение', g_back_guides: 'В гайды'
     },
     en: {
       tab_stats: 'Stats', tab_settings: 'Settings', back: 'Back',
@@ -123,7 +143,19 @@
       src_data: 'Data sources', set_region: 'FACEIT region', set_period: 'Stats period',
       fav_empty: 'Empty — add with the star on a player or team card',
       fav_rm: 'Remove', refresh_stats: 'Refresh stats', user: 'User',
-      app_open: 'Open the app from the bot', load_fail: 'Failed to load data'
+      app_open: 'Open the app from the bot', load_fail: 'Failed to load data',
+      tab_guides: 'Guides',
+      g_tab_lessons: 'Lessons', g_tab_cards: 'Cards', g_tab_quizzes: 'Quizzes',
+      g_lessons_done: 'Lessons done', g_cards_known: 'Cards learned', g_quizzes_taken: 'Quizzes taken',
+      g_sections: 'sections', g_questions: 'questions', g_lesson_done: 'Done',
+      g_next: 'Next', g_to_questions: 'To questions', g_show_answer: 'Show answer', g_answer: 'Answer',
+      g_finish: 'Finish lesson', g_finished: 'Lesson finished!', g_again: 'Again',
+      g_card_flip: 'Show answer', g_known: 'I know it', g_unknown: "Don't know",
+      g_start_cards: 'Start practice',
+      g_cards_done: 'Deck finished!', g_cards_known_n: 'Know {0} of {1}', g_cards_pos: 'Card {0} of {1}',
+      g_quiz_question: 'Question {0} of {1}', g_quiz_score: 'Correct: {0} of {1}', g_quiz_result: 'Result',
+      g_quiz_end: 'Quiz finished', g_your_score: 'Your score', g_quiz_again: 'Try again',
+      g_err_content: 'Failed to load learning', g_back_guides: 'Back to guides'
     }
   };
 
@@ -153,7 +185,14 @@
 
   const api = {
     headers: { 'x-init-data': tg ? tg.initData : '' },
-    get(path) { return fetch(path, { headers: this.headers }).then(r => r.json()); }
+    get(path) { return fetch(path, { headers: this.headers }).then(r => r.json()); },
+    post(path, data) {
+      return fetch(path, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...this.headers },
+        body: JSON.stringify(data || {})
+      }).then(r => r.json());
+    }
   };
 
   function el(tag, cls, text) {
@@ -1171,6 +1210,8 @@
       renderStats(false);
     } else if (name === 'settings') {
       renderSettings();
+    } else if (name === 'guides') {
+      renderGuides();
     }
   }
 
@@ -1218,7 +1259,9 @@
       lang = v;
       saveSettings();
       document.querySelectorAll('#tabBar .tab').forEach(b => {
-        if (b.lastChild) b.lastChild.textContent = b.dataset.tab === 'stats' ? t('tab_stats') : t('tab_settings');
+        if (b.lastChild) {
+          b.lastChild.textContent = b.dataset.tab === 'stats' ? t('tab_stats') : b.dataset.tab === 'guides' ? t('tab_guides') : t('tab_settings');
+        }
       });
       renderSettings();
     }));
@@ -1284,6 +1327,298 @@
     loading = false;
   }
 
+  function loadDone() {
+    try { const l = JSON.parse(localStorage.getItem(DONE_KEY) || '[]'); return Array.isArray(l) ? l : []; } catch (e) { return []; }
+  }
+
+  function markDone(id) {
+    const list = loadDone();
+    if (list.indexOf(id) === -1) list.push(id);
+    try { localStorage.setItem(DONE_KEY, JSON.stringify(list)); } catch (e) {}
+  }
+
+  function gBackBtn() {
+    const back = el('button', 'back-btn');
+    back.appendChild(iconEl('back'));
+    back.appendChild(document.createTextNode(t('g_back_guides')));
+    back.addEventListener('click', () => renderGuides());
+    return back;
+  }
+
+  function gHero(p) {
+    const grid = el('div', 's-grid');
+    const cells = [
+      { v: p.lessons_done + '/' + p.lessons_total, l: t('g_lessons_done') },
+      { v: p.cards_known + '/' + p.cards_total, l: t('g_cards_known') },
+      { v: p.quizzes_taken || 0, l: t('g_quizzes_taken') }
+    ];
+    cells.forEach(c => {
+      const card = el('div', 's-card accent');
+      card.appendChild(el('div', 's-val', c.v));
+      card.appendChild(el('div', 's-lab', c.l));
+      grid.appendChild(card);
+    });
+    return grid;
+  }
+
+  function gTabBtn(tab, label) {
+    const b = document.createElement('button');
+    b.className = 'sub-tab' + (guidesTab === tab ? ' active' : '');
+    b.textContent = label;
+    b.addEventListener('click', () => { guidesTab = tab; renderGuides(); });
+    return b;
+  }
+
+  function gRow(icon, title, meta, done, onClick) {
+    const row = el('div', 'g-row');
+    row.appendChild(el('div', 'g-ico', icon));
+    const info = el('div', 'player-info');
+    info.appendChild(el('div', 'player-nick', title));
+    if (meta) info.appendChild(el('div', 'player-meta', meta));
+    row.appendChild(info);
+    if (done) row.appendChild(el('span', 'g-badge', t('g_lesson_done')));
+    row.appendChild(el('span', 'g-chev', '›'));
+    row.addEventListener('click', onClick);
+    return row;
+  }
+
+  async function renderGuides() {
+    if (loading) return;
+    loading = true;
+    clear();
+    view.appendChild(sectionTitle('guides', t('tab_guides')));
+    try {
+      if (!guidesCache) {
+        const res = await api.get('/api/content');
+        if (res && res.lessons) guidesCache = res;
+      }
+      if (!progressCache) {
+        const pRes = await api.get('/api/progress');
+        if (pRes && pRes.ok) progressCache = pRes.progress;
+      }
+    } catch (e) {}
+    if (!guidesCache) {
+      view.appendChild(el('p', 'section-text', t('g_err_content')));
+      loading = false;
+      return;
+    }
+    view.appendChild(gHero(progressCache || { lessons_done: 0, lessons_total: guidesCache.lessons.length, cards_known: 0, cards_total: guidesCache.cards.length, quizzes_taken: 0 }));
+    const sub = el('div', 'sub-tabs');
+    sub.appendChild(gTabBtn('lessons', t('g_tab_lessons')));
+    sub.appendChild(gTabBtn('cards', t('g_tab_cards')));
+    sub.appendChild(gTabBtn('quizzes', t('g_tab_quizzes')));
+    view.appendChild(sub);
+    const box = el('div', 'sub-box');
+    view.appendChild(box);
+    if (guidesTab === 'lessons') renderLessonsList(box);
+    else if (guidesTab === 'cards') renderCardsList(box);
+    else renderQuizzesList(box);
+    loading = false;
+  }
+
+  function renderLessonsList(box) {
+    const done = loadDone();
+    guidesCache.lessons.forEach((lesson, i) => {
+      const meta = lesson.sections.length + ' ' + t('g_sections') + ' · ' + lesson.questions.length + ' ' + t('g_questions');
+      box.appendChild(gRow(String(i + 1), lesson.title, meta, done.indexOf(lesson.id) !== -1, () => renderLessonDetail(lesson)));
+    });
+  }
+
+  function renderCardsList(box) {
+    const intro = el('div', 'b-list');
+    intro.appendChild(bioRow(t('g_cards_known'), (progressCache ? progressCache.cards_known : 0) + ' / ' + guidesCache.cards.length));
+    box.appendChild(intro);
+    const start = el('button', 'link-btn g-start');
+    start.appendChild(iconEl('bolt'));
+    start.appendChild(document.createTextNode(t('g_start_cards')));
+    start.addEventListener('click', startCards);
+    box.appendChild(start);
+  }
+
+  function renderQuizzesList(box) {
+    guidesCache.quizzes.forEach((quiz, i) => {
+      const meta = quiz.questions.length + ' ' + t('g_questions');
+      box.appendChild(gRow(String(i + 1), quiz.title, meta, false, () => startQuiz(quiz)));
+    });
+  }
+
+  function renderLessonDetail(lesson) {
+    lessonState = { lesson: lesson, idx: 0, showQ: false };
+    renderLessonStep();
+  }
+
+  function renderLessonStep() {
+    clear();
+    view.appendChild(gBackBtn());
+    view.appendChild(sectionTitle('drill', lessonState.lesson.title));
+    const total = lessonState.lesson.sections.length + lessonState.lesson.questions.length;
+    if (lessonState.idx < lessonState.lesson.sections.length) {
+      view.appendChild(el('p', 'section-text', lessonState.lesson.sections[lessonState.idx]));
+      const nbtn = el('button', 'link-btn');
+      nbtn.appendChild(document.createTextNode(lessonState.idx + 1 === lessonState.lesson.sections.length ? t('g_to_questions') : t('g_next')));
+      nbtn.addEventListener('click', () => { lessonState.idx++; renderLessonStep(); });
+      view.appendChild(nbtn);
+      return;
+    }
+    const qIdx = lessonState.idx - lessonState.lesson.sections.length;
+    const q = lessonState.lesson.questions[qIdx];
+    if (!q) { completeLesson(); return; }
+    view.appendChild(el('div', 'q-title', (qIdx + 1) + '. ' + q.q));
+    if (!lessonState.showQ) {
+      const aBtn = el('button', 'link-btn');
+      aBtn.appendChild(iconEl('bolt'));
+      aBtn.appendChild(document.createTextNode(t('g_show_answer')));
+      aBtn.addEventListener('click', () => { lessonState.showQ = true; renderLessonStep(); });
+      view.appendChild(aBtn);
+    } else {
+      const ans = el('div', 'q-answer');
+      ans.appendChild(el('div', 'q-answer-lab', t('g_answer')));
+      ans.appendChild(el('div', 'q-answer-txt', q.a));
+      view.appendChild(ans);
+    }
+    const nbtn = el('button', 'link-btn');
+    nbtn.appendChild(document.createTextNode(qIdx + 1 === lessonState.lesson.questions.length ? t('g_finish') : t('g_next')));
+    nbtn.addEventListener('click', () => {
+      if (qIdx + 1 === lessonState.lesson.questions.length) completeLesson();
+      else { lessonState.idx++; lessonState.showQ = false; renderLessonStep(); }
+    });
+    view.appendChild(nbtn);
+  }
+
+  async function completeLesson() {
+    const lesson = lessonState.lesson;
+    lessonState = null;
+    markDone(lesson.id);
+    if (progressCache) progressCache.lessons_done = Math.min((progressCache.lessons_total || guidesCache.lessons.length), (progressCache.lessons_done || 0) + 1);
+    try { await api.post('/api/lesson', { lesson_id: lesson.id }); } catch (e) {}
+    guidesTab = 'lessons';
+    await renderGuides();
+    view.appendChild(el('p', 'section-text', '✓ ' + t('g_finished')));
+  }
+
+  function renderCardStep() {
+    clear();
+    view.appendChild(gBackBtn());
+    view.appendChild(sectionTitle('bolt', t('g_tab_cards')));
+    const s = cardState;
+    const total = s.deck.length;
+    if (s.idx >= total) {
+      view.appendChild(el('div', 'flip-card', '✓'));
+      view.appendChild(el('div', 'q-answer-lab', t('g_cards_done')));
+      view.appendChild(el('div', 'q-answer-txt', fmt(t('g_cards_known_n'), s.known, total)));
+      const retry = el('button', 'link-btn');
+      retry.appendChild(iconEl('refresh'));
+      retry.appendChild(document.createTextNode(t('g_again')));
+      retry.addEventListener('click', startCards);
+      view.appendChild(retry);
+      return;
+    }
+    const card = s.deck[s.idx];
+    const fcard = el('div', 'flip-card');
+    fcard.appendChild(el('div', 'flip-front', card.front));
+    if (s.revealed) fcard.appendChild(el('div', 'flip-back', card.back));
+    view.appendChild(fcard);
+    const row = el('div', 'f-row');
+    if (s.revealed) {
+      const know = el('button', 'link-btn');
+      know.appendChild(iconEl('trophy'));
+      know.appendChild(document.createTextNode(t('g_known')));
+      know.addEventListener('click', () => postCard(true));
+      const unk = el('button', 'link-btn');
+      unk.appendChild(iconEl('bolt'));
+      unk.appendChild(document.createTextNode(t('g_unknown')));
+      unk.addEventListener('click', () => postCard(false));
+      row.appendChild(know);
+      row.appendChild(unk);
+    } else {
+      const flip = el('button', 'link-btn');
+      flip.appendChild(iconEl('bolt'));
+      flip.appendChild(document.createTextNode(t('g_card_flip')));
+      flip.addEventListener('click', () => { cardState.revealed = true; renderCardStep(); });
+      row.appendChild(flip);
+    }
+    view.appendChild(row);
+    view.appendChild(el('div', 'q-answer-lab', fmt(t('g_cards_pos'), s.idx + 1, total)));
+  }
+
+  function startCards() {
+    cardState = { deck: guidesCache.cards.slice(), idx: 0, known: 0, revealed: false };
+    renderCardStep();
+  }
+
+  function postCard(known) {
+    const s = cardState;
+    if (known) s.known++;
+    try { api.post('/api/card', { index: s.idx, known: known }); } catch (e) {}
+    if (progressCache) progressCache.cards_known = Math.min((progressCache.cards_total || guidesCache.cards.length), (progressCache.cards_known || 0) + (known ? 1 : 0));
+    s.idx++;
+    s.revealed = false;
+    renderCardStep();
+  }
+
+  function startQuiz(quiz) {
+    quizState = { quiz: quiz, idx: 0, score: 0, picked: -1 };
+    renderQuizStep();
+  }
+
+  function renderQuizStep() {
+    clear();
+    view.appendChild(gBackBtn());
+    const s = quizState;
+    view.appendChild(sectionTitle('trophy', s.quiz.title));
+    const q = s.quiz.questions[s.idx];
+    if (!q) { finishQuiz(); return; }
+    view.appendChild(el('div', 'q-title', fmt(t('g_quiz_question'), s.idx + 1, s.quiz.questions.length)));
+    view.appendChild(el('div', 'q-answer-txt', q.q));
+    const opts = el('div', 'q-opts');
+    q.options.forEach((opt, i) => {
+      const b = document.createElement('button');
+      b.className = 'q-opt';
+      b.textContent = String.fromCharCode(65 + i) + '. ' + opt;
+      if (s.picked !== -1) {
+        if (i === q.answer) b.classList.add('correct');
+        else if (i === s.picked) b.classList.add('wrong');
+        b.classList.add('disabled');
+      }
+      b.addEventListener('click', () => {
+        if (s.picked !== -1) return;
+        s.picked = i;
+        if (i === q.answer) s.score++;
+        renderQuizStep();
+      });
+      opts.appendChild(b);
+    });
+    view.appendChild(opts);
+    if (s.picked !== -1) {
+      const nbtn = el('button', 'link-btn');
+      nbtn.appendChild(document.createTextNode(s.idx + 1 === s.quiz.questions.length ? t('g_quiz_result') : t('g_next')));
+      nbtn.addEventListener('click', () => { s.idx++; s.picked = -1; renderQuizStep(); });
+      view.appendChild(nbtn);
+    }
+  }
+
+  async function finishQuiz() {
+    const s = quizState;
+    quizState = null;
+    if (progressCache) {
+      progressCache.quizzes_taken = (progressCache.quizzes_taken || 0) + 1;
+      progressCache.best_score = Math.max(progressCache.best_score || 0, s.score);
+    }
+    try { await api.post('/api/quiz', { quiz_id: s.quiz.id, score: s.score, total: s.quiz.questions.length }); } catch (e) {}
+    clear();
+    view.appendChild(gBackBtn());
+    view.appendChild(sectionTitle('trophy', t('g_quiz_end')));
+    const res = el('div', 'q-answer');
+    res.appendChild(el('div', 'q-answer-lab', t('g_your_score')));
+    res.appendChild(el('div', 'q-answer-txt', s.score + ' / ' + s.quiz.questions.length));
+    view.appendChild(res);
+    const again = el('button', 'link-btn');
+    again.appendChild(iconEl('refresh'));
+    again.appendChild(document.createTextNode(t('g_quiz_again')));
+    again.addEventListener('click', () => startQuiz(s.quiz));
+    view.appendChild(again);
+  }
+
   async function init() {
     loadSettings();
     const orb1 = document.createElement('div');
@@ -1306,6 +1641,7 @@
     }
     [
       { name: 'stats', label: t('tab_stats'), icon: 'stats' },
+      { name: 'guides', label: t('tab_guides'), icon: 'guides' },
       { name: 'settings', label: t('tab_settings'), icon: 'settings' }
     ].forEach(td => {
       const btn = document.createElement('button');
