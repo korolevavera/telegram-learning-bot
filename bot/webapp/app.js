@@ -25,13 +25,14 @@
   let sectionsCache = null;
   let currentPage = null;
   let guidesTab = 'maps';
+  let lineupFilter = 'all';
   const backStack = [];
   const detailCache = { team: {}, player: {}, faceit: {} };
   const SET_KEY = 'cs2coach.settings';
   const FAV_KEY = 'cs2coach.favs';
   const ONB_KEY = 'cs2coach.onboarded';
   const REGIONS = ['EU', 'NA', 'SA', 'AS', 'AU'];
-  const THEMES = ['dark', 'light', 'gurren'];
+  const THEMES = ['dark', 'light', 'gurren', 'pink'];
   const PERIODS = [[90, 'p90'], [180, 'p180'], [365, 'p365']];
 
   const I18N = {
@@ -73,7 +74,7 @@
       gurren_q2: '«Мой бур пробьёт и небеса!» — Симон',
       gurren_q3: '«Выходи за пределы невозможного!» — Камина',
       gurren_note: 'Команда Дай-Гуррен · «Кто, по-твоему, мы такие?!» — Камина · «Мой бур пробьёт небеса!» — Симон',
-      theme_dark: 'Тёмная', theme_light: 'Светлая', theme_gurren: 'Gurren Lagann',
+      theme_dark: 'Тёмная', theme_light: 'Светлая', theme_gurren: 'Gurren Lagann', theme_pink: 'Розовая',
       lang_ru: 'Русский', lang_en: 'English',
       profile_tg: 'Профиль Telegram', app_label: 'Приложение', version: 'Версия',
       src_data: 'Источники данных', set_region: 'Регион FACEIT', set_period: 'Период статистики',
@@ -83,7 +84,11 @@
       tab_guides: 'Гайды',
       g_tab_maps: 'Карты', g_tab_mikra: 'Микра',
       g_sections: 'разделов', g_back_guides: 'В гайды', g_soon: 'Скоро здесь появится контент',
-      g_cat_lineups: 'Раскидки', g_cat_tactics: 'Тактики'
+      g_cat_lineups: 'Раскидки', g_cat_tactics: 'Тактики',
+      g_type_all: 'Все', g_type_insta: 'Insta', g_type_default: 'Default',
+      g_type_insane: 'Insane', g_type_oneway: 'One-way', g_type_reveal: 'Reveal',
+      g_lineups_empty: 'Пока нет раскидок', g_tactics_empty: 'Пока нет тактик',
+      g_steps: 'Выполнение', g_video_soon: 'Видео скоро появится'
     },
     en: {
       tab_stats: 'Stats', tab_settings: 'Settings', back: 'Back',
@@ -133,7 +138,11 @@
       tab_guides: 'Guides',
       g_tab_maps: 'Maps', g_tab_mikra: 'Micro',
       g_sections: 'sections', g_back_guides: 'Back to guides', g_soon: 'Content coming soon',
-      g_cat_lineups: 'Lineups', g_cat_tactics: 'Tactics'
+      g_cat_lineups: 'Lineups', g_cat_tactics: 'Tactics',
+      g_type_all: 'All', g_type_insta: 'Insta', g_type_default: 'Default',
+      g_type_insane: 'Insane', g_type_oneway: 'One-way', g_type_reveal: 'Reveal',
+      g_lineups_empty: 'No lineups yet', g_tactics_empty: 'No tactics yet',
+      g_steps: 'Execution', g_video_soon: 'Video coming soon'
     }
   };
 
@@ -1325,6 +1334,298 @@
     { id: 'tactics', key: 'g_cat_tactics' }
   ];
 
+  const GUIDE_TYPES = {
+    insta: { key: 'g_type_insta', cls: 'lt-insta' },
+    default: { key: 'g_type_default', cls: 'lt-default' },
+    insane: { key: 'g_type_insane', cls: 'lt-insane' },
+    oneway: { key: 'g_type_oneway', cls: 'lt-oneway' },
+    reveal: { key: 'g_type_reveal', cls: 'lt-reveal' }
+  };
+
+  const LINEUPS = {
+    mirage: [
+      { id: 'mi-window', type: 'insta', video: null, title: 'Дым на окно mid', steps: [
+        'Встаньте в T ramp вплотную к левой стене.',
+        'Прицельтесь в правый край окна и зажмите ЛКМ.',
+        'Прыгните и бросьте (jump-throw).',
+        'Дым встаёт на окне — AWP в mid больше не видит вас.'
+      ] },
+      { id: 'mi-ct', type: 'default', video: null, title: 'Дым на CT для захода A', steps: [
+        'Встаньте у правой стены T spawn.',
+        'Направьте прицел в верхнюю часть дальних строений.',
+        'Бросок с прыжком (jump-throw) левой кнопкой.',
+        'Дым закрывает CT — безопасный выход на A site.'
+      ] },
+      { id: 'mi-jungle', type: 'default', video: null, title: 'Дым на Jungle', steps: [
+        'Встаньте слева в T spawn.',
+        'Прицельтесь в верхушку пальмы и бросьте влево одним нажатием.',
+        'Дым встаёт на Jungle, перекрывая ретекейт с CT.'
+      ] },
+      { id: 'mi-stairs', type: 'insane', video: null, title: 'Молотов на лестницу A', steps: [
+        'Подойдите к левой стене T ramp.',
+        'Зажмите ЛКМ, прицелившись в угол крыши.',
+        'Молотов выжигает игрока на лестнице A site.'
+      ] },
+      { id: 'mi-oneway', type: 'oneway', video: null, title: 'One-way на A (лестница)', steps: [
+        'Встаньте в Jungle.',
+        'Киньте дым в угол у лестницы A.',
+        'Встаньте за дымом со стороны сайта — видите всех, кто идёт через stairs.'
+      ] },
+      { id: 'mi-under', type: 'default', video: null, title: 'Дым на underpass B', steps: [
+        'Встаньте у входа в апартаменты.',
+        'Прицельтесь в край окна на втором этаже.',
+        'Бросок с шагом вперёд (one-step throw).',
+        'Дым перекрывает underpass — атака B безопаснее.'
+      ] }
+    ],
+    dust2: [
+      { id: 'd2-xbox', type: 'insta', video: null, title: 'Дым на Xbox (mid)', steps: [
+        'Встаньте у правой стены T spawn.',
+        'Прицельтесь в вершину башни mid.',
+        'Прыжок-бросок левой кнопкой.',
+        'Дым встаёт на Xbox, перекрывая AWP на mid.'
+      ] },
+      { id: 'd2-long', type: 'insta', video: null, title: 'Дым на Long', steps: [
+        'Встаньте у правого угла Long doors.',
+        'Прицельтесь в лист/метку на стене.',
+        'Бросок с прыжком.',
+        'Дым закрывает Long — безопасный переход через двери.'
+      ] },
+      { id: 'd2-bwindow', type: 'default', video: null, title: 'Дым на окно B', steps: [
+        'Встаньте у стены в B tunnels.',
+        'Прицельтесь в левый верхний угол проёма.',
+        'Одиночный бросок ЛКМ.',
+        'Дым перекрывает окно — B site можно брать без пик-атаки.'
+      ] },
+      { id: 'd2-goose', type: 'default', video: null, title: 'Молотов на Goose (A)', steps: [
+        'Встаньте у Long doors.',
+        'Прицельтесь в правую часть сайта A.',
+        'Молотов выжигает позицию Goose.'
+      ] },
+      { id: 'd2-oneway', type: 'oneway', video: null, title: 'One-way на mid', steps: [
+        'Встаньте в Catwalk (Short).',
+        'Киньте дым в угол у mid doors со стороны CT.',
+        'Встаньте за дымом — видите противника, пока он вас нет.'
+      ] },
+      { id: 'd2-ctspawn', type: 'default', video: null, title: 'Дым на CT spawn (A take)', steps: [
+        'Встаньте у T spawn, левый угол.',
+        'Прицельтесь в верхнюю часть крыши.',
+        'Jump-throw.',
+        'Дым закрывает CT — быстрый заход на A.'
+      ] }
+    ],
+    inferno: [
+      { id: 'in-banana', type: 'insta', video: null, title: 'Дым на Banana', steps: [
+        'Встаньте у угла на Banana за первым ящиком.',
+        'Прицельтесь в край стены наверху.',
+        'Одиночный бросок ЛКМ.',
+        'Дым перекрывает Banana — контроль коридора.'
+      ] },
+      { id: 'in-ct', type: 'default', video: null, title: 'Дым на CT (A take)', steps: [
+        'Встаньте под аркой (Arch).',
+        'Прицельтесь в верхний край стены CT.',
+        'Бросок с шагом вперёд.',
+        'Дым закрывает CT — заход на A site.'
+      ] },
+      { id: 'in-coffins', type: 'default', video: null, title: 'Молотов на Coffins', steps: [
+        'Встаньте на Banana, за углом.',
+        'Зажмите ЛКМ и прицельтесь в верхний край стены над B.',
+        'Молотов выжигает позицию Coffins.'
+      ] },
+      { id: 'in-topmid', type: 'default', video: null, title: 'Дым на Top Mid', steps: [
+        'Встаньте у входа в mid.',
+        'Прицельтесь в верхнюю часть центра.',
+        'Jump-throw.',
+        'Дым перекрывает Top Mid для быстрого контроля.'
+      ] },
+      { id: 'in-oneway', type: 'oneway', video: null, title: 'One-way на Banana', steps: [
+        'Встаньте за углом Banana.',
+        'Киньте дым под стены в начале Banana.',
+        'Встаньте за дымом — противник на Banana не видит вас, вы видите его.'
+      ] },
+      { id: 'in-lib', type: 'insane', video: null, title: 'Молотов на Library (B)', steps: [
+        'Встаньте у входа в апартаменты.',
+        'Зажмите ЛКМ, прицельтесь в край крыши.',
+        'Молотов выжигает Library — чистая B site.'
+      ] }
+    ],
+    nuke: [
+      { id: 'nu-outside', type: 'insta', video: null, title: 'Дым на outside', steps: [
+        'Встаньте у outside doors.',
+        'Прицельтесь в верхний край здания напротив.',
+        'Jump-throw.',
+        'Дым перекрывает outside — выход из дверей.'
+      ] },
+      { id: 'nu-secret', type: 'default', video: null, title: 'Молотов на Secret', steps: [
+        'Встаньте на рампе к B.',
+        'Прицельтесь в дальнюю стену secret.',
+        'Зажим ЛКМ + бросок.',
+        'Молотов выжигает позицию Secret.'
+      ] },
+      { id: 'nu-ramp', type: 'default', video: null, title: 'Молотов на A ramp', steps: [
+        'Встаньте наверху рампы.',
+        'Прицельтесь в угол возле сайта A.',
+        'Молотов очищает ramp для захода.'
+      ] },
+      { id: 'nu-oneway', type: 'oneway', video: null, title: 'One-way на A (hut)', steps: [
+        'Встаньте в hut.',
+        'Киньте дым в проём на A site.',
+        'Стойте за дымом — видите ramp, вас — нет.'
+      ] }
+    ],
+    ancient: [
+      { id: 'an-mid', type: 'insta', video: null, title: 'Дым на mid', steps: [
+        'Встаньте у левой стены T mid.',
+        'Прицельтесь в верхнюю часть стены.',
+        'Jump-throw.',
+        'Дым перекрывает mid window.'
+      ] },
+      { id: 'an-a', type: 'default', video: null, title: 'Молотов на A site', steps: [
+        'Встаньте на A main.',
+        'Зажмите ЛКМ и прицельтесь в дальний угол сайта.',
+        'Молотов выжигает default-позицию.'
+      ] },
+      { id: 'an-b', type: 'default', video: null, title: 'Дым на B (cave)', steps: [
+        'Встаньте у B main.',
+        'Прицельтесь в верхнюю часть входа.',
+        'Бросок ЛКМ.',
+        'Дым закрывает cave и ретекейт с mid.'
+      ] },
+      { id: 'an-oneway', type: 'oneway', video: null, title: 'One-way на B', steps: [
+        'Встаньте у входа в B.',
+        'Киньте дым в угол у сайта.',
+        'Встаньте за ним — контролируете B main.'
+      ] }
+    ],
+    overpass: [
+      { id: 'ov-monster', type: 'insta', video: null, title: 'Дым на Monster', steps: [
+        'Встаньте в T mid.',
+        'Прицельтесь в край балкона.',
+        'Jump-throw.',
+        'Дым закрывает Monster для A split.'
+      ] },
+      { id: 'ov-a', type: 'default', video: null, title: 'Молотов на A site', steps: [
+        'Встаньте в connector.',
+        'Зажмите ЛКМ, прицельтесь в дальний угол сайта.',
+        'Молотов выжигает default за A.'
+      ] },
+      { id: 'ov-bshort', type: 'default', video: null, title: 'Дым на B short', steps: [
+        'Встаньте у B main.',
+        'Прицельтесь в верхнюю часть стены.',
+        'Бросок ЛКМ.',
+        'Дым перекрывает B short.'
+      ] },
+      { id: 'ov-oneway', type: 'oneway', video: null, title: 'One-way на A (construction)', steps: [
+        'Встаньте в construction.',
+        'Киньте дым в угол у A site.',
+        'Встаньте за дымом — контролируете заход.'
+      ] }
+    ],
+    anubis: [
+      { id: 'anb-mid', type: 'insta', video: null, title: 'Дым на mid', steps: [
+        'Встаньте в T mid.',
+        'Прицельтесь в верхнюю часть центральной стены.',
+        'Jump-throw.',
+        'Дым перекрывает mid для контроля.'
+      ] },
+      { id: 'anb-a', type: 'default', video: null, title: 'Молотов на A site', steps: [
+        'Встаньте на A main.',
+        'Зажмите ЛКМ, прицельтесь в угол сайта.',
+        'Молотов выжигает default-позицию.'
+      ] },
+      { id: 'anb-b', type: 'default', video: null, title: 'Дым на B', steps: [
+        'Встаньте у B main.',
+        'Прицельтесь в верхнюю часть проёма.',
+        'Бросок ЛКМ.',
+        'Дым закрывает ретекейт с mid на B.'
+      ] }
+    ],
+    vertigo: [
+      { id: 've-aramp', type: 'insta', video: null, title: 'Дым на A ramp', steps: [
+        'Встаньте у входа на рампу A.',
+        'Прицельтесь в верхний край стены.',
+        'Jump-throw.',
+        'Дым перекрывает ramp для захода.'
+      ] },
+      { id: 've-b', type: 'default', video: null, title: 'Дым на B site', steps: [
+        'Встаньте у B main.',
+        'Прицельтесь в дальний угол сайта.',
+        'Бросок ЛКМ.',
+        'Дым перекрывает B.'
+      ] },
+      { id: 've-a', type: 'default', video: null, title: 'Молотов на A site', steps: [
+        'Встаньте у входа на сайт A.',
+        'Зажмите ЛКМ, прицельтесь в угол.',
+        'Молотов выжигает за точкой.'
+      ] }
+    ],
+    train: [
+      { id: 'tr-ladder', type: 'insta', video: null, title: 'Дым на ladder (A)', steps: [
+        'Встаньте на A main.',
+        'Прицельтесь в верхнюю часть здания.',
+        'Jump-throw.',
+        'Дым закрывает ladder — безопасный заход на A.'
+      ] },
+      { id: 'tr-ivy', type: 'default', video: null, title: 'Молотов на Ivy (B)', steps: [
+        'Встаньте у B main.',
+        'Зажмите ЛКМ, прицельтесь в угол.',
+        'Молотов выжигает Ivy.'
+      ] },
+      { id: 'tr-amain', type: 'default', video: null, title: 'Дым на A main', steps: [
+        'Встаньте у A main.',
+        'Прицельтесь в верхний край стены.',
+        'Бросок ЛКМ.',
+        'Дым перекрывает A main.'
+      ] }
+    ],
+    cache: [
+      { id: 'ca-mid', type: 'insta', video: null, title: 'Дым на mid (Z)', steps: [
+        'Встаньте у левой стены T mid.',
+        'Прицельтесь в верхнюю часть.',
+        'Jump-throw.',
+        'Дым закрывает Z для контроля mid.'
+      ] },
+      { id: 'ca-a', type: 'default', video: null, title: 'Дым на A site', steps: [
+        'Встаньте на highway.',
+        'Прицельтесь в дальний угол сайта.',
+        'Бросок ЛКМ.',
+        'Дым перекрывает default A.'
+      ] },
+      { id: 'ca-b', type: 'default', video: null, title: 'Молотов на B site', steps: [
+        'Встаньте у B main.',
+        'Зажмите ЛКМ, прицельтесь в угол.',
+        'Молотов выжигает default B.'
+      ] }
+    ]
+  };
+
+  const TACTICS = {
+    mirage: [
+      { id: 'mi-a-exec', video: null, title: 'Быстрый заход на A', steps: [
+        'Трое идут через ramp с дымами Window и CT.',
+        'Один ставит дым Jungle.',
+        'Выглядывайте сайт, первым заходит подмога из short.',
+        'Разместите бомбу за двойным ящиком.'
+      ] }
+    ],
+    dust2: [
+      { id: 'd2-a-long', video: null, title: 'Быстрый A через Long', steps: [
+        'Первый бежит на Long с флешем.',
+        'Второй ставит дым Long для контроля.',
+        'Третий держит mid, чтобы никто не зашёл сзади.',
+        'Тайминг: дым падает ровно к выходу на сайт.'
+      ] }
+    ],
+    inferno: [
+      { id: 'in-b-banana', video: null, title: 'Заход на B через Banana', steps: [
+        'Один контролирует Banana молотовом.',
+        'Второй ставит дым Banana.',
+        'Третий заходит через апартаменты во второй тайминг.',
+        'Пост-плант на Coffins.'
+      ] }
+    ]
+  };
+
   function gBackBtn(onClick) {
     const back = el('button', 'back-btn');
     back.appendChild(iconEl('back'));
@@ -1410,10 +1711,113 @@
   }
 
   function renderGuideCat(item, cat) {
+    if (cat.id === 'lineups') { lineupFilter = 'all'; renderLineups(item); }
+    else if (cat.id === 'tactics') renderTactics(item);
+    else {
+      clear();
+      view.appendChild(gBackBtn(() => renderGuideDetail(item)));
+      view.appendChild(sectionTitle('guides', t(cat.key)));
+      view.appendChild(el('p', 'section-text', t('g_soon')));
+    }
+  }
+
+  function gLineupRow(l, onClick) {
+    const row = el('div', 'g-row');
+    const gt = GUIDE_TYPES[l.type];
+    row.appendChild(el('span', 'l-badge ' + gt.cls, t(gt.key)));
+    const info = el('div', 'player-info');
+    info.appendChild(el('div', 'player-nick', l.title));
+    row.appendChild(info);
+    row.appendChild(el('span', 'g-chev', '›'));
+    row.addEventListener('click', onClick);
+    return row;
+  }
+
+  function gVideo(url) {
+    const wrap = el('div', 'g-video');
+    if (!url) {
+      wrap.appendChild(el('p', 'section-text', t('g_video_soon')));
+      return wrap;
+    }
+    if (url.indexOf('youtu') !== -1) {
+      const embed = url.replace('watch?v=', 'embed/').replace('youtu.be/', 'www.youtube.com/embed/');
+      const iframe = document.createElement('iframe');
+      iframe.setAttribute('src', embed);
+      iframe.setAttribute('allowfullscreen', '');
+      iframe.setAttribute('frameborder', '0');
+      wrap.appendChild(iframe);
+      return wrap;
+    }
+    const v = document.createElement('video');
+    v.setAttribute('controls', '');
+    v.setAttribute('playsinline', '');
+    v.setAttribute('preload', 'none');
+    v.setAttribute('src', url);
+    wrap.appendChild(v);
+    return wrap;
+  }
+
+  function gSteps(steps) {
+    const wrap = el('div', 'g-steps-wrap');
+    wrap.appendChild(el('div', 'g-steps-title', t('g_steps')));
+    const ol = el('ol', 'g-steps');
+    steps.forEach(s => ol.appendChild(el('li', 'g-step', s)));
+    wrap.appendChild(ol);
+    return wrap;
+  }
+
+  function renderLineups(item) {
     clear();
     view.appendChild(gBackBtn(() => renderGuideDetail(item)));
-    view.appendChild(sectionTitle('guides', t(cat.key)));
-    view.appendChild(el('p', 'section-text', t('g_soon')));
+    view.appendChild(sectionTitle('guides', t('g_cat_lineups') + ' · ' + item.name));
+    const data = LINEUPS[item.id] || [];
+    const chips = el('div', 'chips');
+    const mk = id => {
+      const key = id === 'all' ? 'g_type_all' : GUIDE_TYPES[id].key;
+      const c = el('button', 'chip' + (lineupFilter === id ? ' active' : ''));
+      c.textContent = t(key);
+      c.addEventListener('click', () => { lineupFilter = id; renderLineups(item); });
+      chips.appendChild(c);
+    };
+    mk('all');
+    Object.keys(GUIDE_TYPES).forEach(mk);
+    view.appendChild(chips);
+    const box = el('div', 'sub-box');
+    view.appendChild(box);
+    const list = data.filter(l => lineupFilter === 'all' || l.type === lineupFilter);
+    if (!list.length) box.appendChild(el('p', 'section-text', t('g_lineups_empty')));
+    list.forEach(l => box.appendChild(gLineupRow(l, () => renderLineupDetail(item, l))));
+  }
+
+  function renderLineupDetail(item, l) {
+    clear();
+    view.appendChild(gBackBtn(() => renderLineups(item)));
+    const gt = GUIDE_TYPES[l.type];
+    const title = el('div', 'l-title');
+    title.appendChild(el('span', 'l-badge ' + gt.cls, t(gt.key)));
+    title.appendChild(el('span', 'l-name', l.title));
+    view.appendChild(title);
+    view.appendChild(gVideo(l.video));
+    view.appendChild(gSteps(l.steps));
+  }
+
+  function renderTactics(item) {
+    clear();
+    view.appendChild(gBackBtn(() => renderGuideDetail(item)));
+    view.appendChild(sectionTitle('guides', t('g_cat_tactics') + ' · ' + item.name));
+    const data = TACTICS[item.id] || [];
+    const box = el('div', 'sub-box');
+    view.appendChild(box);
+    if (!data.length) box.appendChild(el('p', 'section-text', t('g_tactics_empty')));
+    data.forEach(tc => box.appendChild(gRow('T', tc.title, null, () => renderTacticDetail(item, tc))));
+  }
+
+  function renderTacticDetail(item, tc) {
+    clear();
+    view.appendChild(gBackBtn(() => renderTactics(item)));
+    view.appendChild(sectionTitle('guides', tc.title));
+    view.appendChild(gVideo(tc.video));
+    view.appendChild(gSteps(tc.steps));
   }
 
 
