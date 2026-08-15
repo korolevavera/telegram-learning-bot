@@ -1421,17 +1421,14 @@
   function renderMap(item) {
     currentMap = item;
     clear();
-    view.appendChild(gBackBtn());
-    view.appendChild(el('div', 'crumb', t('tab_guides') + ' / ' + item.name));
-    view.appendChild(sectionTitle('guides', item.name));
-    const sub = el('div', 'sub-tabs');
-    sub.appendChild(mapTabBtn('lineups', t('g_cat_lineups')));
-    sub.appendChild(mapTabBtn('tactics', t('g_cat_tactics')));
-    view.appendChild(sub);
-    const box = el('div', 'sub-box');
-    view.appendChild(box);
-    if (mapTab === 'tactics') renderTacticsBox(box, item);
-    else renderMapLineups(box, item);
+    const stage = el('div', 'map-stage');
+    const img = document.createElement('img');
+    img.className = 'map-stage-img';
+    img.setAttribute('src', item.radar ? ('/static/maps/' + item.radar) : (item.img || ('/static/maps/' + item.image)));
+    img.setAttribute('alt', item.name);
+    img.loading = 'lazy';
+    stage.appendChild(img);
+    view.appendChild(stage);
   }
 
   function lineupSpotKey(l) {
