@@ -1,0 +1,26 @@
+[
+  {
+    "map": "Mirage",
+    "id": "mi-window",
+    "name": "Дым на окно mid",
+    "type": "insta",
+    "description": "Встаньте в T ramp вплотную к левой стене, прицельтесь в правый край окна и сделайте прыжок-бросок.",
+    "video_url": ""
+  },
+  {
+    "map": "Mirage",
+    "id": "mi-ct",
+    "name": "Дым на CT для захода A",
+    "type": "default",
+    "description": "Встаньте у правой стены T spawn и сделайте jump-throw в верхнюю часть дальних строений.",
+    "video_url": ""
+  },
+  {
+    "map": "Dust II",
+    "id": "d2-xbox",
+    "name": "Дым на Xbox (mid)",
+    "type": "insta",
+    "description": "Встаньте у правой стены T spawn, прицельтесь в вершину башни mid и сделайте прыжок-бросок.",
+    "video_url": ""
+  }
+]

@@ -2,7 +2,7 @@ from aiogram import F, Router
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery
 
-from ..content import LINEUP_TYPES, LINEUPS, MAPS, TACTICS
+from ..content import LINEUP_TYPES, MAPS, TACTICS
 from ..keyboards import (
     guide_back_keyboard,
     guide_lineups_keyboard,
@@ -10,7 +10,10 @@ from ..keyboards import (
     guides_keyboard,
     map_actions_keyboard,
 )
+from ..lineups_loader import get_lineups
+from ..video_player import send_lineup_video
 
+LINEUPS = get_lineups()
 router = Router()
 
 
@@ -105,6 +108,12 @@ async def show_lineup(cb: CallbackQuery) -> None:
         parse_mode="HTML",
         reply_markup=guide_back_keyboard(map_id, to_lineups=True),
     )
+    video_url = lineup.get("video")
+    if video_url:
+        try:
+            await send_lineup_video(cb.bot, cb.message.chat.id, video_url, caption=text)
+        except Exception:
+            pass
     await cb.answer()
 
 

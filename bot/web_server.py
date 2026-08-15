@@ -8,7 +8,8 @@ from urllib.parse import parse_qsl
 from aiohttp import web
 
 from .config_loader import CONFIG
-from .content import CARDS, LESSONS, LINEUP_TYPES, LINEUPS, MAPS, MIKRA, QUIZZES, TACTICS
+from .content import CARDS, LESSONS, LINEUP_TYPES, MAPS, QUIZZES, TACTICS
+from .lineups_loader import get_lineups
 from .services import get_progress, save_quiz_result, set_card_known, upsert_lesson_progress
 from .stats import (
     clear_cache,
@@ -77,9 +78,8 @@ async def api_guides(request: web.Request) -> web.Response:
     return web.json_response(
         {
             "maps": MAPS,
-            "lineups": LINEUPS,
+            "lineups": get_lineups(),
             "tactics": TACTICS,
-            "mikra": MIKRA,
             "types": LINEUP_TYPES,
         }
     )

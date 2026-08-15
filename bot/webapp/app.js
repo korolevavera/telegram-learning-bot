@@ -24,7 +24,6 @@
   let lang = 'ru';
   let sectionsCache = null;
   let currentPage = null;
-  let guidesTab = 'maps';
   let lineupFilter = 'all';
   let mapTab = 'lineups';
   let currentMap = null;
@@ -86,8 +85,8 @@
       fav_rm: 'Убрать', refresh_stats: 'Обновить статистику', user: 'Пользователь',
       app_open: 'Открой приложение через бота', load_fail: 'Не удалось загрузить данные',
       tab_guides: 'Гайды',
-      g_tab_maps: 'Карты', g_tab_mikra: 'Микра',
-      g_sections: 'разделов', g_back_guides: 'В гайды', g_soon: 'Скоро здесь появится контент',
+      g_tab_maps: 'Карты',
+      g_sections: 'разделов', g_back_guides: 'В гайды',
       g_cat_lineups: 'Раскидки', g_cat_tactics: 'Тактики',
       g_type_all: 'Все', g_type_insta: 'Insta', g_type_default: 'Default',
       g_type_insane: 'Insane', g_type_oneway: 'One-way', g_type_reveal: 'Reveal',
@@ -142,8 +141,8 @@
       fav_rm: 'Remove', refresh_stats: 'Refresh stats', user: 'User',
       app_open: 'Open the app from the bot', load_fail: 'Failed to load data',
       tab_guides: 'Guides',
-      g_tab_maps: 'Maps', g_tab_mikra: 'Micro',
-      g_sections: 'sections', g_back_guides: 'Back to guides', g_soon: 'Content coming soon',
+      g_tab_maps: 'Maps',
+      g_sections: 'sections', g_back_guides: 'Back to guides',
       g_cat_lineups: 'Lineups', g_cat_tactics: 'Tactics',
       g_type_all: 'All', g_type_insta: 'Insta', g_type_default: 'Default',
       g_type_insane: 'Insane', g_type_oneway: 'One-way', g_type_reveal: 'Reveal',
@@ -1340,14 +1339,6 @@
     return back;
   }
 
-  function gTabBtn(tab, label) {
-    const b = document.createElement('button');
-    b.className = 'sub-tab' + (guidesTab === tab ? ' active' : '');
-    b.textContent = label;
-    b.addEventListener('click', () => { guidesTab = tab; renderGuides(); });
-    return b;
-  }
-
   function gRow(icon, title, meta, onClick) {
     const row = el('div', 'g-row');
     row.appendChild(el('div', 'g-ico', icon));
@@ -1380,10 +1371,6 @@
     loading = true;
     clear();
     view.appendChild(sectionTitle('guides', t('tab_guides')));
-    const sub = el('div', 'sub-tabs');
-    sub.appendChild(gTabBtn('maps', t('g_tab_maps')));
-    sub.appendChild(gTabBtn('mikra', t('g_tab_mikra')));
-    view.appendChild(sub);
     const box = el('div', 'sub-box');
     view.appendChild(box);
     const loadbar = el('div', 'loadbar');
@@ -1392,8 +1379,7 @@
     try {
       const g = await loadGuides();
       loadbar.remove();
-      if (guidesTab === 'maps') renderMapsList(box, g.maps);
-      else renderMikraList(box, g.mikra);
+      renderMapsList(box, g.maps);
     } catch (err) {
       loadbar.remove();
       const errBox = el('div', 'err-box');
@@ -1411,21 +1397,6 @@
 
   function renderMapsList(box, maps) {
     (maps || []).forEach(map => box.appendChild(gMapCard(map)));
-  }
-
-  function renderMikraList(box, mikra) {
-    (mikra || []).forEach((item, i) => {
-      box.appendChild(gRow(String(i + 1), item.name, null, () => {
-        const map = mapById(String(item.id || '').split('-')[0]);
-        if (map) openMap(map);
-        else {
-          clear();
-          view.appendChild(gBackBtn());
-          view.appendChild(sectionTitle('guides', item.name));
-          view.appendChild(el('p', 'section-text', t('g_soon')));
-        }
-      }));
-    });
   }
 
   function mapById(id) {

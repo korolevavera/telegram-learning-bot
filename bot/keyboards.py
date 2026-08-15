@@ -1,9 +1,12 @@
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
 
 from .config_loader import CONFIG
-from .content import CARDS, LESSONS, LINEUP_TYPES, LINEUPS, MAPS, QUIZZES, TACTICS
+from .content import CARDS, LESSONS, LINEUP_TYPES, MAPS, QUIZZES, TACTICS
+from .lineups_loader import get_lineups
 
-APP_VERSION = "12"
+APP_VERSION = "13"
+
+LINEUPS = get_lineups()
 
 
 def _app_url() -> str:
