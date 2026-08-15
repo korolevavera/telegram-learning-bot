@@ -28,6 +28,7 @@
   let mapTab = 'lineups';
   let currentMap = null;
   let mapSpotKey = null;
+  let mapSearchQuery = '';
   let guidesData = null;
   const backStack = [];
   const detailCache = { team: {}, player: {}, faceit: {} };
@@ -1755,6 +1756,7 @@
     mapTab = 'lineups';
     mapSpotKey = null;
     lineupFilter = 'all';
+    mapSearchQuery = '';
     renderMap(item);
   }
 
@@ -1769,6 +1771,7 @@
   function renderMap(item) {
     currentMap = item;
     clear();
+    view.appendChild(gBackBtn(() => { mapSearchQuery = ''; renderGuides(); }));
     const stage = el('div', 'map-stage');
     const img = document.createElement('img');
     img.className = 'map-stage-img';
@@ -1785,6 +1788,7 @@
     const search = el('input', 'search-input');
     search.setAttribute('type', 'search');
     search.setAttribute('placeholder', t('g_search_ph'));
+    if (mapSearchQuery) search.value = mapSearchQuery;
     searchBox.appendChild(search);
     view.appendChild(searchBox);
 
@@ -1840,7 +1844,7 @@
       }
     }
 
-    search.addEventListener('input', renderResults);
+    search.addEventListener('input', () => { mapSearchQuery = search.value; renderResults(); });
     renderResults();
   }
 
