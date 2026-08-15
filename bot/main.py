@@ -5,7 +5,7 @@ from aiogram import Bot, Dispatcher
 
 from .config_loader import CONFIG
 from .db import init_db
-from .handlers import cards, lessons, progress, quizzes, start
+from .handlers import cards, guides, lessons, progress, quizzes, start
 from .web_server import start_web_server
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
@@ -27,6 +27,7 @@ async def main() -> None:
     dp.include_router(lessons.router)
     dp.include_router(cards.router)
     dp.include_router(quizzes.router)
+    dp.include_router(guides.router)
     dp.include_router(progress.router)
 
     logging.info("Bot started")

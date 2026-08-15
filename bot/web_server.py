@@ -8,7 +8,7 @@ from urllib.parse import parse_qsl
 from aiohttp import web
 
 from .config_loader import CONFIG
-from .content import CARDS, LESSONS, QUIZZES
+from .content import CARDS, LESSONS, LINEUP_TYPES, LINEUPS, MAPS, MIKRA, QUIZZES, TACTICS
 from .services import get_progress, save_quiz_result, set_card_known, upsert_lesson_progress
 from .stats import (
     clear_cache,
@@ -71,6 +71,18 @@ async def api_init(request: web.Request) -> web.Response:
 
 async def api_content(request: web.Request) -> web.Response:
     return web.json_response({"lessons": LESSONS, "cards": CARDS, "quizzes": QUIZZES})
+
+
+async def api_guides(request: web.Request) -> web.Response:
+    return web.json_response(
+        {
+            "maps": MAPS,
+            "lineups": LINEUPS,
+            "tactics": TACTICS,
+            "mikra": MIKRA,
+            "types": LINEUP_TYPES,
+        }
+    )
 
 
 async def api_progress(request: web.Request) -> web.Response:
@@ -199,6 +211,7 @@ def create_app() -> web.Application:
     app.router.add_get("/", index_handler)
     app.router.add_get("/api/init", api_init)
     app.router.add_get("/api/content", api_content)
+    app.router.add_get("/api/guides", api_guides)
     app.router.add_get("/api/progress", api_progress)
     app.router.add_get("/api/stats", api_stats)
     app.router.add_get("/api/team", api_team)

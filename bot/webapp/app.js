@@ -26,6 +26,10 @@
   let currentPage = null;
   let guidesTab = 'maps';
   let lineupFilter = 'all';
+  let mapTab = 'lineups';
+  let currentMap = null;
+  let mapSpotKey = null;
+  let guidesData = null;
   const backStack = [];
   const detailCache = { team: {}, player: {}, faceit: {} };
   const SET_KEY = 'cs2coach.settings';
@@ -88,7 +92,9 @@
       g_type_all: 'Все', g_type_insta: 'Insta', g_type_default: 'Default',
       g_type_insane: 'Insane', g_type_oneway: 'One-way', g_type_reveal: 'Reveal',
       g_lineups_empty: 'Пока нет раскидок', g_tactics_empty: 'Пока нет тактик',
-      g_steps: 'Выполнение', g_video_soon: 'Видео скоро появится'
+      g_steps: 'Выполнение', g_video_soon: 'Видео скоро появится',
+      g_map_hint: 'Нажми на точку на карте — увидишь раскидки с этой позиции',
+      g_map_reset_spot: 'Сбросить точку', g_map_spot: 'Раскидки с этой точки'
     },
     en: {
       tab_stats: 'Stats', tab_settings: 'Settings', back: 'Back',
@@ -142,7 +148,9 @@
       g_type_all: 'All', g_type_insta: 'Insta', g_type_default: 'Default',
       g_type_insane: 'Insane', g_type_oneway: 'One-way', g_type_reveal: 'Reveal',
       g_lineups_empty: 'No lineups yet', g_tactics_empty: 'No tactics yet',
-      g_steps: 'Execution', g_video_soon: 'Video coming soon'
+      g_steps: 'Execution', g_video_soon: 'Video coming soon',
+      g_map_hint: 'Tap a spot on the map to see lineups from it',
+      g_map_reset_spot: 'Clear spot', g_map_spot: 'Lineups from this spot'
     }
   };
 
@@ -1307,33 +1315,6 @@
     loading = false;
   }
 
-  const GUIDES_MAPS = [
-    { id: 'dust2', name: 'Dust II', img: '/static/maps/dust2.png' },
-    { id: 'mirage', name: 'Mirage', img: '/static/maps/mirage.png' },
-    { id: 'inferno', name: 'Inferno', img: '/static/maps/inferno.png' },
-    { id: 'nuke', name: 'Nuke', img: '/static/maps/nuke.png' },
-    { id: 'ancient', name: 'Ancient', img: '/static/maps/ancient.png' },
-    { id: 'overpass', name: 'Overpass', img: '/static/maps/overpass.png' },
-    { id: 'anubis', name: 'Anubis', img: '/static/maps/anubis.png' },
-    { id: 'vertigo', name: 'Vertigo', img: '/static/maps/vertigo.png' },
-    { id: 'train', name: 'Train', img: '/static/maps/train.png' },
-    { id: 'cache', name: 'Cache', img: '/static/maps/cache.png' }
-  ];
-
-  const GUIDES_MIKRA = [
-    { id: 'mirage-smokes', name: 'Дымы на Mirage' },
-    { id: 'dust2-flashes', name: 'Флешки на Dust II' },
-    { id: 'inferno-molotovs', name: 'Молотовы на Inferno' },
-    { id: 'nuke-smokes', name: 'Дымы на Nuke' },
-    { id: 'ancient-molotovs', name: 'Молотовы на Ancient' },
-    { id: 'overpass-smokes', name: 'Дымы на Overpass' }
-  ];
-
-  const GUIDE_CATS = [
-    { id: 'lineups', key: 'g_cat_lineups' },
-    { id: 'tactics', key: 'g_cat_tactics' }
-  ];
-
   const GUIDE_TYPES = {
     insta: { key: 'g_type_insta', cls: 'lt-insta' },
     default: { key: 'g_type_default', cls: 'lt-default' },
@@ -1342,289 +1323,14 @@
     reveal: { key: 'g_type_reveal', cls: 'lt-reveal' }
   };
 
-  const LINEUPS = {
-    mirage: [
-      { id: 'mi-window', type: 'insta', video: null, title: 'Дым на окно mid', steps: [
-        'Встаньте в T ramp вплотную к левой стене.',
-        'Прицельтесь в правый край окна и зажмите ЛКМ.',
-        'Прыгните и бросьте (jump-throw).',
-        'Дым встаёт на окне — AWP в mid больше не видит вас.'
-      ] },
-      { id: 'mi-ct', type: 'default', video: null, title: 'Дым на CT для захода A', steps: [
-        'Встаньте у правой стены T spawn.',
-        'Направьте прицел в верхнюю часть дальних строений.',
-        'Бросок с прыжком (jump-throw) левой кнопкой.',
-        'Дым закрывает CT — безопасный выход на A site.'
-      ] },
-      { id: 'mi-jungle', type: 'default', video: null, title: 'Дым на Jungle', steps: [
-        'Встаньте слева в T spawn.',
-        'Прицельтесь в верхушку пальмы и бросьте влево одним нажатием.',
-        'Дым встаёт на Jungle, перекрывая ретекейт с CT.'
-      ] },
-      { id: 'mi-stairs', type: 'insane', video: null, title: 'Молотов на лестницу A', steps: [
-        'Подойдите к левой стене T ramp.',
-        'Зажмите ЛКМ, прицелившись в угол крыши.',
-        'Молотов выжигает игрока на лестнице A site.'
-      ] },
-      { id: 'mi-oneway', type: 'oneway', video: null, title: 'One-way на A (лестница)', steps: [
-        'Встаньте в Jungle.',
-        'Киньте дым в угол у лестницы A.',
-        'Встаньте за дымом со стороны сайта — видите всех, кто идёт через stairs.'
-      ] },
-      { id: 'mi-under', type: 'default', video: null, title: 'Дым на underpass B', steps: [
-        'Встаньте у входа в апартаменты.',
-        'Прицельтесь в край окна на втором этаже.',
-        'Бросок с шагом вперёд (one-step throw).',
-        'Дым перекрывает underpass — атака B безопаснее.'
-      ] }
-    ],
-    dust2: [
-      { id: 'd2-xbox', type: 'insta', video: null, title: 'Дым на Xbox (mid)', steps: [
-        'Встаньте у правой стены T spawn.',
-        'Прицельтесь в вершину башни mid.',
-        'Прыжок-бросок левой кнопкой.',
-        'Дым встаёт на Xbox, перекрывая AWP на mid.'
-      ] },
-      { id: 'd2-long', type: 'insta', video: null, title: 'Дым на Long', steps: [
-        'Встаньте у правого угла Long doors.',
-        'Прицельтесь в лист/метку на стене.',
-        'Бросок с прыжком.',
-        'Дым закрывает Long — безопасный переход через двери.'
-      ] },
-      { id: 'd2-bwindow', type: 'default', video: null, title: 'Дым на окно B', steps: [
-        'Встаньте у стены в B tunnels.',
-        'Прицельтесь в левый верхний угол проёма.',
-        'Одиночный бросок ЛКМ.',
-        'Дым перекрывает окно — B site можно брать без пик-атаки.'
-      ] },
-      { id: 'd2-goose', type: 'default', video: null, title: 'Молотов на Goose (A)', steps: [
-        'Встаньте у Long doors.',
-        'Прицельтесь в правую часть сайта A.',
-        'Молотов выжигает позицию Goose.'
-      ] },
-      { id: 'd2-oneway', type: 'oneway', video: null, title: 'One-way на mid', steps: [
-        'Встаньте в Catwalk (Short).',
-        'Киньте дым в угол у mid doors со стороны CT.',
-        'Встаньте за дымом — видите противника, пока он вас нет.'
-      ] },
-      { id: 'd2-ctspawn', type: 'default', video: null, title: 'Дым на CT spawn (A take)', steps: [
-        'Встаньте у T spawn, левый угол.',
-        'Прицельтесь в верхнюю часть крыши.',
-        'Jump-throw.',
-        'Дым закрывает CT — быстрый заход на A.'
-      ] }
-    ],
-    inferno: [
-      { id: 'in-banana', type: 'insta', video: null, title: 'Дым на Banana', steps: [
-        'Встаньте у угла на Banana за первым ящиком.',
-        'Прицельтесь в край стены наверху.',
-        'Одиночный бросок ЛКМ.',
-        'Дым перекрывает Banana — контроль коридора.'
-      ] },
-      { id: 'in-ct', type: 'default', video: null, title: 'Дым на CT (A take)', steps: [
-        'Встаньте под аркой (Arch).',
-        'Прицельтесь в верхний край стены CT.',
-        'Бросок с шагом вперёд.',
-        'Дым закрывает CT — заход на A site.'
-      ] },
-      { id: 'in-coffins', type: 'default', video: null, title: 'Молотов на Coffins', steps: [
-        'Встаньте на Banana, за углом.',
-        'Зажмите ЛКМ и прицельтесь в верхний край стены над B.',
-        'Молотов выжигает позицию Coffins.'
-      ] },
-      { id: 'in-topmid', type: 'default', video: null, title: 'Дым на Top Mid', steps: [
-        'Встаньте у входа в mid.',
-        'Прицельтесь в верхнюю часть центра.',
-        'Jump-throw.',
-        'Дым перекрывает Top Mid для быстрого контроля.'
-      ] },
-      { id: 'in-oneway', type: 'oneway', video: null, title: 'One-way на Banana', steps: [
-        'Встаньте за углом Banana.',
-        'Киньте дым под стены в начале Banana.',
-        'Встаньте за дымом — противник на Banana не видит вас, вы видите его.'
-      ] },
-      { id: 'in-lib', type: 'insane', video: null, title: 'Молотов на Library (B)', steps: [
-        'Встаньте у входа в апартаменты.',
-        'Зажмите ЛКМ, прицельтесь в край крыши.',
-        'Молотов выжигает Library — чистая B site.'
-      ] }
-    ],
-    nuke: [
-      { id: 'nu-outside', type: 'insta', video: null, title: 'Дым на outside', steps: [
-        'Встаньте у outside doors.',
-        'Прицельтесь в верхний край здания напротив.',
-        'Jump-throw.',
-        'Дым перекрывает outside — выход из дверей.'
-      ] },
-      { id: 'nu-secret', type: 'default', video: null, title: 'Молотов на Secret', steps: [
-        'Встаньте на рампе к B.',
-        'Прицельтесь в дальнюю стену secret.',
-        'Зажим ЛКМ + бросок.',
-        'Молотов выжигает позицию Secret.'
-      ] },
-      { id: 'nu-ramp', type: 'default', video: null, title: 'Молотов на A ramp', steps: [
-        'Встаньте наверху рампы.',
-        'Прицельтесь в угол возле сайта A.',
-        'Молотов очищает ramp для захода.'
-      ] },
-      { id: 'nu-oneway', type: 'oneway', video: null, title: 'One-way на A (hut)', steps: [
-        'Встаньте в hut.',
-        'Киньте дым в проём на A site.',
-        'Стойте за дымом — видите ramp, вас — нет.'
-      ] }
-    ],
-    ancient: [
-      { id: 'an-mid', type: 'insta', video: null, title: 'Дым на mid', steps: [
-        'Встаньте у левой стены T mid.',
-        'Прицельтесь в верхнюю часть стены.',
-        'Jump-throw.',
-        'Дым перекрывает mid window.'
-      ] },
-      { id: 'an-a', type: 'default', video: null, title: 'Молотов на A site', steps: [
-        'Встаньте на A main.',
-        'Зажмите ЛКМ и прицельтесь в дальний угол сайта.',
-        'Молотов выжигает default-позицию.'
-      ] },
-      { id: 'an-b', type: 'default', video: null, title: 'Дым на B (cave)', steps: [
-        'Встаньте у B main.',
-        'Прицельтесь в верхнюю часть входа.',
-        'Бросок ЛКМ.',
-        'Дым закрывает cave и ретекейт с mid.'
-      ] },
-      { id: 'an-oneway', type: 'oneway', video: null, title: 'One-way на B', steps: [
-        'Встаньте у входа в B.',
-        'Киньте дым в угол у сайта.',
-        'Встаньте за ним — контролируете B main.'
-      ] }
-    ],
-    overpass: [
-      { id: 'ov-monster', type: 'insta', video: null, title: 'Дым на Monster', steps: [
-        'Встаньте в T mid.',
-        'Прицельтесь в край балкона.',
-        'Jump-throw.',
-        'Дым закрывает Monster для A split.'
-      ] },
-      { id: 'ov-a', type: 'default', video: null, title: 'Молотов на A site', steps: [
-        'Встаньте в connector.',
-        'Зажмите ЛКМ, прицельтесь в дальний угол сайта.',
-        'Молотов выжигает default за A.'
-      ] },
-      { id: 'ov-bshort', type: 'default', video: null, title: 'Дым на B short', steps: [
-        'Встаньте у B main.',
-        'Прицельтесь в верхнюю часть стены.',
-        'Бросок ЛКМ.',
-        'Дым перекрывает B short.'
-      ] },
-      { id: 'ov-oneway', type: 'oneway', video: null, title: 'One-way на A (construction)', steps: [
-        'Встаньте в construction.',
-        'Киньте дым в угол у A site.',
-        'Встаньте за дымом — контролируете заход.'
-      ] }
-    ],
-    anubis: [
-      { id: 'anb-mid', type: 'insta', video: null, title: 'Дым на mid', steps: [
-        'Встаньте в T mid.',
-        'Прицельтесь в верхнюю часть центральной стены.',
-        'Jump-throw.',
-        'Дым перекрывает mid для контроля.'
-      ] },
-      { id: 'anb-a', type: 'default', video: null, title: 'Молотов на A site', steps: [
-        'Встаньте на A main.',
-        'Зажмите ЛКМ, прицельтесь в угол сайта.',
-        'Молотов выжигает default-позицию.'
-      ] },
-      { id: 'anb-b', type: 'default', video: null, title: 'Дым на B', steps: [
-        'Встаньте у B main.',
-        'Прицельтесь в верхнюю часть проёма.',
-        'Бросок ЛКМ.',
-        'Дым закрывает ретекейт с mid на B.'
-      ] }
-    ],
-    vertigo: [
-      { id: 've-aramp', type: 'insta', video: null, title: 'Дым на A ramp', steps: [
-        'Встаньте у входа на рампу A.',
-        'Прицельтесь в верхний край стены.',
-        'Jump-throw.',
-        'Дым перекрывает ramp для захода.'
-      ] },
-      { id: 've-b', type: 'default', video: null, title: 'Дым на B site', steps: [
-        'Встаньте у B main.',
-        'Прицельтесь в дальний угол сайта.',
-        'Бросок ЛКМ.',
-        'Дым перекрывает B.'
-      ] },
-      { id: 've-a', type: 'default', video: null, title: 'Молотов на A site', steps: [
-        'Встаньте у входа на сайт A.',
-        'Зажмите ЛКМ, прицельтесь в угол.',
-        'Молотов выжигает за точкой.'
-      ] }
-    ],
-    train: [
-      { id: 'tr-ladder', type: 'insta', video: null, title: 'Дым на ladder (A)', steps: [
-        'Встаньте на A main.',
-        'Прицельтесь в верхнюю часть здания.',
-        'Jump-throw.',
-        'Дым закрывает ladder — безопасный заход на A.'
-      ] },
-      { id: 'tr-ivy', type: 'default', video: null, title: 'Молотов на Ivy (B)', steps: [
-        'Встаньте у B main.',
-        'Зажмите ЛКМ, прицельтесь в угол.',
-        'Молотов выжигает Ivy.'
-      ] },
-      { id: 'tr-amain', type: 'default', video: null, title: 'Дым на A main', steps: [
-        'Встаньте у A main.',
-        'Прицельтесь в верхний край стены.',
-        'Бросок ЛКМ.',
-        'Дым перекрывает A main.'
-      ] }
-    ],
-    cache: [
-      { id: 'ca-mid', type: 'insta', video: null, title: 'Дым на mid (Z)', steps: [
-        'Встаньте у левой стены T mid.',
-        'Прицельтесь в верхнюю часть.',
-        'Jump-throw.',
-        'Дым закрывает Z для контроля mid.'
-      ] },
-      { id: 'ca-a', type: 'default', video: null, title: 'Дым на A site', steps: [
-        'Встаньте на highway.',
-        'Прицельтесь в дальний угол сайта.',
-        'Бросок ЛКМ.',
-        'Дым перекрывает default A.'
-      ] },
-      { id: 'ca-b', type: 'default', video: null, title: 'Молотов на B site', steps: [
-        'Встаньте у B main.',
-        'Зажмите ЛКМ, прицельтесь в угол.',
-        'Молотов выжигает default B.'
-      ] }
-    ]
-  };
-
-  const TACTICS = {
-    mirage: [
-      { id: 'mi-a-exec', video: null, title: 'Быстрый заход на A', steps: [
-        'Трое идут через ramp с дымами Window и CT.',
-        'Один ставит дым Jungle.',
-        'Выглядывайте сайт, первым заходит подмога из short.',
-        'Разместите бомбу за двойным ящиком.'
-      ] }
-    ],
-    dust2: [
-      { id: 'd2-a-long', video: null, title: 'Быстрый A через Long', steps: [
-        'Первый бежит на Long с флешем.',
-        'Второй ставит дым Long для контроля.',
-        'Третий держит mid, чтобы никто не зашёл сзади.',
-        'Тайминг: дым падает ровно к выходу на сайт.'
-      ] }
-    ],
-    inferno: [
-      { id: 'in-b-banana', video: null, title: 'Заход на B через Banana', steps: [
-        'Один контролирует Banana молотовом.',
-        'Второй ставит дым Banana.',
-        'Третий заходит через апартаменты во второй тайминг.',
-        'Пост-плант на Coffins.'
-      ] }
-    ]
-  };
+  async function loadGuides() {
+    if (!guidesData) {
+      const res = await api.get('/api/guides');
+      if (!res.ok) throw new Error('bad guides');
+      guidesData = res;
+    }
+    return guidesData;
+  }
 
   function gBackBtn(onClick) {
     const back = el('button', 'back-btn');
@@ -1658,18 +1364,18 @@
     const card = el('div', 'g-map');
     const pic = el('div', 'map-pic');
     const img = document.createElement('img');
-    img.setAttribute('src', map.img);
+    img.setAttribute('src', map.img || ('/static/maps/' + map.image));
     img.setAttribute('alt', map.name);
     img.loading = 'lazy';
     pic.appendChild(img);
     pic.appendChild(el('span', 'map-name', map.name));
     card.appendChild(pic);
     card.appendChild(el('span', 'g-chev', '›'));
-    card.addEventListener('click', () => renderGuideDetail(map));
+    card.addEventListener('click', () => openMap(map));
     return card;
   }
 
-  function renderGuides() {
+  async function renderGuides() {
     if (loading) return;
     loading = true;
     clear();
@@ -1680,51 +1386,166 @@
     view.appendChild(sub);
     const box = el('div', 'sub-box');
     view.appendChild(box);
-    if (guidesTab === 'maps') renderMapsList(box);
-    else renderMikraList(box);
-    loading = false;
+    const loadbar = el('div', 'loadbar');
+    loadbar.appendChild(el('div', 'loadbar-fill'));
+    box.appendChild(loadbar);
+    try {
+      const g = await loadGuides();
+      loadbar.remove();
+      if (guidesTab === 'maps') renderMapsList(box, g.maps);
+      else renderMikraList(box, g.mikra);
+    } catch (err) {
+      loadbar.remove();
+      const errBox = el('div', 'err-box');
+      errBox.appendChild(el('p', 'section-text', t('load_fail')));
+      const retry = el('button', 'link-btn');
+      retry.appendChild(iconEl('refresh'));
+      retry.appendChild(document.createTextNode(t('retry')));
+      retry.addEventListener('click', () => { guidesData = null; renderGuides(); });
+      errBox.appendChild(retry);
+      box.appendChild(errBox);
+    } finally {
+      loading = false;
+    }
   }
 
-  function renderMapsList(box) {
-    GUIDES_MAPS.forEach(map => box.appendChild(gMapCard(map)));
+  function renderMapsList(box, maps) {
+    (maps || []).forEach(map => box.appendChild(gMapCard(map)));
   }
 
-  function renderMikraList(box) {
-    GUIDES_MIKRA.forEach((item, i) => {
-      box.appendChild(gRow(String(i + 1), item.name, null, () => renderGuideDetail(item)));
+  function renderMikraList(box, mikra) {
+    (mikra || []).forEach((item, i) => {
+      box.appendChild(gRow(String(i + 1), item.name, null, () => {
+        const map = mapById(String(item.id || '').split('-')[0]);
+        if (map) openMap(map);
+        else {
+          clear();
+          view.appendChild(gBackBtn());
+          view.appendChild(sectionTitle('guides', item.name));
+          view.appendChild(el('p', 'section-text', t('g_soon')));
+        }
+      }));
     });
   }
 
-  function renderGuideDetail(item) {
+  function mapById(id) {
+    if (!guidesData || !guidesData.maps) return null;
+    return guidesData.maps.find(m => m.id === id) || null;
+  }
+
+  function openMap(item) {
+    mapTab = 'lineups';
+    mapSpotKey = null;
+    lineupFilter = 'all';
+    renderMap(item);
+  }
+
+  function mapTabBtn(tab, label) {
+    const b = document.createElement('button');
+    b.className = 'sub-tab' + (mapTab === tab ? ' active' : '');
+    b.textContent = label;
+    b.addEventListener('click', () => { mapTab = tab; mapSpotKey = null; renderMap(currentMap); });
+    return b;
+  }
+
+  function renderMap(item) {
+    currentMap = item;
     clear();
     view.appendChild(gBackBtn());
     view.appendChild(sectionTitle('guides', item.name));
-    const grid = el('div', 'cat-grid');
-    GUIDE_CATS.forEach(cat => {
-      const btn = el('div', 'cat-btn');
-      btn.appendChild(el('span', 'cat-name', t(cat.key)));
-      btn.appendChild(el('span', 'g-chev', '›'));
-      btn.addEventListener('click', () => renderGuideCat(item, cat));
-      grid.appendChild(btn);
-    });
-    view.appendChild(grid);
+    const sub = el('div', 'sub-tabs');
+    sub.appendChild(mapTabBtn('lineups', t('g_cat_lineups')));
+    sub.appendChild(mapTabBtn('tactics', t('g_cat_tactics')));
+    view.appendChild(sub);
+    const box = el('div', 'sub-box');
+    view.appendChild(box);
+    if (mapTab === 'tactics') renderTacticsBox(box, item);
+    else renderMapLineups(box, item);
   }
 
-  function renderGuideCat(item, cat) {
-    if (cat.id === 'lineups') { lineupFilter = 'all'; renderLineups(item); }
-    else if (cat.id === 'tactics') renderTactics(item);
-    else {
-      clear();
-      view.appendChild(gBackBtn(() => renderGuideDetail(item)));
-      view.appendChild(sectionTitle('guides', t(cat.key)));
-      view.appendChild(el('p', 'section-text', t('g_soon')));
+  function lineupSpotKey(l) {
+    if (!l.pos || !l.pos.length) return null;
+    return Math.round(l.pos[0]) + ',' + Math.round(l.pos[1]);
+  }
+
+  function renderMapLineups(box, item) {
+    const data = (guidesData.lineups || {})[item.id] || [];
+    const stage = el('div', 'map-stage');
+    const img = document.createElement('img');
+    img.className = 'map-stage-img';
+    img.setAttribute('src', item.img || ('/static/maps/' + item.image));
+    img.setAttribute('alt', item.name);
+    img.loading = 'lazy';
+    stage.appendChild(img);
+    const spots = {};
+    data.forEach(l => {
+      const k = lineupSpotKey(l);
+      if (!k) return;
+      (spots[k] = spots[k] || { x: l.pos[0], y: l.pos[1], list: [] }).list.push(l);
+    });
+    Object.keys(spots).forEach(k => {
+      const s = spots[k];
+      const mk = el('button', 'map-dot ' + guideTypeCls(s.list[0].type) + (mapSpotKey === k ? ' active' : ''));
+      mk.style.left = s.x + '%';
+      mk.style.top = s.y + '%';
+      if (s.list.length > 1) mk.appendChild(el('span', 'map-dot-n', String(s.list.length)));
+      mk.addEventListener('click', () => {
+        mapSpotKey = mapSpotKey === k ? null : k;
+        renderMapLineups(box, item);
+      });
+      stage.appendChild(mk);
+    });
+    box.appendChild(stage);
+    const chips = el('div', 'chips');
+    const mkChip = id => {
+      const c = el('button', 'chip' + (lineupFilter === id ? ' active' : ''));
+      c.textContent = guideTypeLabel(id);
+      c.addEventListener('click', () => { lineupFilter = id; renderMapLineups(box, item); });
+      chips.appendChild(c);
+    };
+    if (mapSpotKey) {
+      const reset = el('button', 'chip spot-chip');
+      reset.appendChild(iconEl('back'));
+      reset.appendChild(document.createTextNode(t('g_map_reset_spot')));
+      reset.addEventListener('click', () => { mapSpotKey = null; renderMapLineups(box, item); });
+      chips.appendChild(reset);
     }
+    mkChip('all');
+    Object.keys(guidesData.types || GUIDE_TYPES).forEach(mkChip);
+    box.appendChild(chips);
+    if (mapSpotKey) box.appendChild(el('p', 'section-text map-spot-label', t('g_map_spot')));
+    else if (Object.keys(spots).length) box.appendChild(el('p', 'section-text map-hint', t('g_map_hint')));
+    const listBox = el('div', 'map-list');
+    box.appendChild(listBox);
+    let list = data;
+    if (mapSpotKey) list = list.filter(l => lineupSpotKey(l) === mapSpotKey);
+    if (lineupFilter !== 'all') list = list.filter(l => l.type === lineupFilter);
+    if (!list.length) listBox.appendChild(el('p', 'section-text', t('g_lineups_empty')));
+    list.forEach(l => listBox.appendChild(gLineupRow(l, () => renderLineupDetail(item, l))));
+  }
+
+  function renderTacticsBox(box, item) {
+    const data = (guidesData.tactics || {})[item.id] || [];
+    if (!data.length) { box.appendChild(el('p', 'section-text', t('g_tactics_empty'))); return; }
+    data.forEach(tc => box.appendChild(gRow('T', tc.title, null, () => renderTacticDetail(item, tc))));
+  }
+
+  function guideTypeLabel(id) {
+    if (id === 'all') return t('g_type_all');
+    const gt = GUIDE_TYPES[id];
+    if (gt) return t(gt.key);
+    const tdata = guidesData && guidesData.types ? guidesData.types[id] : null;
+    return tdata && tdata.label ? tdata.label : id;
+  }
+
+  function guideTypeCls(id) {
+    const gt = GUIDE_TYPES[id];
+    return gt ? gt.cls : 'lt-default';
   }
 
   function gLineupRow(l, onClick) {
     const row = el('div', 'g-row');
-    const gt = GUIDE_TYPES[l.type];
-    row.appendChild(el('span', 'l-badge ' + gt.cls, t(gt.key)));
+    row.appendChild(el('span', 'l-badge ' + guideTypeCls(l.type), guideTypeLabel(l.type)));
     const info = el('div', 'player-info');
     info.appendChild(el('div', 'player-nick', l.title));
     row.appendChild(info);
@@ -1766,55 +1587,20 @@
     return wrap;
   }
 
-  function renderLineups(item) {
-    clear();
-    view.appendChild(gBackBtn(() => renderGuideDetail(item)));
-    view.appendChild(sectionTitle('guides', t('g_cat_lineups') + ' · ' + item.name));
-    const data = LINEUPS[item.id] || [];
-    const chips = el('div', 'chips');
-    const mk = id => {
-      const key = id === 'all' ? 'g_type_all' : GUIDE_TYPES[id].key;
-      const c = el('button', 'chip' + (lineupFilter === id ? ' active' : ''));
-      c.textContent = t(key);
-      c.addEventListener('click', () => { lineupFilter = id; renderLineups(item); });
-      chips.appendChild(c);
-    };
-    mk('all');
-    Object.keys(GUIDE_TYPES).forEach(mk);
-    view.appendChild(chips);
-    const box = el('div', 'sub-box');
-    view.appendChild(box);
-    const list = data.filter(l => lineupFilter === 'all' || l.type === lineupFilter);
-    if (!list.length) box.appendChild(el('p', 'section-text', t('g_lineups_empty')));
-    list.forEach(l => box.appendChild(gLineupRow(l, () => renderLineupDetail(item, l))));
-  }
-
   function renderLineupDetail(item, l) {
     clear();
-    view.appendChild(gBackBtn(() => renderLineups(item)));
-    const gt = GUIDE_TYPES[l.type];
+    view.appendChild(gBackBtn(() => renderMap(currentMap)));
     const title = el('div', 'l-title');
-    title.appendChild(el('span', 'l-badge ' + gt.cls, t(gt.key)));
+    title.appendChild(el('span', 'l-badge ' + guideTypeCls(l.type), guideTypeLabel(l.type)));
     title.appendChild(el('span', 'l-name', l.title));
     view.appendChild(title);
     view.appendChild(gVideo(l.video));
     view.appendChild(gSteps(l.steps));
   }
 
-  function renderTactics(item) {
-    clear();
-    view.appendChild(gBackBtn(() => renderGuideDetail(item)));
-    view.appendChild(sectionTitle('guides', t('g_cat_tactics') + ' · ' + item.name));
-    const data = TACTICS[item.id] || [];
-    const box = el('div', 'sub-box');
-    view.appendChild(box);
-    if (!data.length) box.appendChild(el('p', 'section-text', t('g_tactics_empty')));
-    data.forEach(tc => box.appendChild(gRow('T', tc.title, null, () => renderTacticDetail(item, tc))));
-  }
-
   function renderTacticDetail(item, tc) {
     clear();
-    view.appendChild(gBackBtn(() => renderTactics(item)));
+    view.appendChild(gBackBtn(() => renderMap(currentMap)));
     view.appendChild(sectionTitle('guides', tc.title));
     view.appendChild(gVideo(tc.video));
     view.appendChild(gSteps(tc.steps));
