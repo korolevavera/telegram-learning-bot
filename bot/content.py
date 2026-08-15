@@ -245,7 +245,7 @@ QUIZZES = [
 # LINEUPS — раскидки по картам. Ключ = id карты, значение — список раскидок:
 #   "id"    — уникальный идентификатор раскидки
 #   "title" — название (что бросаем и куда)
-#   "type"  — тип: insta / default / insane / oneway / reveal (см. LINEUP_TYPES)
+#   "type"  — тип: smoke / flash / molotov / grenade (см. LINEUP_TYPES)
 #   "steps" — пошаговая инструкция (каждый шаг — строка)
 
 MAPS = [
@@ -262,11 +262,10 @@ MAPS = [
 ]
 
 LINEUP_TYPES = {
-    "insta": {"label": "Insta", "emoji": "⚡"},
-    "default": {"label": "Default", "emoji": "🧱"},
-    "insane": {"label": "Insane", "emoji": "🤯"},
-    "oneway": {"label": "One-way", "emoji": "👁️"},
-    "reveal": {"label": "Reveal", "emoji": "🔍"},
+    "smoke": {"label": "Смок", "emoji": "💨"},
+    "flash": {"label": "Флешка", "emoji": "✨"},
+    "molotov": {"label": "Молотов", "emoji": "🔥"},
+    "grenade": {"label": "Граната", "emoji": "💣"},
 }
 
 LINEUPS = {
@@ -274,7 +273,7 @@ LINEUPS = {
         {
             "id": "mi-window",
             "pos": [24, 30],
-            "type": "insta",
+            "type": "smoke",
             "title": "Дым на окно mid",
             "steps": [
                 "Встаньте в T ramp вплотную к левой стене.",
@@ -286,7 +285,7 @@ LINEUPS = {
         {
             "id": "mi-ct",
             "pos": [16, 14],
-            "type": "default",
+            "type": "smoke",
             "title": "Дым на CT для захода A",
             "steps": [
                 "Встаньте у правой стены T spawn.",
@@ -298,7 +297,7 @@ LINEUPS = {
         {
             "id": "mi-jungle",
             "pos": [14, 18],
-            "type": "default",
+            "type": "smoke",
             "title": "Дым на Jungle",
             "steps": [
                 "Встаньте слева в T spawn.",
@@ -309,7 +308,7 @@ LINEUPS = {
         {
             "id": "mi-stairs",
             "pos": [26, 34],
-            "type": "insane",
+            "type": "molotov",
             "title": "Молотов на лестницу A",
             "steps": [
                 "Подойдите к левой стене T ramp.",
@@ -320,7 +319,7 @@ LINEUPS = {
         {
             "id": "mi-oneway",
             "pos": [60, 62],
-            "type": "oneway",
+            "type": "smoke",
             "title": "One-way на A (лестница)",
             "steps": [
                 "Встаньте в Jungle.",
@@ -331,7 +330,7 @@ LINEUPS = {
         {
             "id": "mi-under",
             "pos": [34, 66],
-            "type": "default",
+            "type": "smoke",
             "title": "Дым на underpass B",
             "steps": [
                 "Встаньте у входа в апартаменты.",
@@ -345,7 +344,7 @@ LINEUPS = {
         {
             "id": "d2-xbox",
             "pos": [18, 18],
-            "type": "insta",
+            "type": "smoke",
             "title": "Дым на Xbox (mid)",
             "steps": [
                 "Встаньте у правой стены T spawn.",
@@ -357,7 +356,7 @@ LINEUPS = {
         {
             "id": "d2-long",
             "pos": [20, 64],
-            "type": "insta",
+            "type": "smoke",
             "title": "Дым на Long",
             "steps": [
                 "Встаньте у правого угла Long doors.",
@@ -369,7 +368,7 @@ LINEUPS = {
         {
             "id": "d2-bwindow",
             "pos": [46, 40],
-            "type": "default",
+            "type": "smoke",
             "title": "Дым на окно B",
             "steps": [
                 "Встаньте у стены в B tunnels.",
@@ -381,7 +380,7 @@ LINEUPS = {
         {
             "id": "d2-goose",
             "pos": [24, 70],
-            "type": "default",
+            "type": "molotov",
             "title": "Молотов на Goose (A)",
             "steps": [
                 "Встаньте у Long doors.",
@@ -392,7 +391,7 @@ LINEUPS = {
         {
             "id": "d2-oneway",
             "pos": [40, 30],
-            "type": "oneway",
+            "type": "smoke",
             "title": "One-way на mid",
             "steps": [
                 "Встаньте в Catwalk (Short).",
@@ -403,7 +402,7 @@ LINEUPS = {
         {
             "id": "d2-ctspawn",
             "pos": [14, 12],
-            "type": "default",
+            "type": "smoke",
             "title": "Дым на CT spawn (A take)",
             "steps": [
                 "Встаньте у T spawn, левый угол.",
@@ -417,7 +416,7 @@ LINEUPS = {
         {
             "id": "in-banana",
             "pos": [50, 64],
-            "type": "insta",
+            "type": "smoke",
             "title": "Дым на Banana",
             "steps": [
                 "Встаньте у угла на Banana за первым ящиком.",
@@ -429,7 +428,7 @@ LINEUPS = {
         {
             "id": "in-ct",
             "pos": [28, 46],
-            "type": "default",
+            "type": "smoke",
             "title": "Дым на CT (A take)",
             "steps": [
                 "Встаньте под аркой (Arch).",
@@ -441,7 +440,7 @@ LINEUPS = {
         {
             "id": "in-coffins",
             "pos": [46, 68],
-            "type": "default",
+            "type": "molotov",
             "title": "Молотов на Coffins",
             "steps": [
                 "Встаньте на Banana, за углом.",
@@ -452,7 +451,7 @@ LINEUPS = {
         {
             "id": "in-topmid",
             "pos": [36, 34],
-            "type": "default",
+            "type": "smoke",
             "title": "Дым на Top Mid",
             "steps": [
                 "Встаньте у входа в mid.",
@@ -464,7 +463,7 @@ LINEUPS = {
         {
             "id": "in-oneway",
             "pos": [44, 60],
-            "type": "oneway",
+            "type": "smoke",
             "title": "One-way на Banana",
             "steps": [
                 "Встаньте за углом Banana.",
@@ -475,7 +474,7 @@ LINEUPS = {
         {
             "id": "in-lib",
             "pos": [58, 50],
-            "type": "insane",
+            "type": "molotov",
             "title": "Молотов на Library (B)",
             "steps": [
                 "Встаньте у входа в апартаменты.",
@@ -488,7 +487,7 @@ LINEUPS = {
         {
             "id": "nu-outside",
             "pos": [18, 56],
-            "type": "insta",
+            "type": "smoke",
             "title": "Дым на outside",
             "steps": [
                 "Встаньте у outside doors.",
@@ -500,7 +499,7 @@ LINEUPS = {
         {
             "id": "nu-secret",
             "pos": [46, 44],
-            "type": "default",
+            "type": "molotov",
             "title": "Молотов на Secret",
             "steps": [
                 "Встаньте на рампе к B.",
@@ -512,7 +511,7 @@ LINEUPS = {
         {
             "id": "nu-ramp",
             "pos": [42, 36],
-            "type": "default",
+            "type": "molotov",
             "title": "Молотов на A ramp",
             "steps": [
                 "Встаньте наверху рампы.",
@@ -523,7 +522,7 @@ LINEUPS = {
         {
             "id": "nu-oneway",
             "pos": [36, 30],
-            "type": "oneway",
+            "type": "smoke",
             "title": "One-way на A (hut)",
             "steps": [
                 "Встаньте в hut.",
@@ -536,7 +535,7 @@ LINEUPS = {
         {
             "id": "an-mid",
             "pos": [32, 36],
-            "type": "insta",
+            "type": "smoke",
             "title": "Дым на mid",
             "steps": [
                 "Встаньте у левой стены T mid.",
@@ -548,7 +547,7 @@ LINEUPS = {
         {
             "id": "an-a",
             "pos": [62, 60],
-            "type": "default",
+            "type": "molotov",
             "title": "Молотов на A site",
             "steps": [
                 "Встаньте на A main.",
@@ -559,7 +558,7 @@ LINEUPS = {
         {
             "id": "an-b",
             "pos": [38, 70],
-            "type": "default",
+            "type": "smoke",
             "title": "Дым на B (cave)",
             "steps": [
                 "Встаньте у B main.",
@@ -571,7 +570,7 @@ LINEUPS = {
         {
             "id": "an-oneway",
             "pos": [42, 66],
-            "type": "oneway",
+            "type": "smoke",
             "title": "One-way на B",
             "steps": [
                 "Встаньте у входа в B.",
@@ -584,7 +583,7 @@ LINEUPS = {
         {
             "id": "ov-monster",
             "pos": [32, 34],
-            "type": "insta",
+            "type": "smoke",
             "title": "Дым на Monster",
             "steps": [
                 "Встаньте в T mid.",
@@ -596,7 +595,7 @@ LINEUPS = {
         {
             "id": "ov-a",
             "pos": [46, 52],
-            "type": "default",
+            "type": "molotov",
             "title": "Молотов на A site",
             "steps": [
                 "Встаньте в connector.",
@@ -607,7 +606,7 @@ LINEUPS = {
         {
             "id": "ov-bshort",
             "pos": [56, 62],
-            "type": "default",
+            "type": "smoke",
             "title": "Дым на B short",
             "steps": [
                 "Встаньте у B main.",
@@ -619,7 +618,7 @@ LINEUPS = {
         {
             "id": "ov-oneway",
             "pos": [52, 58],
-            "type": "oneway",
+            "type": "smoke",
             "title": "One-way на A (construction)",
             "steps": [
                 "Встаньте в construction.",
@@ -632,7 +631,7 @@ LINEUPS = {
         {
             "id": "anb-mid",
             "pos": [36, 36],
-            "type": "insta",
+            "type": "smoke",
             "title": "Дым на mid",
             "steps": [
                 "Встаньте в T mid.",
@@ -644,7 +643,7 @@ LINEUPS = {
         {
             "id": "anb-a",
             "pos": [62, 64],
-            "type": "default",
+            "type": "molotov",
             "title": "Молотов на A site",
             "steps": [
                 "Встаньте на A main.",
@@ -655,7 +654,7 @@ LINEUPS = {
         {
             "id": "anb-b",
             "pos": [40, 68],
-            "type": "default",
+            "type": "smoke",
             "title": "Дым на B",
             "steps": [
                 "Встаньте у B main.",
@@ -669,7 +668,7 @@ LINEUPS = {
         {
             "id": "ve-aramp",
             "pos": [52, 40],
-            "type": "insta",
+            "type": "smoke",
             "title": "Дым на A ramp",
             "steps": [
                 "Встаньте у входа на рампу A.",
@@ -681,7 +680,7 @@ LINEUPS = {
         {
             "id": "ve-b",
             "pos": [34, 58],
-            "type": "default",
+            "type": "smoke",
             "title": "Дым на B site",
             "steps": [
                 "Встаньте у B main.",
@@ -693,7 +692,7 @@ LINEUPS = {
         {
             "id": "ve-a",
             "pos": [60, 52],
-            "type": "default",
+            "type": "molotov",
             "title": "Молотов на A site",
             "steps": [
                 "Встаньте у входа на сайт A.",
@@ -706,7 +705,7 @@ LINEUPS = {
         {
             "id": "tr-ladder",
             "pos": [30, 62],
-            "type": "insta",
+            "type": "smoke",
             "title": "Дым на ladder (A)",
             "steps": [
                 "Встаньте на A main.",
@@ -718,7 +717,7 @@ LINEUPS = {
         {
             "id": "tr-ivy",
             "pos": [58, 36],
-            "type": "default",
+            "type": "molotov",
             "title": "Молотов на Ivy (B)",
             "steps": [
                 "Встаньте у B main.",
@@ -729,7 +728,7 @@ LINEUPS = {
         {
             "id": "tr-amain",
             "pos": [28, 60],
-            "type": "default",
+            "type": "smoke",
             "title": "Дым на A main",
             "steps": [
                 "Встаньте у A main.",
@@ -743,7 +742,7 @@ LINEUPS = {
         {
             "id": "ca-mid",
             "pos": [38, 34],
-            "type": "insta",
+            "type": "smoke",
             "title": "Дым на mid (Z)",
             "steps": [
                 "Встаньте у левой стены T mid.",
@@ -755,7 +754,7 @@ LINEUPS = {
         {
             "id": "ca-a",
             "pos": [62, 58],
-            "type": "default",
+            "type": "smoke",
             "title": "Дым на A site",
             "steps": [
                 "Встаньте на highway.",
@@ -767,7 +766,7 @@ LINEUPS = {
         {
             "id": "ca-b",
             "pos": [34, 62],
-            "type": "default",
+            "type": "molotov",
             "title": "Молотов на B site",
             "steps": [
                 "Встаньте у B main.",
@@ -824,4 +823,3 @@ TACTICS = {
         }
     ],
 }
-

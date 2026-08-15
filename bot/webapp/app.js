@@ -88,8 +88,8 @@
       g_tab_maps: 'Карты',
       g_sections: 'разделов', g_back_guides: 'В гайды',
       g_cat_lineups: 'Раскидки', g_cat_tactics: 'Тактики',
-      g_type_all: 'Все', g_type_insta: 'Insta', g_type_default: 'Default',
-      g_type_insane: 'Insane', g_type_oneway: 'One-way', g_type_reveal: 'Reveal',
+      g_type_all: 'Все', g_type_smoke: 'Смок', g_type_flash: 'Флешка',
+      g_type_molotov: 'Молотов', g_type_grenade: 'Граната',
       g_lineups_empty: 'Пока нет раскидок', g_tactics_empty: 'Пока нет тактик',
       g_steps: 'Выполнение', g_video_soon: 'Видео скоро появится',
       g_map_hint: 'Нажми на точку на карте — увидишь раскидки с этой позиции',
@@ -144,8 +144,8 @@
       g_tab_maps: 'Maps',
       g_sections: 'sections', g_back_guides: 'Back to guides',
       g_cat_lineups: 'Lineups', g_cat_tactics: 'Tactics',
-      g_type_all: 'All', g_type_insta: 'Insta', g_type_default: 'Default',
-      g_type_insane: 'Insane', g_type_oneway: 'One-way', g_type_reveal: 'Reveal',
+      g_type_all: 'All', g_type_smoke: 'Smoke', g_type_flash: 'Flash',
+      g_type_molotov: 'Molotov', g_type_grenade: 'Grenade',
       g_lineups_empty: 'No lineups yet', g_tactics_empty: 'No tactics yet',
       g_steps: 'Execution', g_video_soon: 'Video coming soon',
       g_map_hint: 'Tap a spot on the map to see lineups from it',
@@ -1315,11 +1315,10 @@
   }
 
   const GUIDE_TYPES = {
-    insta: { key: 'g_type_insta', cls: 'lt-insta' },
-    default: { key: 'g_type_default', cls: 'lt-default' },
-    insane: { key: 'g_type_insane', cls: 'lt-insane' },
-    oneway: { key: 'g_type_oneway', cls: 'lt-oneway' },
-    reveal: { key: 'g_type_reveal', cls: 'lt-reveal' }
+    smoke: { key: 'g_type_smoke', cls: 'lt-smoke' },
+    flash: { key: 'g_type_flash', cls: 'lt-flash' },
+    molotov: { key: 'g_type_molotov', cls: 'lt-molotov' },
+    grenade: { key: 'g_type_grenade', cls: 'lt-grenade' }
   };
 
   async function loadGuides() {
@@ -1511,7 +1510,7 @@
 
   function guideTypeCls(id) {
     const gt = GUIDE_TYPES[id];
-    return gt ? gt.cls : 'lt-default';
+    return gt ? gt.cls : 'lt-smoke';
   }
 
   function gLineupRow(l, onClick) {
