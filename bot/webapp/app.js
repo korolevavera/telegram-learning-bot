@@ -89,14 +89,13 @@
       g_tab_maps: 'Карты',
       g_sections: 'разделов', g_back_guides: 'В гайды',
       g_cat_lineups: 'Раскидки', g_cat_tactics: 'Тактики',
-      g_cat_videos: 'Видео гайды', g_video_open: 'Открыть на YouTube',
       g_type_all: 'Все', g_type_smoke: 'Смок', g_type_flash: 'Флешка',
       g_type_molotov: 'Молотов', g_type_grenade: 'Граната',
       g_lineups_empty: 'Пока нет раскидок', g_tactics_empty: 'Пока нет тактик',
-      g_steps: 'Выполнение', g_video_soon: 'Видео скоро появится',
+      g_steps: 'Выполнение',
       g_map_hint: 'Нажми на точку на карте — увидишь раскидки с этой позиции',
       g_map_reset_spot: 'Сбросить точку', g_map_spot: 'Раскидки с этой точки', g_tactic_label: 'Тактика',
-      g_search_ph: 'Поиск по раскидкам, видео и тактикам…'
+      g_search_ph: 'Поиск по раскидкам и тактикам…'
     },
     en: {
       tab_stats: 'Stats', tab_settings: 'Settings', back: 'Back',
@@ -147,14 +146,13 @@
       g_tab_maps: 'Maps',
       g_sections: 'sections', g_back_guides: 'Back to guides',
       g_cat_lineups: 'Lineups', g_cat_tactics: 'Tactics',
-      g_cat_videos: 'Video guides', g_video_open: 'Open on YouTube',
       g_type_all: 'All', g_type_smoke: 'Smoke', g_type_flash: 'Flash',
       g_type_molotov: 'Molotov', g_type_grenade: 'Grenade',
       g_lineups_empty: 'No lineups yet', g_tactics_empty: 'No tactics yet',
-      g_steps: 'Execution', g_video_soon: 'Video coming soon',
+      g_steps: 'Execution',
       g_map_hint: 'Tap a spot on the map to see lineups from it',
       g_map_reset_spot: 'Clear spot', g_map_spot: 'Lineups from this spot', g_tactic_label: 'Tactic',
-      g_search_ph: 'Search lineups, videos and tactics…'
+      g_search_ph: 'Search lineups and tactics…'
     }
   };
 
@@ -1576,35 +1574,6 @@
     return { idx, keys: Object.keys(idx), blob: text, locs };
   }
 
-  function gBuildVideoIndex(mapId, v) {
-    const idx = {};
-    const add = (arr, w) => {
-      if (!arr) return;
-      arr.forEach(tok => {
-        const st = gStem(String(tok).toLowerCase());
-        if (st && !G_STOP.has(st)) idx[st] = Math.max(idx[st] || 0, w);
-      });
-    };
-    const title = v.title || '';
-    const tags = v.tags || [];
-    const text = title.toLowerCase() + ' ' + tags.join(' ').toLowerCase();
-    const textTok = new Set(gTokens(text));
-    const titleTok = new Set(gTokens(title));
-    const locs = [];
-    add(titleTok, 3);
-    (v.types || []).forEach(ty => add(G_TYPE_SYN[ty] || [ty], 3));
-    (G_LOC[mapId] || []).forEach(loc => {
-      if (textTok.has(loc.name)) {
-        locs.push(loc.name);
-        const w = titleTok.has(loc.name) ? 4 : 3;
-        add(loc.aliases, w);
-        add([loc.name], w);
-      }
-    });
-    add(textTok, 1);
-    return { idx, keys: Object.keys(idx), blob: text, locs };
-  }
-
   function gScore(idx, tokens) {
     let score = 0, hits = 0;
     const seen = new Set();
@@ -1797,8 +1766,6 @@
 
     const indexedL = lineups.map(l => ({ item: l, idx: gBuildIndex(item.id, l) }));
     const indexedT = tactics.map(tc => ({ item: tc, idx: gBuildIndex(item.id, tc) }));
-    const videos = (guidesData.videos || {})[item.id] || [];
-    const indexedV = videos.map(v => ({ item: v, idx: gBuildVideoIndex(item.id, v) }));
 
     function renderResults() {
       listBox.innerHTML = '';
@@ -1819,16 +1786,9 @@
 
       const ls = (q && qTok.length) ? pick(indexedL) : lineups;
       const ts = (q && qTok.length) ? pick(indexedT) : tactics;
-      const vs = (q && qTok.length) ? pick(indexedV) : videos;
-      if (!ls.length && !ts.length && !vs.length) {
+      if (!ls.length && !ts.length) {
         listBox.appendChild(el('p', 'section-text', q ? t('not_found') + ' «' + raw + '»' : t('no_data')));
         return;
-      }
-      if (vs.length) {
-        const vh = el('div', 'map-list-head');
-        vh.appendChild(el('span', 'map-list-title', t('g_cat_videos') + ' · ' + vs.length));
-        listBox.appendChild(vh);
-        vs.forEach(v => listBox.appendChild(gVideoRow(v, () => renderVideoDetail(item, v))));
       }
       if (ls.length) {
         const lh = el('div', 'map-list-head');
@@ -1969,40 +1929,9 @@
     return row;
   }
 
-  function gVideoId(url) {
-    const m = String(url || '').match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|shorts\/|embed\/))([\w-]{6,})/);
-    return m ? m[1] : '';
-  }
-
-  function gVideoThumb(url) {
-    const id = gVideoId(url);
-    return id ? ('https://i.ytimg.com/vi/' + id + '/hqdefault.jpg') : '';
-  }
-
   function gOpenUrl(url) {
     if (tg && tg.openLink) { tg.openLink(url, { try_instant_view: false }); return; }
     window.open(url, '_blank');
-  }
-
-  function gVideo(url) {
-    if (!url) return null;
-    const wrap = el('div', 'g-video');
-    if (url.indexOf('youtu') !== -1) {
-      const embed = url.replace('watch?v=', 'embed/').replace('youtu.be/', 'www.youtube.com/embed/');
-      const iframe = document.createElement('iframe');
-      iframe.setAttribute('src', embed);
-      iframe.setAttribute('allowfullscreen', '');
-      iframe.setAttribute('frameborder', '0');
-      wrap.appendChild(iframe);
-      return wrap;
-    }
-    const v = document.createElement('video');
-    v.setAttribute('controls', '');
-    v.setAttribute('playsinline', '');
-    v.setAttribute('preload', 'none');
-    v.setAttribute('src', url);
-    wrap.appendChild(v);
-    return wrap;
   }
 
   function gSteps(steps) {
@@ -2012,50 +1941,6 @@
     steps.forEach(s => ol.appendChild(el('li', 'g-step', s)));
     wrap.appendChild(ol);
     return wrap;
-  }
-
-  function gVideoTypesMeta(v) {
-    return (v.types || []).map(ty => guideTypeLabel(ty)).join(' · ') || 'YouTube';
-  }
-
-  function gVideoRow(v, onClick) {
-    const row = el('div', 'g-row g-video-card');
-    const thumb = el('div', 'g-video-thumb');
-    const th = gVideoThumb(v.url);
-    if (th) {
-      const img = document.createElement('img');
-      img.setAttribute('src', th);
-      img.setAttribute('alt', v.title);
-      img.loading = 'lazy';
-      thumb.appendChild(img);
-    }
-    thumb.appendChild(el('span', 'g-video-play', '▶'));
-    row.appendChild(thumb);
-    const info = el('div', 'player-info');
-    info.appendChild(el('div', 'player-nick', v.title));
-    info.appendChild(el('div', 'player-meta', gVideoTypesMeta(v)));
-    row.appendChild(info);
-    row.appendChild(el('span', 'g-chev', '›'));
-    row.addEventListener('click', onClick);
-    return row;
-  }
-
-  function renderVideoDetail(item, v) {
-    clear();
-    view.appendChild(gBackBtn(() => renderMap(currentMap)));
-    const title = el('div', 'l-title');
-    title.appendChild(el('span', 'l-badge lt-video', '🎬'));
-    title.appendChild(el('span', 'l-name', v.title));
-    view.appendChild(title);
-    const vw = gVideo(v.url);
-    if (vw) view.appendChild(vw);
-    const meta = el('p', 'section-text', gVideoTypesMeta(v));
-    view.appendChild(meta);
-    const open = el('button', 'link-btn');
-    open.appendChild(el('span', 'ico-sm', '▶'));
-    open.appendChild(document.createTextNode(t('g_video_open')));
-    open.addEventListener('click', () => gOpenUrl(v.url));
-    view.appendChild(open);
   }
 
   function gMiniRadar(map, l) {
@@ -2083,8 +1968,6 @@
     view.appendChild(title);
     const mini = gMiniRadar(item, l);
     if (mini) view.appendChild(mini);
-    const v = gVideo(l.video);
-    if (v) view.appendChild(v);
     view.appendChild(gSteps(l.steps));
   }
 
@@ -2100,8 +1983,6 @@
     img.loading = 'lazy';
     stage.appendChild(img);
     view.appendChild(stage);
-    const v = gVideo(tc.video);
-    if (v) view.appendChild(v);
     view.appendChild(gSteps(tc.steps));
   }
 
