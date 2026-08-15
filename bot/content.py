@@ -249,16 +249,16 @@ QUIZZES = [
 #   "steps" — пошаговая инструкция (каждый шаг — строка)
 
 MAPS = [
-    {"id": "dust2", "name": "Dust II", "image": "dust2.png", "emoji": "🏜️"},
-    {"id": "mirage", "name": "Mirage", "image": "mirage.png", "emoji": "🕌"},
-    {"id": "inferno", "name": "Inferno", "image": "inferno.png", "emoji": "🔥"},
-    {"id": "nuke", "name": "Nuke", "image": "nuke.png", "emoji": "☢️"},
-    {"id": "ancient", "name": "Ancient", "image": "ancient.png", "emoji": "🏛️"},
-    {"id": "overpass", "name": "Overpass", "image": "overpass.png", "emoji": "🌉"},
-    {"id": "anubis", "name": "Anubis", "image": "anubis.png", "emoji": "🐫"},
-    {"id": "vertigo", "name": "Vertigo", "image": "vertigo.png", "emoji": "🏢"},
-    {"id": "train", "name": "Train", "image": "train.png", "emoji": "🚂"},
-    {"id": "cache", "name": "Cache", "image": "cache.png", "emoji": "📦"},
+    {"id": "dust2", "name": "Dust II", "image": "dust2.jpg", "emoji": "🏜️"},
+    {"id": "mirage", "name": "Mirage", "image": "mirage.jpg", "emoji": "🕌"},
+    {"id": "inferno", "name": "Inferno", "image": "inferno.jpg", "emoji": "🔥"},
+    {"id": "nuke", "name": "Nuke", "image": "nuke.jpg", "emoji": "☢️"},
+    {"id": "ancient", "name": "Ancient", "image": "ancient.jpg", "emoji": "🏛️"},
+    {"id": "overpass", "name": "Overpass", "image": "overpass.jpg", "emoji": "🌉"},
+    {"id": "anubis", "name": "Anubis", "image": "anubis.jpg", "emoji": "🐫"},
+    {"id": "vertigo", "name": "Vertigo", "image": "vertigo.jpg", "emoji": "🏢"},
+    {"id": "train", "name": "Train", "image": "train.jpg", "emoji": "🚂"},
+    {"id": "cache", "name": "Cache", "image": "cache.jpg", "emoji": "📦"},
 ]
 
 LINEUP_TYPES = {
