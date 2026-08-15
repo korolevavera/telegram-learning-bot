@@ -77,6 +77,7 @@ async def api_content(request: web.Request) -> web.Response:
 async def api_guides(request: web.Request) -> web.Response:
     return web.json_response(
         {
+            "ok": True,
             "maps": MAPS,
             "lineups": get_lineups(),
             "tactics": TACTICS,
