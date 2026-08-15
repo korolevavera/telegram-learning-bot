@@ -823,3 +823,116 @@ TACTICS = {
         }
     ],
 }
+
+# VIDEOS — видео-гайды по раскидкам гранат для каждой карты (ссылки на YouTube).
+#   "id"    — уникальный идентификатор видео
+#   "title" — название (показывается в приложении и участвует в поиске)
+#   "types" — типы гранат, показанные в видео: smoke / flash / molotov / grenade
+#   "url"   — ссылка на YouTube
+#   "tags"  — ключевые слова для поиска (локации карты и типы гранат)
+VIDEOS = {
+    "mirage": [
+        {
+            "id": "vid-mirage-nades",
+            "types": ["smoke", "flash", "molotov", "grenade"],
+            "title": "Mirage: все раскидки гранат — смоки, молотовы и флешки",
+            "url": "https://www.youtube.com/watch?v=FqK5P16vqhE",
+            "tags": ["мираж", "mirage", "все раскидки", "смок", "дым", "молотов", "флешка", "граната", "окно", "мид", "джангл", "лестница", "апсы", "андерпас", "кт"],
+        }
+    ],
+    "dust2": [
+        {
+            "id": "vid-dust2-nades",
+            "types": ["smoke", "flash", "molotov"],
+            "title": "Dust II: важные раскидки — смоки, молотовы и флешки",
+            "url": "https://www.youtube.com/watch?v=b6QaET7ipxU",
+            "tags": ["даст", "dust", "пыль", "смок", "дым", "молотов", "флешка", "окно", "мид", "лонг", "шорт", "туннели", "кт", "гусь"],
+        }
+    ],
+    "inferno": [
+        {
+            "id": "vid-inferno-smokes",
+            "types": ["smoke"],
+            "title": "Inferno: смоки — все основные раскидки",
+            "url": "https://www.youtube.com/watch?v=phvZLZa7Uag",
+            "tags": ["инферно", "inferno", "смок", "дым", "банан", "коффинс", "апсы", "арка", "библиотека", "мид", "кт"],
+        },
+        {
+            "id": "vid-inferno-molotovs",
+            "types": ["molotov"],
+            "title": "Inferno: топ-10 молотовов",
+            "url": "https://www.youtube.com/watch?v=0b3nPHM5EhE",
+            "tags": ["инферно", "inferno", "молотов", "молотовы", "банан", "коффинс", "арка", "апсы", "мид"],
+        },
+    ],
+    "nuke": [
+        {
+            "id": "vid-nuke-smokes",
+            "types": ["smoke"],
+            "title": "Nuke: все основные смоки и раскидки",
+            "url": "https://www.youtube.com/watch?v=DbBx6iBuVIQ",
+            "tags": ["нук", "nuke", "смок", "дым", "аутсайд", "гараж", "секрет", "хевен", "рампа", "лобби"],
+        },
+        {
+            "id": "vid-nuke-smokes2",
+            "types": ["smoke"],
+            "title": "Nuke: смоки — линейки от T и CT",
+            "url": "https://www.youtube.com/watch?v=XldNueUumqY",
+            "tags": ["нук", "nuke", "смок", "дым", "аутсайд", "хевен", "секрет", "гараж"],
+        },
+    ],
+    "ancient": [
+        {
+            "id": "vid-ancient-nades",
+            "types": ["smoke", "flash", "molotov"],
+            "title": "Ancient: важные раскидки — смоки, молотовы и флешки",
+            "url": "https://www.youtube.com/watch?v=NXTgB2AXWKw",
+            "tags": ["эйншент", "ancient", "смок", "дым", "молотов", "флешка", "мид", "донат", "кейв", "лонг", "рампа", "мейн"],
+        }
+    ],
+    "overpass": [
+        {
+            "id": "vid-overpass-smokes",
+            "types": ["smoke"],
+            "title": "Overpass: смоки — все основные линейки",
+            "url": "https://www.youtube.com/watch?v=EMehkVqpB2A",
+            "tags": ["оверпас", "overpass", "смок", "дым", "банк", "монстер", "хевен", "шорт", "коннектор", "кт"],
+        }
+    ],
+    "anubis": [
+        {
+            "id": "vid-anubis-nades",
+            "types": ["smoke", "flash", "molotov", "grenade"],
+            "title": "Anubis: все раскидки гранат — смоки, молотовы и флешки",
+            "url": "https://www.youtube.com/watch?v=lJidiX0JJEk",
+            "tags": ["анубис", "anubis", "все раскидки", "смок", "дым", "молотов", "флешка", "граната", "мид", "вотер", "мейн", "сайт"],
+        }
+    ],
+    "vertigo": [
+        {
+            "id": "vid-vertigo-nades",
+            "types": ["smoke", "flash", "molotov"],
+            "title": "Vertigo: все основные раскидки — смоки, молотовы и флешки",
+            "url": "https://www.youtube.com/watch?v=AnMqaor4bww",
+            "tags": ["вертиго", "vertigo", "смок", "дым", "молотов", "флешка", "рампа", "мид", "лестница", "аутсайд"],
+        }
+    ],
+    "train": [
+        {
+            "id": "vid-train-nades",
+            "types": ["smoke", "flash", "molotov", "grenade"],
+            "title": "Train: все раскидки гранат — полный гайд",
+            "url": "https://www.youtube.com/watch?v=_6CGgh75qmM",
+            "tags": ["трейн", "train", "все раскидки", "смок", "дым", "молотов", "флешка", "граната", "айви", "лэддер", "коннектор", "мейн"],
+        }
+    ],
+    "cache": [
+        {
+            "id": "vid-cache-nades",
+            "types": ["smoke", "flash", "molotov", "grenade"],
+            "title": "Cache: все раскидки гранат — смоки, молотовы и флешки",
+            "url": "https://www.youtube.com/watch?v=5gbIC3igve8",
+            "tags": ["кэш", "cache", "все раскидки", "смок", "дым", "молотов", "флешка", "граната", "мид", "мейн", "хайвей", "вент"],
+        }
+    ],
+}

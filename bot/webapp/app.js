@@ -88,13 +88,14 @@
       g_tab_maps: 'Карты',
       g_sections: 'разделов', g_back_guides: 'В гайды',
       g_cat_lineups: 'Раскидки', g_cat_tactics: 'Тактики',
+      g_cat_videos: 'Видео гайды', g_video_open: 'Открыть на YouTube',
       g_type_all: 'Все', g_type_smoke: 'Смок', g_type_flash: 'Флешка',
       g_type_molotov: 'Молотов', g_type_grenade: 'Граната',
       g_lineups_empty: 'Пока нет раскидок', g_tactics_empty: 'Пока нет тактик',
       g_steps: 'Выполнение', g_video_soon: 'Видео скоро появится',
       g_map_hint: 'Нажми на точку на карте — увидишь раскидки с этой позиции',
       g_map_reset_spot: 'Сбросить точку', g_map_spot: 'Раскидки с этой точки', g_tactic_label: 'Тактика',
-      g_search_ph: 'Поиск по раскидкам и тактикам…'
+      g_search_ph: 'Поиск по раскидкам, видео и тактикам…'
     },
     en: {
       tab_stats: 'Stats', tab_settings: 'Settings', back: 'Back',
@@ -145,13 +146,14 @@
       g_tab_maps: 'Maps',
       g_sections: 'sections', g_back_guides: 'Back to guides',
       g_cat_lineups: 'Lineups', g_cat_tactics: 'Tactics',
+      g_cat_videos: 'Video guides', g_video_open: 'Open on YouTube',
       g_type_all: 'All', g_type_smoke: 'Smoke', g_type_flash: 'Flash',
       g_type_molotov: 'Molotov', g_type_grenade: 'Grenade',
       g_lineups_empty: 'No lineups yet', g_tactics_empty: 'No tactics yet',
       g_steps: 'Execution', g_video_soon: 'Video coming soon',
       g_map_hint: 'Tap a spot on the map to see lineups from it',
       g_map_reset_spot: 'Clear spot', g_map_spot: 'Lineups from this spot', g_tactic_label: 'Tactic',
-      g_search_ph: 'Search lineups and tactics…'
+      g_search_ph: 'Search lineups, videos and tactics…'
     }
   };
 
@@ -1323,6 +1325,350 @@
     grenade: { key: 'g_type_grenade', cls: 'lt-grenade', emoji: '💣' }
   };
 
+  const G_STOP = new Set(['на', 'в', 'из', 'и', 'к', 'за', 'от', 'по', 'со', 'с', 'у', 'для', 'до', 'во', 'что', 'как', 'не', 'же', 'бы', 'при', 'над', 'под', 'об', 'про', 'без', 'мне', 'нужно', 'надо', 'хочу', 'хотел', 'через', 'можно', 'типа', 'если', 'когда', 'нужен', 'нужна', 'все', 'всё', 'покажи', 'показать', 'посоветуй', 'дай', 'чтобы', 'я', 'играю', 'играть', 'играем', 'какой', 'какие', 'какая', 'где', 'это', 'или', 'тоже', 'очень']);
+
+  const G_TYPE_SYN = {
+    smoke: ['смок', 'дым', 'смоук', 'smoke', 'oneway', 'ванвей'],
+    flash: ['флешка', 'флеш', 'светаш', 'вспышка', 'flash', 'светошумовая', 'флешбанг'],
+    molotov: ['молотов', 'молот', 'зажигательная', 'молотовом', 'molotov', 'зажигательный'],
+    grenade: ['граната', 'гранат', 'grenade', 'гранаты']
+  };
+
+  const G_TERMS = [
+    { keys: ['выход', 'выйти', 'выбежать', 'выходить', 'вылезть'], w: 2 },
+    { keys: ['заход', 'зайти', 'заходит', 'заходить'], w: 2 },
+    { keys: ['пуш', 'пушить', 'пушим'], w: 2 },
+    { keys: ['контроль', 'контролировать'], w: 2 },
+    { keys: ['перекрыть', 'перекрывает', 'перекрытия'], w: 2 },
+    { keys: ['закрыть', 'закрывает'], w: 2 },
+    { keys: ['убрать', 'убирает', 'выжигает', 'выжечь'], w: 2 },
+    { keys: ['дефолт', 'default'], w: 2 },
+    { keys: ['ретекейт', 'ретейк'], w: 2 },
+    { keys: ['сайт', 'site', 'точка'], w: 2 },
+    { keys: ['ящик', 'ящика', 'box', 'бокс'], w: 2 },
+    { keys: ['пройти', 'проход', 'проходить', 'пройдём', 'проходим'], w: 2 },
+    { keys: ['взять', 'занять', 'забирать', 'забираем'], w: 2 },
+    { keys: ['идти', 'идём', 'идем', 'пойти', 'заходим'], w: 2 }
+  ];
+
+  const G_LOC = {
+    mirage: [
+      { name: 'window', aliases: ['окно', 'window', 'виндоу'] },
+      { name: 'ct', aliases: ['кт', 'ct'] },
+      { name: 'jungle', aliases: ['джангл', 'jungle', 'пальма'] },
+      { name: 'stairs', aliases: ['лестница', 'лестницу', 'stairs'] },
+      { name: 'underpass', aliases: ['андерпас', 'underpass'] },
+      { name: 'apartments', aliases: ['апартаменты', 'apartments', 'апсы'] },
+      { name: 'ramp', aliases: ['рамп', 'ramp'] },
+      { name: 'short', aliases: ['шорт', 'short'] },
+      { name: 'a', aliases: ['а', 'ай', 'a'] },
+      { name: 'b', aliases: ['б', 'би', 'b'] }
+    ],
+    dust2: [
+      { name: 'xbox', aliases: ['xbox', 'бокс', 'ящик'] },
+      { name: 'mid', aliases: ['mid', 'мид'] },
+      { name: 'long', aliases: ['long', 'лонг', 'длинная', 'длинную'] },
+      { name: 'window', aliases: ['окно', 'window', 'виндоу'] },
+      { name: 'short', aliases: ['short', 'шорт', 'кошка', 'cat', 'catwalk'] },
+      { name: 'goose', aliases: ['goose', 'гоуз', 'гусь', 'гуся', 'гус'] },
+      { name: 'ct', aliases: ['ct', 'кт'] },
+      { name: 'tunnels', aliases: ['туннели', 'туннел', 'tunnels'] },
+      { name: 'doors', aliases: ['двери', 'doors'] },
+      { name: 'a', aliases: ['а', 'ай', 'a'] },
+      { name: 'b', aliases: ['б', 'би', 'b'] }
+    ],
+    inferno: [
+      { name: 'banana', aliases: ['banana', 'банан', 'банану'] },
+      { name: 'ct', aliases: ['ct', 'кт'] },
+      { name: 'coffins', aliases: ['coffins', 'коффинс', 'гробы'] },
+      { name: 'mid', aliases: ['mid', 'мид'] },
+      { name: 'library', aliases: ['library', 'лайбрари', 'библиотека'] },
+      { name: 'arch', aliases: ['арка', 'arch', 'арки', 'арку'] },
+      { name: 'apartments', aliases: ['апартаменты', 'apartments', 'апсы'] },
+      { name: 'a', aliases: ['а', 'ай', 'a'] },
+      { name: 'b', aliases: ['б', 'би', 'b'] }
+    ],
+    nuke: [
+      { name: 'outside', aliases: ['outside', 'аутсайд', 'аут'] },
+      { name: 'secret', aliases: ['secret', 'секрет'] },
+      { name: 'ramp', aliases: ['ramp', 'рамп'] },
+      { name: 'hut', aliases: ['hut', 'хат'] },
+      { name: 'a', aliases: ['а', 'ай', 'a'] },
+      { name: 'b', aliases: ['б', 'би', 'b'] }
+    ],
+    ancient: [
+      { name: 'mid', aliases: ['mid', 'мид'] },
+      { name: 'cave', aliases: ['cave', 'кейв', 'пещера'] },
+      { name: 'main', aliases: ['main', 'мейн'] },
+      { name: 'a', aliases: ['а', 'ай', 'a'] },
+      { name: 'b', aliases: ['б', 'би', 'b'] }
+    ],
+    overpass: [
+      { name: 'monster', aliases: ['monster', 'монстр'] },
+      { name: 'short', aliases: ['short', 'шорт'] },
+      { name: 'construction', aliases: ['construction', 'констракшн', 'стройка'] },
+      { name: 'connector', aliases: ['connector', 'коннектор'] },
+      { name: 'a', aliases: ['а', 'ай', 'a'] },
+      { name: 'b', aliases: ['б', 'би', 'b'] }
+    ],
+    anubis: [
+      { name: 'mid', aliases: ['mid', 'мид'] },
+      { name: 'main', aliases: ['main', 'мейн'] },
+      { name: 'a', aliases: ['а', 'ай', 'a'] },
+      { name: 'b', aliases: ['б', 'би', 'b'] }
+    ],
+    vertigo: [
+      { name: 'ramp', aliases: ['ramp', 'рамп'] },
+      { name: 'main', aliases: ['main', 'мейн'] },
+      { name: 'a', aliases: ['а', 'ай', 'a'] },
+      { name: 'b', aliases: ['б', 'би', 'b'] }
+    ],
+    train: [
+      { name: 'ladder', aliases: ['ladder', 'лестница', 'ладер'] },
+      { name: 'ivy', aliases: ['ivy', 'айви'] },
+      { name: 'main', aliases: ['main', 'мейн'] },
+      { name: 'a', aliases: ['а', 'ай', 'a'] },
+      { name: 'b', aliases: ['б', 'би', 'b'] }
+    ],
+    cache: [
+      { name: 'mid', aliases: ['mid', 'мид'] },
+      { name: 'highway', aliases: ['highway', 'хайвей'] },
+      { name: 'main', aliases: ['main', 'мейн'] },
+      { name: 'a', aliases: ['а', 'ай', 'a'] },
+      { name: 'b', aliases: ['б', 'би', 'b'] }
+    ]
+  };
+
+  const G_SITE = {
+    mirage: {
+      a: { covers: ['window', 'jungle', 'ct', 'stairs', 'short', 'ramp', 'a'] },
+      b: { covers: ['underpass', 'apartments', 'ct', 'stairs', 'jungle', 'b'] }
+    },
+    dust2: {
+      a: { covers: ['long', 'goose', 'ct', 'doors', 'short', 'xbox', 'a'] },
+      b: { covers: ['short', 'window', 'tunnels', 'doors', 'mid', 'ct', 'xbox', 'b'] }
+    },
+    inferno: {
+      a: { covers: ['ct', 'apartments', 'arch', 'library', 'mid', 'a'] },
+      b: { covers: ['banana', 'coffins', 'ct', 'library', 'arch', 'b'] }
+    },
+    nuke: {
+      a: { covers: ['ramp', 'hut', 'outside', 'secret', 'a'] },
+      b: { covers: ['secret', 'ramp', 'outside', 'b'] }
+    },
+    ancient: {
+      a: { covers: ['main', 'mid', 'cave', 'a'] },
+      b: { covers: ['cave', 'mid', 'main', 'b'] }
+    },
+    overpass: {
+      a: { covers: ['monster', 'construction', 'connector', 'short', 'a'] },
+      b: { covers: ['short', 'construction', 'connector', 'monster', 'b'] }
+    },
+    anubis: {
+      a: { covers: ['main', 'mid', 'a'] },
+      b: { covers: ['main', 'mid', 'b'] }
+    },
+    vertigo: {
+      a: { covers: ['ramp', 'main', 'a'] },
+      b: { covers: ['ramp', 'main', 'b'] }
+    },
+    train: {
+      a: { covers: ['ladder', 'main', 'ivy', 'a'] },
+      b: { covers: ['ivy', 'main', 'ladder', 'b'] }
+    },
+    cache: {
+      a: { covers: ['mid', 'main', 'highway', 'a'] },
+      b: { covers: ['mid', 'main', 'highway', 'b'] }
+    }
+  };
+
+  const G_SITE_W = { 'а': 'a', 'a': 'a', 'ай': 'a', 'ai': 'a', 'б': 'b', 'b': 'b', 'би': 'b', 'бэ': 'b', 'be': 'b' };
+
+  const G_TR_ALPHA = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюяіїєґўabcdefghijklmnopqrstuvwxyz0123456789';
+  const G_TR = {
+    'sh': 'ш', 'ch': 'ч', 'zh': 'ж', 'ts': 'ц', 'ya': 'я', 'yu': 'ю', 'ye': 'е',
+    'yo': 'ё', 'kh': 'х', 'ph': 'ф', 'dz': 'дз', 'a': 'а', 'b': 'б', 'v': 'в',
+    'g': 'г', 'd': 'д', 'e': 'е', 'z': 'з', 'i': 'и', 'y': 'й', 'k': 'к', 'l': 'л',
+    'm': 'м', 'n': 'н', 'o': 'о', 'p': 'п', 'r': 'р', 's': 'с', 't': 'т', 'u': 'у',
+    'f': 'ф', 'h': 'х', 'c': 'ц', 'x': 'кс', 'w': 'в', 'q': 'к', 'j': 'дж',
+    'і': 'и', 'ї': 'и', 'є': 'е', 'ґ': 'г'
+  };
+  const _gNearCache = new Map();
+
+  function gTr(s) {
+    const out = [];
+    const cs = String(s || '').toLowerCase();
+    for (let i = 0; i < cs.length; i++) {
+      const two = cs.slice(i, i + 2);
+      if (G_TR[two]) { out.push(G_TR[two]); i++; continue; }
+      out.push(G_TR[cs[i]] || cs[i]);
+    }
+    return out.join('');
+  }
+
+  function gNear(s) {
+    const key = s || '';
+    if (_gNearCache.has(key)) return _gNearCache.get(key);
+    const set = new Set();
+    if (key.length) {
+      for (let i = 0; i < key.length; i++) set.add(key.slice(0, i) + key.slice(i + 1));
+      for (let i = 0; i < key.length; i++) {
+        const c = key[i];
+        for (let j = 0; j < G_TR_ALPHA.length; j++) {
+          const r = G_TR_ALPHA[j];
+          if (r !== c) set.add(key.slice(0, i) + r + key.slice(i + 1));
+        }
+      }
+    }
+    for (let i = 0; i <= key.length; i++) {
+      for (let j = 0; j < G_TR_ALPHA.length; j++) {
+        set.add(key.slice(0, i) + G_TR_ALPHA[j] + key.slice(i));
+      }
+    }
+    if (_gNearCache.size > 400) _gNearCache.clear();
+    _gNearCache.set(key, set);
+    return set;
+  }
+
+  function gStem(w) {
+    if (!w || w.length <= 3) return w;
+    const sufs = ['иями', 'ями', 'ого', 'его', 'ому', 'ему', 'ими', 'ыми', 'ая', 'яя', 'ый', 'ий', 'ой', 'ое', 'ее', 'ую', 'юю', 'ах', 'ях', 'ам', 'ям', 'ом', 'ем', 'ым', 'им', 'ов', 'ев', 'ей', 'а', 'я', 'ы', 'и', 'е', 'у', 'ю', 'о', 'ь'];
+    for (const s of sufs) {
+      if (w.length - s.length >= 3 && w.endsWith(s)) return w.slice(0, -s.length);
+    }
+    return w;
+  }
+
+  function gTokens(text) {
+    return String(text || '').toLowerCase().split(/[^a-zа-я0-9ёіїєґў]+/).filter(Boolean);
+  }
+
+  function gBuildIndex(mapId, item) {
+    const idx = {};
+    const add = (arr, w) => {
+      if (!arr) return;
+      arr.forEach(tok => {
+        const st = gStem(String(tok).toLowerCase());
+        if (st && !G_STOP.has(st)) idx[st] = Math.max(idx[st] || 0, w);
+      });
+    };
+    const title = item.title || '';
+    const steps = item.steps || [];
+    const text = title.toLowerCase() + ' ' + steps.join(' ').toLowerCase();
+    const textTok = new Set(gTokens(text));
+    const titleTok = new Set(gTokens(title));
+    const locs = [];
+    add(titleTok, 3);
+    add(G_TYPE_SYN[item.type], 3);
+    (G_LOC[mapId] || []).forEach(loc => {
+      if (textTok.has(loc.name)) {
+        locs.push(loc.name);
+        const w = titleTok.has(loc.name) ? 4 : 3;
+        add(loc.aliases, w);
+        add([loc.name], w);
+      }
+    });
+    G_TERMS.forEach(term => {
+      if (term.keys.some(k => text.indexOf(k) !== -1)) add(term.keys, term.w);
+    });
+    add(textTok, 1);
+    return { idx, keys: Object.keys(idx), blob: text, locs };
+  }
+
+  function gBuildVideoIndex(mapId, v) {
+    const idx = {};
+    const add = (arr, w) => {
+      if (!arr) return;
+      arr.forEach(tok => {
+        const st = gStem(String(tok).toLowerCase());
+        if (st && !G_STOP.has(st)) idx[st] = Math.max(idx[st] || 0, w);
+      });
+    };
+    const title = v.title || '';
+    const tags = v.tags || [];
+    const text = title.toLowerCase() + ' ' + tags.join(' ').toLowerCase();
+    const textTok = new Set(gTokens(text));
+    const titleTok = new Set(gTokens(title));
+    const locs = [];
+    add(titleTok, 3);
+    (v.types || []).forEach(ty => add(G_TYPE_SYN[ty] || [ty], 3));
+    (G_LOC[mapId] || []).forEach(loc => {
+      if (textTok.has(loc.name)) {
+        locs.push(loc.name);
+        const w = titleTok.has(loc.name) ? 4 : 3;
+        add(loc.aliases, w);
+        add([loc.name], w);
+      }
+    });
+    add(textTok, 1);
+    return { idx, keys: Object.keys(idx), blob: text, locs };
+  }
+
+  function gScore(idx, tokens) {
+    let score = 0, hits = 0;
+    const seen = new Set();
+    tokens.forEach(tok => {
+      let best = 0;
+      [tok, gTr(tok)].forEach(v => {
+        const st = gStem(v);
+        if (!st || G_STOP.has(st) || seen.has(st)) return;
+        seen.add(st);
+        if (idx.idx[st]) { best = Math.max(best, idx.idx[st]); return; }
+        if (st.length >= 3 && idx.blob.indexOf(st) !== -1) { best = Math.max(best, 1); return; }
+        if (st.length >= 3) {
+          const near = gNear(st);
+          idx.keys.forEach(k => {
+            if (near.has(k)) best = Math.max(best, idx.idx[k]);
+          });
+        }
+      });
+      if (best) { score += best; hits++; }
+    });
+    return { score, hits };
+  }
+
+  function gDetectGoal(mapId, tokens) {
+    const sites = new Set();
+    const routes = new Set();
+    const locs = G_LOC[mapId] || [];
+    tokens.forEach(tok => {
+      [tok, gTr(tok)].forEach(v => {
+        const st = gStem(v);
+        if (!st || G_STOP.has(st)) return;
+        const s = G_SITE_W[st];
+        if (s) { sites.add(s); }
+        const near = st.length >= 3 ? gNear(st) : null;
+        locs.forEach(loc => {
+          if (loc.aliases.some(al => {
+            const a = gStem(String(al).toLowerCase());
+            return a === st || (near && near.has(a));
+          })) routes.add(loc.name);
+        });
+      });
+    });
+    return { sites: [...sites], routes: [...routes] };
+  }
+
+  function gGoalScore(mapId, idx, goal) {
+    if ((!goal.sites.length && !goal.routes.length) || !idx.locs || !idx.locs.length) return 0;
+    const relevant = new Set();
+    goal.sites.forEach(s => {
+      const c = (G_SITE[mapId] || {})[s];
+      if (c) c.covers.forEach(x => relevant.add(x));
+    });
+    goal.routes.forEach(x => relevant.add(x));
+    let bonus = 0;
+    idx.locs.forEach(l => {
+      if (relevant.has(l)) bonus += 3;
+    });
+    goal.routes.forEach(x => {
+      if (idx.locs.indexOf(x) !== -1) bonus += 2;
+    });
+    if (goal.sites.includes('a') && idx.locs.indexOf('a') !== -1) bonus += 6;
+    if (goal.sites.includes('b') && idx.locs.indexOf('b') !== -1) bonus += 6;
+    return bonus;
+  }
+
   async function loadGuides() {
     if (!guidesData) {
       const res = await api.get('/api/guides');
@@ -1445,15 +1791,40 @@
     const listBox = el('div', 'map-list');
     view.appendChild(listBox);
 
+    const indexedL = lineups.map(l => ({ item: l, idx: gBuildIndex(item.id, l) }));
+    const indexedT = tactics.map(tc => ({ item: tc, idx: gBuildIndex(item.id, tc) }));
+    const videos = (guidesData.videos || {})[item.id] || [];
+    const indexedV = videos.map(v => ({ item: v, idx: gBuildVideoIndex(item.id, v) }));
+
     function renderResults() {
       listBox.innerHTML = '';
-      const q = search.value.trim().toLowerCase();
-      const match = x => !q || (x.title || '').toLowerCase().indexOf(q) !== -1 || (guideTypeLabel(x.type) || '').toLowerCase().indexOf(q) !== -1;
-      const ls = lineups.filter(match);
-      const ts = tactics.filter(match);
-      if (!ls.length && !ts.length) {
-        listBox.appendChild(el('p', 'section-text', q ? t('not_found') + ' «' + search.value.trim() + '»' : t('no_data')));
+      const raw = search.value.trim();
+      const q = raw.toLowerCase();
+      const qTok = gTokens(q).filter(t => !G_STOP.has(t));
+      const qTokS = qTok.map(gStem);
+      const goal = qTok.length ? gDetectGoal(item.id, qTokS) : { sites: [], routes: [] };
+
+      const pick = arr => {
+        const scored = arr.map(r => ({ r, s: gScore(r.idx, qTok).score + gGoalScore(item.id, r.idx, goal) }));
+        const hits = scored.filter(x => x.s > 0).sort((x, y) => y.s - x.s);
+        if (hits.length) return hits.map(x => x.r.item);
+        return arr
+          .filter(r => q && ((r.item.title || '').toLowerCase().indexOf(q) !== -1 || (guideTypeLabel(r.item.type) || '').toLowerCase().indexOf(q) !== -1))
+          .map(r => r.item);
+      };
+
+      const ls = (q && qTok.length) ? pick(indexedL) : lineups;
+      const ts = (q && qTok.length) ? pick(indexedT) : tactics;
+      const vs = (q && qTok.length) ? pick(indexedV) : videos;
+      if (!ls.length && !ts.length && !vs.length) {
+        listBox.appendChild(el('p', 'section-text', q ? t('not_found') + ' «' + raw + '»' : t('no_data')));
         return;
+      }
+      if (vs.length) {
+        const vh = el('div', 'map-list-head');
+        vh.appendChild(el('span', 'map-list-title', t('g_cat_videos') + ' · ' + vs.length));
+        listBox.appendChild(vh);
+        vs.forEach(v => listBox.appendChild(gVideoRow(v, () => renderVideoDetail(item, v))));
       }
       if (ls.length) {
         const lh = el('div', 'map-list-head');
@@ -1594,6 +1965,21 @@
     return row;
   }
 
+  function gVideoId(url) {
+    const m = String(url || '').match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|shorts\/|embed\/))([\w-]{6,})/);
+    return m ? m[1] : '';
+  }
+
+  function gVideoThumb(url) {
+    const id = gVideoId(url);
+    return id ? ('https://i.ytimg.com/vi/' + id + '/hqdefault.jpg') : '';
+  }
+
+  function gOpenUrl(url) {
+    if (tg && tg.openLink) { tg.openLink(url, { try_instant_view: false }); return; }
+    window.open(url, '_blank');
+  }
+
   function gVideo(url) {
     if (!url) return null;
     const wrap = el('div', 'g-video');
@@ -1622,6 +2008,50 @@
     steps.forEach(s => ol.appendChild(el('li', 'g-step', s)));
     wrap.appendChild(ol);
     return wrap;
+  }
+
+  function gVideoTypesMeta(v) {
+    return (v.types || []).map(ty => guideTypeLabel(ty)).join(' · ') || 'YouTube';
+  }
+
+  function gVideoRow(v, onClick) {
+    const row = el('div', 'g-row g-video-card');
+    const thumb = el('div', 'g-video-thumb');
+    const th = gVideoThumb(v.url);
+    if (th) {
+      const img = document.createElement('img');
+      img.setAttribute('src', th);
+      img.setAttribute('alt', v.title);
+      img.loading = 'lazy';
+      thumb.appendChild(img);
+    }
+    thumb.appendChild(el('span', 'g-video-play', '▶'));
+    row.appendChild(thumb);
+    const info = el('div', 'player-info');
+    info.appendChild(el('div', 'player-nick', v.title));
+    info.appendChild(el('div', 'player-meta', gVideoTypesMeta(v)));
+    row.appendChild(info);
+    row.appendChild(el('span', 'g-chev', '›'));
+    row.addEventListener('click', onClick);
+    return row;
+  }
+
+  function renderVideoDetail(item, v) {
+    clear();
+    view.appendChild(gBackBtn(() => renderMap(currentMap)));
+    const title = el('div', 'l-title');
+    title.appendChild(el('span', 'l-badge lt-video', '🎬'));
+    title.appendChild(el('span', 'l-name', v.title));
+    view.appendChild(title);
+    const vw = gVideo(v.url);
+    if (vw) view.appendChild(vw);
+    const meta = el('p', 'section-text', gVideoTypesMeta(v));
+    view.appendChild(meta);
+    const open = el('button', 'link-btn');
+    open.appendChild(el('span', 'ico-sm', '▶'));
+    open.appendChild(document.createTextNode(t('g_video_open')));
+    open.addEventListener('click', () => gOpenUrl(v.url));
+    view.appendChild(open);
   }
 
   function gMiniRadar(map, l) {
