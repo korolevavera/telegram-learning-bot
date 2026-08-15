@@ -673,28 +673,28 @@
     return row;
   }
 
-  function renderTeamDetail(t, td) {
+  function renderTeamDetail(team, td) {
     const hero = el('div', 't-hero');
-    const logo = avatarEl({ image: t.image, name: t.name });
+    const logo = avatarEl({ image: team.image, name: team.name });
     logo.classList.add('hero-logo');
     hero.appendChild(logo);
     const hinfo = el('div', 't-hinfo');
-    hinfo.appendChild(el('div', 't-name', t.name + (t.acronym ? ' ' + t.acronym : '')));
+    hinfo.appendChild(el('div', 't-name', team.name + (team.acronym ? ' ' + team.acronym : '')));
     const badges = el('div', 't-badges');
-    if (t.rank != null) badges.appendChild(el('span', 'rank-badge', '#' + t.rank));
-    if (t.rank_diff) badges.appendChild(el('span', 'delta-badge', (t.rank_diff > 0 ? '▲' : '▼') + ' ' + Math.abs(t.rank_diff)));
-    if (t.country_code) badges.appendChild(el('span', 'c-badge', t.country_code.toUpperCase()));
+    if (team.rank != null) badges.appendChild(el('span', 'rank-badge', '#' + team.rank));
+    if (team.rank_diff) badges.appendChild(el('span', 'delta-badge', (team.rank_diff > 0 ? '▲' : '▼') + ' ' + Math.abs(team.rank_diff)));
+    if (team.country_code) badges.appendChild(el('span', 'c-badge', team.country_code.toUpperCase()));
     hinfo.appendChild(badges);
     const meta = el('div', 't-meta');
-    if (t.country_name) meta.appendChild(el('span', null, t.country_name));
-    if (t.est_date) meta.appendChild(el('span', null, t('founded') + t.est_date));
-    if (t.six_month_earned) meta.appendChild(el('span', 'earn', formatMoney(t.six_month_earned)));
+    if (team.country_name) meta.appendChild(el('span', null, team.country_name));
+    if (team.est_date) meta.appendChild(el('span', null, t('founded') + team.est_date));
+    if (team.six_month_earned) meta.appendChild(el('span', 'earn', formatMoney(team.six_month_earned)));
     hinfo.appendChild(meta);
     hero.appendChild(hinfo);
-    if (t.slug) hero.appendChild(favBtn({ type: 'team', key: t.slug, name: t.name, image: t.image }));
+    if (team.slug) hero.appendChild(favBtn({ type: 'team', key: team.slug, name: team.name, image: team.image }));
     td.appendChild(hero);
 
-    const s = t.stats || {};
+    const s = team.stats || {};
     td.appendChild(sectionTitle('stats', t('stats_6m')));
     const grid = el('div', 's-grid');
     grid.appendChild(statCard(t('l_matches'), s.matches, 0));
@@ -714,14 +714,14 @@
 
     td.appendChild(sectionTitle('stats', t('history_6m')));
     const hist = el('div', 't-matches');
-    const ms = t.matches || [];
+    const ms = team.matches || [];
     if (!ms.length) hist.appendChild(el('p', 'muted-note', t('no_data')));
     ms.forEach(m => hist.appendChild(matchRow(m)));
     td.appendChild(hist);
 
     td.appendChild(sectionTitle('users', t('roster')));
     const rost = el('div', 't-roster');
-    const rl = t.roster || [];
+    const rl = team.roster || [];
     if (!rl.length) rost.appendChild(el('p', 'muted-note', t('no_data')));
     rl.forEach(p => rost.appendChild(rosterRow(p)));
     bindRows(rost, slug => openPlayer(slug));
@@ -729,7 +729,7 @@
 
     td.appendChild(sectionTitle('trophy', t('achievements')));
     const ach = el('div', 't-ach');
-    const al = t.achievements || [];
+    const al = team.achievements || [];
     if (!al.length) ach.appendChild(el('p', 'muted-note', t('no_data')));
     al.forEach(a => ach.appendChild(achRow(a)));
     td.appendChild(ach);
