@@ -1443,7 +1443,7 @@
     const stage = el('div', 'map-stage');
     const img = document.createElement('img');
     img.className = 'map-stage-img';
-    img.setAttribute('src', item.radar || item.img || ('/static/maps/' + item.image));
+    img.setAttribute('src', item.radar ? ('/static/maps/' + item.radar) : (item.img || ('/static/maps/' + item.image)));
     img.setAttribute('alt', item.name);
     img.loading = 'lazy';
     stage.appendChild(img);
