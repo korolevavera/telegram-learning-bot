@@ -36,7 +36,7 @@
   const FAV_KEY = 'cs2coach.favs';
   const ONB_KEY = 'cs2coach.onboarded';
   const REGIONS = ['EU', 'NA', 'SA', 'AS', 'AU'];
-  const THEMES = ['dark', 'light', 'gurren', 'pink'];
+  const THEMES = ['dark', 'light', 'gurren'];
   const PERIODS = [[90, 'p90'], [180, 'p180'], [365, 'p365']];
 
   const I18N = {
@@ -78,7 +78,7 @@
       gurren_q2: '«Мой бур пробьёт и небеса!» — Симон',
       gurren_q3: '«Выходи за пределы невозможного!» — Камина',
       gurren_note: 'Команда Дай-Гуррен · «Кто, по-твоему, мы такие?!» — Камина · «Мой бур пробьёт небеса!» — Симон',
-      theme_dark: 'Тёмная', theme_light: 'Светлая', theme_gurren: 'Gurren Lagann', theme_pink: 'Розовая',
+      theme_dark: 'Тёмная', theme_light: 'Светлая', theme_gurren: 'Gurren Lagann',
       lang_ru: 'Русский', lang_en: 'English',
       profile_tg: 'Профиль Telegram', app_label: 'Приложение', version: 'Версия',
       src_data: 'Источники данных', set_region: 'Регион FACEIT', set_period: 'Период статистики',
