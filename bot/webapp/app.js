@@ -93,7 +93,8 @@
       g_lineups_empty: 'Пока нет раскидок', g_tactics_empty: 'Пока нет тактик',
       g_steps: 'Выполнение', g_video_soon: 'Видео скоро появится',
       g_map_hint: 'Нажми на точку на карте — увидишь раскидки с этой позиции',
-      g_map_reset_spot: 'Сбросить точку', g_map_spot: 'Раскидки с этой точки', g_tactic_label: 'Тактика'
+      g_map_reset_spot: 'Сбросить точку', g_map_spot: 'Раскидки с этой точки', g_tactic_label: 'Тактика',
+      g_search_ph: 'Поиск по раскидкам и тактикам…'
     },
     en: {
       tab_stats: 'Stats', tab_settings: 'Settings', back: 'Back',
@@ -149,7 +150,8 @@
       g_lineups_empty: 'No lineups yet', g_tactics_empty: 'No tactics yet',
       g_steps: 'Execution', g_video_soon: 'Video coming soon',
       g_map_hint: 'Tap a spot on the map to see lineups from it',
-      g_map_reset_spot: 'Clear spot', g_map_spot: 'Lineups from this spot', g_tactic_label: 'Tactic'
+      g_map_reset_spot: 'Clear spot', g_map_spot: 'Lineups from this spot', g_tactic_label: 'Tactic',
+      g_search_ph: 'Search lineups and tactics…'
     }
   };
 
@@ -1429,6 +1431,46 @@
     img.loading = 'lazy';
     stage.appendChild(img);
     view.appendChild(stage);
+
+    const lineups = (guidesData.lineups || {})[item.id] || [];
+    const tactics = (guidesData.tactics || {})[item.id] || [];
+
+    const searchBox = el('div', 'search-box');
+    const search = el('input', 'search-input');
+    search.setAttribute('type', 'search');
+    search.setAttribute('placeholder', t('g_search_ph'));
+    searchBox.appendChild(search);
+    view.appendChild(searchBox);
+
+    const listBox = el('div', 'map-list');
+    view.appendChild(listBox);
+
+    function renderResults() {
+      listBox.innerHTML = '';
+      const q = search.value.trim().toLowerCase();
+      const match = x => !q || (x.title || '').toLowerCase().indexOf(q) !== -1 || (guideTypeLabel(x.type) || '').toLowerCase().indexOf(q) !== -1;
+      const ls = lineups.filter(match);
+      const ts = tactics.filter(match);
+      if (!ls.length && !ts.length) {
+        listBox.appendChild(el('p', 'section-text', q ? t('not_found') + ' «' + search.value.trim() + '»' : t('no_data')));
+        return;
+      }
+      if (ls.length) {
+        const lh = el('div', 'map-list-head');
+        lh.appendChild(el('span', 'map-list-title', t('g_cat_lineups') + ' · ' + ls.length));
+        listBox.appendChild(lh);
+        ls.forEach(l => listBox.appendChild(gLineupRow(l, () => renderLineupDetail(item, l))));
+      }
+      if (ts.length) {
+        const th = el('div', 'map-list-head');
+        th.appendChild(el('span', 'map-list-title', t('g_cat_tactics') + ' · ' + ts.length));
+        listBox.appendChild(th);
+        ts.forEach(tc => listBox.appendChild(gRow('T', tc.title, t('g_tactic_label'), () => renderTacticDetail(item, tc))));
+      }
+    }
+
+    search.addEventListener('input', renderResults);
+    renderResults();
   }
 
   function lineupSpotKey(l) {

@@ -4,7 +4,7 @@ from .config_loader import CONFIG
 from .content import CARDS, LESSONS, LINEUP_TYPES, MAPS, QUIZZES, TACTICS
 from .lineups_loader import get_lineups
 
-APP_VERSION = "19"
+APP_VERSION = "21"
 
 LINEUPS = get_lineups()
 
@@ -179,4 +179,6 @@ def guide_back_keyboard(map_id: str, to_lineups: bool) -> InlineKeyboardMarkup:
             [InlineKeyboardButton(text="🏠 Меню", callback_data="menu")],
         ]
     )
+
+
 
