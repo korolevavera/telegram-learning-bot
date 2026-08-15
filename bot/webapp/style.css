@@ -846,6 +846,11 @@ header h1 .brand .hl {
 .map-spot-label { color: var(--accent); }
 .spot-chip { color: var(--accent2) !important; border-color: rgba(var(--accent2-rgb), .6) !important; }
 .map-list { margin-top: 2px; }
+.map-list-head { display: flex; align-items: center; margin: 12px 0 4px; }
+.map-list-title { font-family: 'Orbitron', sans-serif; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); }
+.crumb { color: var(--muted); font-size: 12px; margin: 10px 0 -6px; }
+.map-stage.mini { max-width: 300px; margin-top: 2px; }
+.map-stage.mini .map-dot { width: 20px; height: 20px; cursor: default; pointer-events: none; box-shadow: 0 0 12px rgba(var(--accent-rgb), .7); }
 .l-title { display: flex; align-items: center; gap: 10px; margin: 12px 0; flex-wrap: wrap; }
 .l-name { font-family: 'Orbitron', sans-serif; font-size: 15px; letter-spacing: 1px; color: var(--text); }
 .g-video {

@@ -93,7 +93,7 @@
       g_lineups_empty: 'Пока нет раскидок', g_tactics_empty: 'Пока нет тактик',
       g_steps: 'Выполнение', g_video_soon: 'Видео скоро появится',
       g_map_hint: 'Нажми на точку на карте — увидишь раскидки с этой позиции',
-      g_map_reset_spot: 'Сбросить точку', g_map_spot: 'Раскидки с этой точки'
+      g_map_reset_spot: 'Сбросить точку', g_map_spot: 'Раскидки с этой точки', g_tactic_label: 'Тактика'
     },
     en: {
       tab_stats: 'Stats', tab_settings: 'Settings', back: 'Back',
@@ -149,7 +149,7 @@
       g_lineups_empty: 'No lineups yet', g_tactics_empty: 'No tactics yet',
       g_steps: 'Execution', g_video_soon: 'Video coming soon',
       g_map_hint: 'Tap a spot on the map to see lineups from it',
-      g_map_reset_spot: 'Clear spot', g_map_spot: 'Lineups from this spot'
+      g_map_reset_spot: 'Clear spot', g_map_spot: 'Lineups from this spot', g_tactic_label: 'Tactic'
     }
   };
 
@@ -1315,10 +1315,10 @@
   }
 
   const GUIDE_TYPES = {
-    smoke: { key: 'g_type_smoke', cls: 'lt-smoke' },
-    flash: { key: 'g_type_flash', cls: 'lt-flash' },
-    molotov: { key: 'g_type_molotov', cls: 'lt-molotov' },
-    grenade: { key: 'g_type_grenade', cls: 'lt-grenade' }
+    smoke: { key: 'g_type_smoke', cls: 'lt-smoke', emoji: '💨' },
+    flash: { key: 'g_type_flash', cls: 'lt-flash', emoji: '✨' },
+    molotov: { key: 'g_type_molotov', cls: 'lt-molotov', emoji: '🔥' },
+    grenade: { key: 'g_type_grenade', cls: 'lt-grenade', emoji: '💣' }
   };
 
   async function loadGuides() {
@@ -1422,6 +1422,7 @@
     currentMap = item;
     clear();
     view.appendChild(gBackBtn());
+    view.appendChild(el('div', 'crumb', t('tab_guides') + ' / ' + item.name));
     view.appendChild(sectionTitle('guides', item.name));
     const sub = el('div', 'sub-tabs');
     sub.appendChild(mapTabBtn('lineups', t('g_cat_lineups')));
@@ -1456,6 +1457,7 @@
     Object.keys(spots).forEach(k => {
       const s = spots[k];
       const mk = el('button', 'map-dot ' + guideTypeCls(s.list[0].type) + (mapSpotKey === k ? ' active' : ''));
+      mk.title = s.list.map(x => x.title).join(' · ');
       mk.style.left = s.x + '%';
       mk.style.top = s.y + '%';
       if (s.list.length > 1) mk.appendChild(el('span', 'map-dot-n', String(s.list.length)));
@@ -1466,10 +1468,12 @@
       stage.appendChild(mk);
     });
     box.appendChild(stage);
+    const present = {};
+    data.forEach(l => { if (l.type) present[l.type] = (present[l.type] || 0) + 1; });
     const chips = el('div', 'chips');
     const mkChip = id => {
       const c = el('button', 'chip' + (lineupFilter === id ? ' active' : ''));
-      c.textContent = guideTypeLabel(id);
+      c.textContent = guideTypeLabel(id) + (id !== 'all' && present[id] ? ' · ' + present[id] : '');
       c.addEventListener('click', () => { lineupFilter = id; renderMapLineups(box, item); });
       chips.appendChild(c);
     };
@@ -1481,12 +1485,19 @@
       chips.appendChild(reset);
     }
     mkChip('all');
-    Object.keys(guidesData.types || GUIDE_TYPES).forEach(mkChip);
+    Object.keys(present).forEach(mkChip);
     box.appendChild(chips);
-    if (mapSpotKey) box.appendChild(el('p', 'section-text map-spot-label', t('g_map_spot')));
-    else if (Object.keys(spots).length) box.appendChild(el('p', 'section-text map-hint', t('g_map_hint')));
+    if (mapSpotKey) {
+      const s = spots[mapSpotKey];
+      const names = (s ? s.list : []).map(x => x.title).slice(0, 2).join(', ');
+      const extra = s && s.list.length > 2 ? ' +' + (s.list.length - 2) : '';
+      box.appendChild(el('p', 'section-text map-spot-label', names ? names + extra : t('g_map_spot')));
+    } else if (Object.keys(spots).length) box.appendChild(el('p', 'section-text map-hint', t('g_map_hint')));
     const listBox = el('div', 'map-list');
     box.appendChild(listBox);
+    const head = el('div', 'map-list-head');
+    head.appendChild(el('span', 'map-list-title', t('g_cat_lineups') + ' · ' + data.length));
+    listBox.appendChild(head);
     let list = data;
     if (mapSpotKey) list = list.filter(l => lineupSpotKey(l) === mapSpotKey);
     if (lineupFilter !== 'all') list = list.filter(l => l.type === lineupFilter);
@@ -1497,7 +1508,10 @@
   function renderTacticsBox(box, item) {
     const data = (guidesData.tactics || {})[item.id] || [];
     if (!data.length) { box.appendChild(el('p', 'section-text', t('g_tactics_empty'))); return; }
-    data.forEach(tc => box.appendChild(gRow('T', tc.title, null, () => renderTacticDetail(item, tc))));
+    const head = el('div', 'map-list-head');
+    head.appendChild(el('span', 'map-list-title', t('g_cat_tactics') + ' · ' + data.length));
+    box.appendChild(head);
+    data.forEach(tc => box.appendChild(gRow('T', tc.title, t('g_tactic_label'), () => renderTacticDetail(item, tc))));
   }
 
   function guideTypeLabel(id) {
@@ -1513,11 +1527,28 @@
     return gt ? gt.cls : 'lt-smoke';
   }
 
+  function guideTypeEmoji(id) {
+    const gt = GUIDE_TYPES[id];
+    return gt ? gt.emoji : '💣';
+  }
+
+  function gStepCount(steps) {
+    const n = (steps || []).length;
+    if (lang === 'en') return n + (n === 1 ? ' step' : ' steps');
+    const d10 = n % 10, d100 = n % 100;
+    let p;
+    if (d10 === 1 && d100 !== 11) p = 'шаг';
+    else if (d10 >= 2 && d10 <= 4 && (d100 < 12 || d100 > 14)) p = 'шага';
+    else p = 'шагов';
+    return n + ' ' + p;
+  }
+
   function gLineupRow(l, onClick) {
     const row = el('div', 'g-row');
-    row.appendChild(el('span', 'l-badge ' + guideTypeCls(l.type), guideTypeLabel(l.type)));
+    row.appendChild(el('span', 'l-badge ' + guideTypeCls(l.type), guideTypeEmoji(l.type)));
     const info = el('div', 'player-info');
     info.appendChild(el('div', 'player-nick', l.title));
+    info.appendChild(el('div', 'player-meta', gStepCount(l.steps)));
     row.appendChild(info);
     row.appendChild(el('span', 'g-chev', '›'));
     row.addEventListener('click', onClick);
@@ -1525,11 +1556,8 @@
   }
 
   function gVideo(url) {
+    if (!url) return null;
     const wrap = el('div', 'g-video');
-    if (!url) {
-      wrap.appendChild(el('p', 'section-text', t('g_video_soon')));
-      return wrap;
-    }
     if (url.indexOf('youtu') !== -1) {
       const embed = url.replace('watch?v=', 'embed/').replace('youtu.be/', 'www.youtube.com/embed/');
       const iframe = document.createElement('iframe');
@@ -1557,6 +1585,22 @@
     return wrap;
   }
 
+  function gMiniRadar(map, l) {
+    if (!l.pos || !l.pos.length) return null;
+    const stage = el('div', 'map-stage mini');
+    const img = document.createElement('img');
+    img.className = 'map-stage-img';
+    img.setAttribute('src', map.radar ? ('/static/maps/' + map.radar) : ('/static/maps/' + map.image));
+    img.setAttribute('alt', map.name);
+    img.loading = 'lazy';
+    stage.appendChild(img);
+    const mk = el('span', 'map-dot active ' + guideTypeCls(l.type));
+    mk.style.left = l.pos[0] + '%';
+    mk.style.top = l.pos[1] + '%';
+    stage.appendChild(mk);
+    return stage;
+  }
+
   function renderLineupDetail(item, l) {
     clear();
     view.appendChild(gBackBtn(() => renderMap(currentMap)));
@@ -1564,7 +1608,10 @@
     title.appendChild(el('span', 'l-badge ' + guideTypeCls(l.type), guideTypeLabel(l.type)));
     title.appendChild(el('span', 'l-name', l.title));
     view.appendChild(title);
-    view.appendChild(gVideo(l.video));
+    const mini = gMiniRadar(item, l);
+    if (mini) view.appendChild(mini);
+    const v = gVideo(l.video);
+    if (v) view.appendChild(v);
     view.appendChild(gSteps(l.steps));
   }
 
@@ -1572,7 +1619,16 @@
     clear();
     view.appendChild(gBackBtn(() => renderMap(currentMap)));
     view.appendChild(sectionTitle('guides', tc.title));
-    view.appendChild(gVideo(tc.video));
+    const stage = el('div', 'map-stage');
+    const img = document.createElement('img');
+    img.className = 'map-stage-img';
+    img.setAttribute('src', item.radar ? ('/static/maps/' + item.radar) : ('/static/maps/' + item.image));
+    img.setAttribute('alt', item.name);
+    img.loading = 'lazy';
+    stage.appendChild(img);
+    view.appendChild(stage);
+    const v = gVideo(tc.video);
+    if (v) view.appendChild(v);
     view.appendChild(gSteps(tc.steps));
   }
 
