@@ -1307,3 +1307,123 @@ html[data-theme="gurren"] .tab.active .tab-ico { filter: drop-shadow(0 0 8px rgb
   0%, 100% { transform: scale(1); box-shadow: 0 0 10px rgba(255, 91, 43, .35); }
   50% { transform: scale(1.06); box-shadow: 0 0 20px rgba(255, 209, 63, .65); }
 }
+
+/* ===================== Тактики v2: режимы, плейбук, радар ===================== */
+
+.t-mode-tabs { display: flex; gap: 8px; margin: 12px 0 4px; }
+.t-mode-tab {
+  flex: 1; padding: 9px 6px; border: 1px solid rgba(var(--accent-rgb), .3);
+  border-radius: 10px; background: rgba(var(--accent-rgb), .06); color: var(--text);
+  font-family: 'Orbitron', sans-serif; font-size: 11px; letter-spacing: 1px;
+  text-transform: uppercase; cursor: pointer; transition: .2s;
+}
+.t-mode-tab.active {
+  background: var(--accent); color: #06121a; font-weight: 700;
+  box-shadow: 0 0 14px rgba(var(--accent-rgb), .5);
+}
+.t-mode-body { margin-top: 4px; }
+
+.t-diff { font-variant-numeric: tabular-nums; letter-spacing: 2px; color: var(--gold); }
+
+.t-phase-chips { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+.t-phase-chip {
+  display: flex; align-items: center; gap: 10px; padding: 9px 12px;
+  background: rgba(var(--accent-rgb), .07); border: 1px solid rgba(var(--accent-rgb), .22);
+  border-radius: 10px;
+}
+.t-phase-chip-num {
+  font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 700; color: var(--accent);
+}
+.t-phase-chip-name { flex: 1; font-size: 13.5px; color: var(--text); font-weight: 600; }
+.t-phase-chip-steps { font-size: 12px; color: var(--muted); }
+
+.t-radar { position: relative; }
+.t-svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.t-arrow-line { stroke-width: 1.4; opacity: .55; stroke-linecap: round; }
+.t-arrow-line.active { opacity: 1; stroke-width: 2; }
+
+.t-dot {
+  position: absolute; transform: translate(-50%, -50%); width: 22px; height: 22px;
+  border-radius: 50%; border: 2px solid #fff; background: #9aa0b5; cursor: pointer;
+  box-shadow: 0 0 8px rgba(0, 0, 0, .55); transition: transform .15s, box-shadow .2s; padding: 0;
+  z-index: 2; display: flex; align-items: center; justify-content: center;
+}
+.t-dot:hover { transform: translate(-50%, -50%) scale(1.2); }
+.t-dot.active { box-shadow: 0 0 0 3px rgba(255, 255, 255, .85), 0 0 16px rgba(var(--accent-rgb), .8); z-index: 3; }
+.t-dot-pulse {
+  position: absolute; inset: -6px; border-radius: 50%;
+  border: 2px solid currentColor; animation: tPulse 1.6s ease-out infinite; pointer-events: none;
+}
+@keyframes tPulse {
+  0% { transform: scale(.7); opacity: .9; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+.t-dot-util {
+  position: absolute; top: -9px; right: -9px; font-size: 12px; line-height: 1;
+  background: rgba(6, 18, 26, .92); border-radius: 50%; padding: 2px; pointer-events: none;
+}
+
+.g-step-text { color: var(--text); }
+.g-step-badges { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 6px; }
+.g-role-badge, .g-time-badge {
+  font-size: 11px; line-height: 1; padding: 4px 8px; border-radius: 999px;
+  background: rgba(var(--accent-rgb), .12); border: 1px solid rgba(var(--accent-rgb), .3);
+  color: var(--text); white-space: nowrap;
+}
+.g-role-badge { border-color: transparent; }
+.g-time-badge { color: var(--gold); border-color: rgba(255, 209, 102, .35); }
+.g-util {
+  font-size: 11px; line-height: 1; padding: 4px 8px; border-radius: 999px; cursor: pointer;
+  border: 1px solid rgba(var(--accent-rgb), .35); background: rgba(var(--accent-rgb), .1);
+  color: var(--text); transition: .15s;
+}
+.g-util:active { transform: scale(.94); }
+.g-util-chips { display: inline-flex; gap: 6px; flex-wrap: wrap; }
+
+.g-term { color: var(--gold); text-decoration: underline dotted rgba(255, 209, 102, .6); cursor: pointer; }
+.g-term-pop {
+  margin: 10px 0; padding: 12px; border-radius: 10px;
+  background: linear-gradient(135deg, rgba(var(--accent-rgb), .12), rgba(var(--accent-rgb), .04));
+  border: 1px solid rgba(var(--accent-rgb), .35); animation: fadeUp .2s ease;
+}
+.g-term-pop-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.g-term-pop-name { font-family: 'Orbitron', sans-serif; font-size: 13px; letter-spacing: 1px; color: var(--gold); }
+.g-term-pop-close {
+  background: none; border: none; color: var(--muted); font-size: 15px; cursor: pointer; padding: 2px 6px;
+}
+.g-term-pop-desc { font-size: 13px; line-height: 1.5; color: var(--text); margin-bottom: 8px; }
+
+.t-role-chips { margin: 6px 0 12px; }
+.role-chip.active { background: var(--accent); color: #06121a; font-weight: 700; }
+
+.pb-info {
+  margin-top: 12px; padding: 12px; border-radius: 10px;
+  background: rgba(var(--accent-rgb), .07); border: 1px solid rgba(var(--accent-rgb), .22);
+}
+.pb-step-meta { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 8px; }
+.pb-phase {
+  font-family: 'Orbitron', sans-serif; font-size: 11px; letter-spacing: 1.2px;
+  text-transform: uppercase; color: var(--accent);
+}
+.pb-time { font-size: 12px; color: var(--gold); font-variant-numeric: tabular-nums; }
+.pb-step-text { font-size: 14.5px; line-height: 1.6; color: var(--text); }
+.pb-role {
+  display: inline-block; margin-top: 8px; font-size: 12px; padding: 4px 10px; border-radius: 999px;
+  background: rgba(var(--accent-rgb), .12); border: 1px solid rgba(var(--accent-rgb), .3); color: var(--text);
+}
+.pb-util-row { margin-top: 8px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.pb-util-title { font-size: 12px; color: var(--muted); }
+
+.pb-nav { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 12px; }
+.pb-btn {
+  padding: 10px 16px; border: 1px solid rgba(var(--accent-rgb), .35); border-radius: 10px;
+  background: rgba(var(--accent-rgb), .08); color: var(--text); font-size: 16px; cursor: pointer; transition: .15s;
+}
+.pb-btn:active { transform: scale(.94); }
+.pb-stepof { font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.pb-play {
+  font-family: 'Orbitron', sans-serif; font-size: 10.5px; letter-spacing: 1px; text-transform: uppercase;
+  background: var(--accent); color: #06121a; border-color: transparent; font-weight: 700;
+  padding: 10px 12px;
+}
+.pb-play:active { transform: scale(.94); }

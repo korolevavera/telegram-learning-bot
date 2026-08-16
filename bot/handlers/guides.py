@@ -2,7 +2,7 @@ from aiogram import F, Router
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery
 
-from ..content import LINEUP_TYPES, MAPS, flatten_tactics, tactic_steps
+from ..content import DIFFICULTY, LINEUP_TYPES, MAPS, ROLES, flatten_tactics, tactic_steps
 from ..keyboards import (
     guide_back_keyboard,
     guide_lineups_keyboard,
@@ -36,8 +36,27 @@ def _lineup_badge(lineup: dict) -> str:
     return f"{emoji} {label}"
 
 
-def _steps_text(steps: list[str]) -> str:
-    return "\n".join(f"{i + 1}. {step}" for i, step in enumerate(steps))
+def _steps_text(steps: list) -> str:
+    parts = []
+    for i, step in enumerate(steps):
+        if isinstance(step, dict):
+            text = step.get("text", "")
+            badges = []
+            role = step.get("role")
+            if role:
+                role_info = ROLES.get(role, {})
+                badges.append(f"{role_info.get('emoji', '')}{role_info.get('ru', role)}")
+            for util in step.get("util", []) or []:
+                u_info = LINEUP_TYPES.get(util.get("type", ""), {})
+                badges.append(f"{u_info.get('emoji', '🧨')}{u_info.get('label', util.get('type', ''))}")
+            time = step.get("time")
+            if time is not None:
+                badges.append(f"⏱️{time}с")
+            prefix = f"[{' · '.join(badges)}] " if badges else ""
+            parts.append(f"{i + 1}. {prefix}{text}")
+        else:
+            parts.append(f"{i + 1}. {step}")
+    return "\n".join(parts)
 
 
 @router.callback_query(F.data == "guides")
@@ -151,6 +170,10 @@ async def show_tactic(cb: CallbackQuery) -> None:
     if tactic.get("short"):
         lines.append(f"💡 <i>{tactic['short']}</i>")
     lines.append(f"🗺️ {map_data['emoji']} {map_data['name']}")
+    diff = tactic.get("difficulty")
+    if diff:
+        d_info = DIFFICULTY.get(diff, {})
+        lines.append(f"📊 <b>Сложность:</b> {'●' * diff}{'○' * (3 - diff)} {d_info.get('ru', '')}")
     if tactic.get("goal"):
         lines.append(f"🎯 <b>Цель:</b> {tactic['goal']}")
     if tactic.get("buy"):

@@ -117,7 +117,15 @@
       g_spot_no_video: 'Видео для этой позиции скоро появится',
       g_spot_hint: 'Нажми на точку на радаре — под ней появится видео',
       g_spot_next: 'Следующее видео',
-      g_spot_open: 'Открыть на YouTube'
+      g_spot_open: 'Открыть на YouTube',
+      g_mode_tldr: 'Коротко', g_mode_plan: 'План', g_mode_playbook: 'Плейбук',
+      g_difficulty: 'Сложность', g_roles: 'Роли',
+      g_role_filter: 'Показать роль', g_role_all: 'Все роли',
+      g_prev_step: 'Шаг назад', g_next_step: 'Шаг вперёд',
+      g_autoplay: 'Автопросмотр', g_autoplay_stop: 'Стоп',
+      g_step_of: 'Шаг {0} из {1}', g_phase: 'Фаза',
+      g_util_video: 'Смотреть раскидку', g_glossary: 'Подсказка',
+      g_playbook_hint: 'Листай шаги как в реальном раунде: точки на радаре, стрелки — движение, утилиты и роли рядом с шагом.'
     },
     en: {
       tab_stats: 'Stats', tab_settings: 'Settings', back: 'Back',
@@ -195,7 +203,15 @@
       g_spot_no_video: 'Video for this spot coming soon',
       g_spot_hint: 'Tap a spot on the radar to watch a video',
       g_spot_next: 'Next video',
-      g_spot_open: 'Open on YouTube'
+      g_spot_open: 'Open on YouTube',
+      g_mode_tldr: 'TL;DR', g_mode_plan: 'Plan', g_mode_playbook: 'Playbook',
+      g_difficulty: 'Difficulty', g_roles: 'Roles',
+      g_role_filter: 'Show role', g_role_all: 'All roles',
+      g_prev_step: 'Previous step', g_next_step: 'Next step',
+      g_autoplay: 'Autoplay', g_autoplay_stop: 'Stop',
+      g_step_of: 'Step {0} of {1}', g_phase: 'Phase',
+      g_util_video: 'Watch the lineup', g_glossary: 'Hint',
+      g_playbook_hint: 'Flip through steps like a real round: dots on the radar, arrows — movement, utility and roles next to each step.'
     }
   };
 
@@ -2253,6 +2269,163 @@
     view.appendChild(gSteps(l.steps));
   }
 
+  const ROLE_COLORS = { entry: '#ff6b5e', support: '#5ec8ff', awp: '#ffd166', lurker: '#b18cff', rifler: '#6ee7b7', anchor: '#ff9f6b', rotator: '#7ee8a0' };
+
+  function roleColor(r) { return ROLE_COLORS[r] || '#9aa0b5'; }
+  function roleEmoji(r) { const d = (guidesData.roles || {})[r]; return d ? d.emoji : ''; }
+  function roleRu(r) { const d = (guidesData.roles || {})[r]; return d ? (d.ru || r) : r; }
+  function diffBadge(tc) { const n = tc.difficulty || 0; let s = ''; for (let i = 1; i <= 3; i++) s += (i <= n ? '●' : '○'); return s; }
+  function diffName(tc) { const d = (guidesData.difficulty || {})[tc.difficulty]; return d ? (lang === 'en' ? d.en : d.ru) : ''; }
+  function posOf(id, item) { const m = (guidesData.positions || {})[item.id] || {}; return m[id] || null; }
+  function spotName(item, id) { const sp = (guidesData.spots || {})[item.id] || []; const f = sp.find(s => s.id === id); return f ? f.name : null; }
+  function spotExists(item, id) { return ((guidesData.spots || {})[item.id] || []).some(s => s.id === id); }
+
+  function glossHtml(item, text) {
+    const m = (guidesData.terms || {})[item.id] || {};
+    const keys = Object.keys(m);
+    let out = String(text);
+    keys.forEach(k => {
+      if (out.indexOf('<span class="g-term"') !== -1 && out.indexOf('>' + k + '<') !== -1) return;
+      const re = new RegExp('(?<![a-zа-яё])(' + k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')(?![a-zа-яё])', 'gi');
+      out = out.replace(re, '<span class="g-term" data-term="' + k + '">$1</span>');
+    });
+    return out;
+  }
+
+  function bindGloss(root, item) {
+    root.querySelectorAll('.g-term').forEach(sp => sp.addEventListener('click', () => showTermPop(item, sp.dataset.term)));
+  }
+
+  function removeTermPop() { const p = view.querySelector('.g-term-pop'); if (p) p.remove(); }
+
+  function showTermPop(item, key) {
+    const m = (guidesData.terms || {})[item.id] || {};
+    const data = m[key];
+    if (!data) return;
+    removeTermPop();
+    const pop = el('div', 'g-term-pop');
+    const head = el('div', 'g-term-pop-head');
+    head.appendChild(el('span', 'g-term-pop-name', data.name || key));
+    const close = el('button', 'g-term-pop-close', '✕');
+    close.addEventListener('click', removeTermPop);
+    head.appendChild(close);
+    pop.appendChild(head);
+    if (data.desc) pop.appendChild(el('div', 'g-term-pop-desc', data.desc));
+    if (data.pos) {
+      const p = posOf(data.pos, item);
+      if (p) {
+        const stage = el('div', 'map-stage mini');
+        const img = document.createElement('img');
+        img.className = 'map-stage-img';
+        img.setAttribute('src', item.radar ? ('/static/maps/' + item.radar) : ('/static/maps/' + item.image));
+        img.setAttribute('alt', item.name);
+        img.loading = 'lazy';
+        stage.appendChild(img);
+        const mk = el('span', 'map-dot active');
+        mk.style.left = p[0] + '%';
+        mk.style.top = p[1] + '%';
+        stage.appendChild(mk);
+        pop.appendChild(stage);
+      }
+    }
+    pop.addEventListener('click', (e) => { if (e.target === pop) removeTermPop(); });
+    view.appendChild(pop);
+  }
+
+  function tacticRadar(item, marks) {
+    const svgns = 'http://www.w3.org/2000/svg';
+    const stage = el('div', 'map-stage t-radar');
+    const img = document.createElement('img');
+    img.className = 'map-stage-img';
+    img.setAttribute('src', item.radar ? ('/static/maps/' + item.radar) : ('/static/maps/' + item.image));
+    img.setAttribute('alt', item.name);
+    img.loading = 'lazy';
+    stage.appendChild(img);
+
+    const svg = document.createElementNS(svgns, 'svg');
+    svg.setAttribute('class', 't-svg');
+    svg.setAttribute('viewBox', '0 0 100 100');
+    svg.setAttribute('preserveAspectRatio', 'none');
+
+    function arrowMarker(color) {
+      const id = 'ah' + color.replace('#', '');
+      if (svg.querySelector('#' + id)) return id;
+      const marker = document.createElementNS(svgns, 'marker');
+      marker.setAttribute('id', id);
+      marker.setAttribute('viewBox', '0 0 10 10');
+      marker.setAttribute('refX', '9');
+      marker.setAttribute('refY', '5');
+      marker.setAttribute('markerWidth', '5');
+      marker.setAttribute('markerHeight', '5');
+      marker.setAttribute('orient', 'auto-start-reverse');
+      const path = document.createElementNS(svgns, 'path');
+      path.setAttribute('d', 'M0,0 L10,5 L0,10 z');
+      path.setAttribute('fill', color);
+      marker.appendChild(path);
+      svg.appendChild(marker);
+      return id;
+    }
+
+    marks.forEach(mk => {
+      if (mk.from && mk.to && mk.from !== mk.to) {
+        const a = posOf(mk.from, item), b = posOf(mk.to, item);
+        if (a && b) {
+          const line = document.createElementNS(svgns, 'line');
+          line.setAttribute('x1', a[0]); line.setAttribute('y1', a[1]);
+          line.setAttribute('x2', b[0]); line.setAttribute('y2', b[1]);
+          line.setAttribute('class', 't-arrow-line' + (mk.active ? ' active' : ''));
+          const color = mk.role ? roleColor(mk.role) : '#ffd166';
+          line.setAttribute('stroke', color);
+          line.setAttribute('marker-end', 'url(#' + arrowMarker(color) + ')');
+          svg.appendChild(line);
+        }
+      }
+    });
+    stage.appendChild(svg);
+
+    marks.forEach(mk => {
+      const p = posOf(mk.pos, item);
+      if (!p) return;
+      const dot = el('button', 't-dot' + (mk.active ? ' active' : ''));
+      dot.dataset.pos = mk.pos;
+      dot.style.left = p[0] + '%';
+      dot.style.top = p[1] + '%';
+      if (mk.role) dot.style.background = roleColor(mk.role);
+      if (mk.util && mk.util.length) dot.appendChild(el('span', 't-dot-util', guideTypeEmoji(mk.util[0].type)));
+      if (mk.active) dot.appendChild(el('span', 't-dot-pulse'));
+      if (mk.onClick) dot.addEventListener('click', mk.onClick);
+      stage.appendChild(dot);
+    });
+    return stage;
+  }
+
+  function utilChips(item, step, onOpen) {
+    const chips = el('span', 'g-util-chips');
+    (step.util || []).forEach(u => {
+      const c = el('button', 'g-util ' + guideTypeCls(u.type));
+      c.textContent = guideTypeEmoji(u.type);
+      const hasVideo = u.pos && spotExists(item, u.pos);
+      c.title = guideTypeLabel(u.type) + (hasVideo ? ' · ' + t('g_util_video') : (u.pos && posOf(u.pos, item) ? ' · ' + t('g_spot_no_video') : ''));
+      c.addEventListener('click', (e) => { e.stopPropagation(); if (onOpen) onOpen(u, hasVideo); });
+      chips.appendChild(c);
+    });
+    return chips;
+  }
+
+  function flatSteps(tc) {
+    const out = [];
+    tacticPhases(tc).forEach((ph, i) => {
+      (ph.steps || []).forEach(s => out.push({ phase: i, phaseName: ph.name, step: s }));
+    });
+    return out;
+  }
+
+  function openSpotVideo(item, posId) {
+    if (!posId || !spotExists(item, posId)) return;
+    activeSpotId = posId;
+    renderMap(item);
+  }
+
   function renderTacticDetail(item, tc, back, ctx) {
     clear();
     view.appendChild(gBackBtn(back || (() => renderMap(currentMap))));
@@ -2264,26 +2437,219 @@
     const chips = el('div', 'tactic-chips');
     if (ctx && ctx.side) chips.appendChild(el('span', 't-chip ' + (ctx.side === 't' ? 'side-t' : 'side-ct'), (ctx.side === 't' ? 'T' : 'CT') + ' · ' + t(ctx.side === 't' ? 'g_side_t' : 'g_side_ct')));
     if (ctx && ctx.round) chips.appendChild(el('span', 't-chip', roundLabel(ctx.round)));
+    if (tc.difficulty) chips.appendChild(el('span', 't-chip t-diff', diffBadge(tc) + ' ' + diffName(tc)));
     if (item && item.name) chips.appendChild(el('span', 't-chip t-chip-map', (item.emoji || '') + ' ' + item.name));
     head.appendChild(chips);
     view.appendChild(head);
 
-    if (tc.short) view.appendChild(tacticBox('◎', t('g_essence'), tc.short, 't-essence'));
+    const modes = [['tldr', t('g_mode_tldr')], ['plan', t('g_mode_plan')], ['playbook', t('g_mode_playbook')]];
+    const tabRow = el('div', 't-mode-tabs');
+    view.appendChild(tabRow);
+    const body = el('div', 't-mode-body');
+    view.appendChild(body);
 
-    const metaGrid = el('div', 'tactic-meta-grid');
-    if (tc.goal) metaGrid.appendChild(tacticBox('🎯', t('g_goal'), tc.goal, 't-goal'));
-    if (tc.buy) metaGrid.appendChild(tacticBox('💰', t('g_buy'), tc.buy, 't-buy'));
-    if (metaGrid.children.length) view.appendChild(metaGrid);
+    function renderMode(mode) {
+      body.innerHTML = '';
+      tabRow.querySelectorAll('.t-mode-tab').forEach(b => b.classList.remove('active'));
+      const active = Array.from(tabRow.children).find(b => b.dataset.mode === mode);
+      if (active) active.classList.add('active');
+      if (mode === 'tldr') renderTldr(body);
+      else if (mode === 'plan') renderPlan(body);
+      else renderPlaybook(body, item, tc);
+    }
 
-    const stage = el('div', 'map-stage');
-    const img = document.createElement('img');
-    img.className = 'map-stage-img';
-    img.setAttribute('src', item.radar ? ('/static/maps/' + item.radar) : ('/static/maps/' + item.image));
-    img.setAttribute('alt', item.name);
-    img.loading = 'lazy';
-    stage.appendChild(img);
-    view.appendChild(stage);
-    view.appendChild(gPhases(tc));
+    modes.forEach(m => {
+      const b = el('button', 't-mode-tab', m[1]);
+      b.dataset.mode = m[0];
+      b.addEventListener('click', () => renderMode(m[0]));
+      tabRow.appendChild(b);
+    });
+
+    function renderTldr(root) {
+      if (tc.short) root.appendChild(tacticBox('◎', t('g_essence'), tc.short, 't-essence'));
+      const meta = el('div', 'tactic-meta-grid');
+      if (tc.goal) meta.appendChild(tacticBox('🎯', t('g_goal'), tc.goal, 't-goal'));
+      if (tc.buy) meta.appendChild(tacticBox('💰', t('g_buy'), tc.buy, 't-buy'));
+      if (meta.children.length) root.appendChild(meta);
+      const phases = tacticPhases(tc);
+      const marks = [];
+      phases.forEach(ph => (ph.steps || []).forEach(s => { if (s.pos) marks.push({ pos: s.pos, role: s.role, util: s.util }); }));
+      if (marks.length) root.appendChild(tacticRadar(item, marks));
+      const chipsWrap = el('div', 't-phase-chips');
+      phases.forEach((ph, i) => {
+        const c = el('div', 't-phase-chip');
+        c.appendChild(el('span', 't-phase-chip-num', String(i + 1).padStart(2, '0')));
+        c.appendChild(el('span', 't-phase-chip-name', ph.name));
+        c.appendChild(el('span', 't-phase-chip-steps', String((ph.steps || []).length) + ' ⤷'));
+        chipsWrap.appendChild(c);
+      });
+      if (chipsWrap.children.length) root.appendChild(chipsWrap);
+    }
+
+    function renderPlan(root) {
+      if (tc.short) root.appendChild(tacticBox('◎', t('g_essence'), tc.short, 't-essence'));
+      const meta = el('div', 'tactic-meta-grid');
+      if (tc.goal) meta.appendChild(tacticBox('🎯', t('g_goal'), tc.goal, 't-goal'));
+      if (tc.buy) meta.appendChild(tacticBox('💰', t('g_buy'), tc.buy, 't-buy'));
+      if (meta.children.length) root.appendChild(meta);
+      const phases = tacticPhases(tc);
+      const marks = [];
+      phases.forEach(ph => (ph.steps || []).forEach(s => { if (s.pos) marks.push({ pos: s.pos, role: s.role, from: s.from, to: s.to, util: s.util }); }));
+      if (marks.length) root.appendChild(tacticRadar(item, marks));
+      const wrap = el('div', 'g-phases');
+      phases.forEach((ph, i) => {
+        const block = el('div', 'g-phase');
+        const head = el('div', 'g-phase-head');
+        head.appendChild(el('span', 'g-phase-num', String(i + 1).padStart(2, '0')));
+        head.appendChild(el('span', 'g-phase-name', ph.name));
+        const times = (ph.steps || []).map(s => s.time).filter(x => x != null);
+        if (times.length) head.appendChild(el('span', 'g-phase-time', '⏱ ' + Math.min.apply(null, times) + '–' + Math.max.apply(null, times) + 'с'));
+        block.appendChild(head);
+        const ol = el('ol', 'g-steps');
+        (ph.steps || []).forEach(s => {
+          const li = el('li', 'g-step');
+          const txt = el('div', 'g-step-text');
+          txt.innerHTML = glossHtml(item, s.text);
+          bindGloss(txt, item);
+          li.appendChild(txt);
+          const badges = el('div', 'g-step-badges');
+          if (s.role) badges.appendChild(el('span', 'g-role-badge', (roleEmoji(s.role) || '') + ' ' + roleRu(s.role)));
+          if (s.time != null) badges.appendChild(el('span', 'g-time-badge', '⏱ ' + s.time + 'с'));
+          if (s.util && s.util.length) {
+            s.util.forEach(u => {
+              const c = el('button', 'g-util ' + guideTypeCls(u.type));
+              c.textContent = guideTypeEmoji(u.type) + ' ' + guideTypeLabel(u.type);
+              c.addEventListener('click', () => { if (u.pos) openSpotVideo(item, u.pos); });
+              badges.appendChild(c);
+            });
+          }          if (badges.children.length) li.appendChild(badges);
+          ol.appendChild(li);
+        });
+        block.appendChild(ol);
+        wrap.appendChild(block);
+      });
+      root.appendChild(wrap);
+    }
+
+    renderMode('tldr');
+  }
+
+  function renderPlaybook(body, item, tc) {
+    const flat = flatSteps(tc);
+    let idx = 0;
+    let auto = false;
+    let timer = null;
+
+    const hint = el('p', 'section-text', t('g_playbook_hint'));
+    body.appendChild(hint);
+
+    const roleChips = el('div', 'chips t-role-chips');
+    const present = [];
+    flat.forEach(x => { if (x.step.role && present.indexOf(x.step.role) < 0) present.push(x.step.role); });
+    let roleFilter = null;
+    const mkChip = (r, label) => {
+      const c = el('button', 'chip role-chip' + (r === null ? ' active' : ''));
+      c.textContent = label;
+      c.addEventListener('click', () => {
+        roleChips.querySelectorAll('.chip').forEach(x => x.classList.remove('active'));
+        c.classList.add('active');
+        roleFilter = r;
+        stop();
+        renderStep();
+      });
+      roleChips.appendChild(c);
+    };
+    mkChip(null, t('g_role_all'));
+    present.forEach(r => mkChip(r, (roleEmoji(r) || '') + ' ' + roleRu(r)));
+    body.appendChild(roleChips);
+
+    const radar = el('div');
+    body.appendChild(radar);
+    const info = el('div', 'pb-info');
+    body.appendChild(info);
+    const nav = el('div', 'pb-nav');
+    body.appendChild(nav);
+    const play = el('button', 'pb-btn pb-play', t('g_autoplay'));
+
+    function visibleSteps() {
+      const res = [];
+      for (let i = 0; i < flat.length; i++) if (!roleFilter || flat[i].step.role === roleFilter) res.push(i);
+      return res;
+    }
+
+    function stop() { auto = false; if (timer) { clearTimeout(timer); timer = null; } play.textContent = t('g_autoplay'); }
+
+    function schedule() {
+      if (!auto) return;
+      const list = visibleSteps();
+      const pos = list.indexOf(idx);
+      if (pos >= list.length - 1) { stop(); return; }
+      const cur = flat[list[pos]].step;
+      const nx = flat[list[pos + 1]].step;
+      let delay = 4000;
+      if (cur.time != null && nx.time != null) {
+        const d = (nx.time - cur.time) * 1000;
+        if (d >= 1500 && d <= 12000) delay = d;
+      }
+      timer = setTimeout(() => { if (!auto || !body.isConnected) return; idx = list[pos + 1]; renderStep(); schedule(); }, delay);
+    }
+
+    function renderStep() {
+      if (timer) { clearTimeout(timer); timer = null; }
+      if (!body.isConnected) return;
+      const list = visibleSteps();
+      if (!list.length) return;
+      let pos = list.indexOf(idx);
+      if (pos < 0) { pos = 0; idx = list[0]; }
+      const fi = list[pos];
+      const st = flat[fi].step;
+
+      const marks = list.map(li => {
+        const x = flat[li].step;
+        return { pos: x.pos, from: x.from, to: x.to, role: x.role, util: x.util, active: li === fi, onClick: li === fi ? null : () => { stop(); idx = li; renderStep(); } };
+      });
+      radar.innerHTML = '';
+      radar.appendChild(tacticRadar(item, marks));
+
+      info.innerHTML = '';
+      const meta = el('div', 'pb-step-meta');
+      meta.appendChild(el('span', 'pb-phase', t('g_phase') + ' ' + String(flat[fi].phase + 1) + ' · ' + flat[fi].phaseName));
+      if (st.time != null) meta.appendChild(el('span', 'pb-time', '⏱ ' + st.time + 'с'));
+      info.appendChild(meta);
+      const txt = el('div', 'pb-step-text');
+      txt.innerHTML = glossHtml(item, st.text);
+      bindGloss(txt, item);
+      info.appendChild(txt);
+      if (st.role) info.appendChild(el('div', 'pb-role', (roleEmoji(st.role) || '') + ' ' + roleRu(st.role)));
+      const chips = utilChips(item, st, u => openSpotVideo(item, u.pos));
+      if (chips.children.length) {
+        const row = el('div', 'pb-util-row');
+        row.appendChild(el('span', 'pb-util-title', t('g_util_video') + ':'));
+        row.appendChild(chips);
+        info.appendChild(row);
+      }
+
+      nav.innerHTML = '';
+      const prev = el('button', 'pb-btn', '‹');
+      prev.setAttribute('aria-label', t('g_prev_step'));
+      prev.addEventListener('click', () => { stop(); pos = (pos - 1 + list.length) % list.length; idx = list[pos]; renderStep(); });
+      const next = el('button', 'pb-btn pb-next', '›');
+      next.setAttribute('aria-label', t('g_next_step'));
+      next.addEventListener('click', () => { stop(); pos = (pos + 1) % list.length; idx = list[pos]; renderStep(); });
+      const stepOf = el('span', 'pb-stepof', t('g_step_of').replace('{0}', String(pos + 1)).replace('{1}', String(list.length)));
+      play.addEventListener('click', () => {
+        if (auto) { stop(); return; }
+        auto = true;
+        play.textContent = t('g_autoplay_stop');
+        schedule();
+      });
+      nav.appendChild(prev);
+      nav.appendChild(stepOf);
+      nav.appendChild(play);
+      nav.appendChild(next);
+    }
+
+    renderStep();
   }
 
 
