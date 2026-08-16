@@ -118,14 +118,16 @@
       g_spot_hint: 'Нажми на точку на радаре — под ней появится видео',
       g_spot_next: 'Следующее видео',
       g_spot_open: 'Открыть на YouTube',
-      g_mode_tldr: 'Коротко', g_mode_plan: 'План', g_mode_playbook: 'Плейбук',
+      g_mode_tldr: 'Коротко', g_mode_plan: 'Схема', g_mode_replay: 'Реплей',
       g_difficulty: 'Сложность', g_roles: 'Роли',
       g_role_filter: 'Показать роль', g_role_all: 'Все роли',
       g_prev_step: 'Шаг назад', g_next_step: 'Шаг вперёд',
       g_autoplay: 'Автопросмотр', g_autoplay_stop: 'Стоп',
       g_step_of: 'Шаг {0} из {1}', g_phase: 'Фаза',
       g_util_video: 'Смотреть раскидку', g_glossary: 'Подсказка',
-      g_playbook_hint: 'Листай шаги как в реальном раунде: точки на радаре, стрелки — движение, утилиты и роли рядом с шагом.'
+      g_replay_play: 'Смотреть', g_replay_pause: 'Пауза',
+      g_replay_restart: 'Сначала', g_replay_speed: 'Скорость',
+      g_replay_hint: 'Нажми «Смотреть» — игроки разыграют тактику по таймлайну, как в реальном раунде.'
     },
     en: {
       tab_stats: 'Stats', tab_settings: 'Settings', back: 'Back',
@@ -204,14 +206,16 @@
       g_spot_hint: 'Tap a spot on the radar to watch a video',
       g_spot_next: 'Next video',
       g_spot_open: 'Open on YouTube',
-      g_mode_tldr: 'TL;DR', g_mode_plan: 'Plan', g_mode_playbook: 'Playbook',
+      g_mode_tldr: 'TL;DR', g_mode_plan: 'Scheme', g_mode_replay: 'Replay',
       g_difficulty: 'Difficulty', g_roles: 'Roles',
       g_role_filter: 'Show role', g_role_all: 'All roles',
       g_prev_step: 'Previous step', g_next_step: 'Next step',
       g_autoplay: 'Autoplay', g_autoplay_stop: 'Stop',
       g_step_of: 'Step {0} of {1}', g_phase: 'Phase',
       g_util_video: 'Watch the lineup', g_glossary: 'Hint',
-      g_playbook_hint: 'Flip through steps like a real round: dots on the radar, arrows — movement, utility and roles next to each step.'
+      g_replay_play: 'Watch', g_replay_pause: 'Pause',
+      g_replay_restart: 'Restart', g_replay_speed: 'Speed',
+      g_replay_hint: 'Hit "Watch" — players run the tactic on the timeline, like a real round.'
     }
   };
 
@@ -2426,6 +2430,18 @@
     renderMap(item);
   }
 
+  let activeRafId = null;
+  function raf(fn) {
+    if (typeof requestAnimationFrame === 'function') return requestAnimationFrame(fn);
+    return setInterval(function () { fn(performance.now()); }, 33);
+  }
+  function caf(id) {
+    if (id == null) return;
+    if (typeof cancelAnimationFrame === 'function') cancelAnimationFrame(id);
+    else clearInterval(id);
+  }
+  function stopActiveRaf() { if (activeRafId != null) { caf(activeRafId); activeRafId = null; } }
+
   function renderTacticDetail(item, tc, back, ctx) {
     clear();
     view.appendChild(gBackBtn(back || (() => renderMap(currentMap))));
@@ -2442,20 +2458,21 @@
     head.appendChild(chips);
     view.appendChild(head);
 
-    const modes = [['tldr', t('g_mode_tldr')], ['plan', t('g_mode_plan')], ['playbook', t('g_mode_playbook')]];
+    const modes = [['replay', t('g_mode_replay')], ['plan', t('g_mode_plan')], ['tldr', t('g_mode_tldr')]];
     const tabRow = el('div', 't-mode-tabs');
     view.appendChild(tabRow);
     const body = el('div', 't-mode-body');
     view.appendChild(body);
 
     function renderMode(mode) {
+      stopActiveRaf();
       body.innerHTML = '';
       tabRow.querySelectorAll('.t-mode-tab').forEach(b => b.classList.remove('active'));
       const active = Array.from(tabRow.children).find(b => b.dataset.mode === mode);
       if (active) active.classList.add('active');
-      if (mode === 'tldr') renderTldr(body);
+      if (mode === 'replay') renderReplay(body, item, tc);
       else if (mode === 'plan') renderPlan(body);
-      else renderPlaybook(body, item, tc);
+      else renderTldr(body);
     }
 
     modes.forEach(m => {
@@ -2531,125 +2548,278 @@
       root.appendChild(wrap);
     }
 
-    renderMode('tldr');
+    renderMode('replay');
   }
 
-  function renderPlaybook(body, item, tc) {
+  function renderReplay(body, item, tc) {
+    const svgns = 'http://www.w3.org/2000/svg';
     const flat = flatSteps(tc);
-    let idx = 0;
-    let auto = false;
-    let timer = null;
+    let prevT = 0;
+    flat.forEach(f => {
+      if (f.step.time == null) f.step.time = prevT + 3;
+      prevT = f.step.time;
+    });
+    const maxT = Math.max(115, prevT + 5);
 
-    const hint = el('p', 'section-text', t('g_playbook_hint'));
-    body.appendChild(hint);
-
-    const roleChips = el('div', 'chips t-role-chips');
-    const present = [];
-    flat.forEach(x => { if (x.step.role && present.indexOf(x.step.role) < 0) present.push(x.step.role); });
-    let roleFilter = null;
-    const mkChip = (r, label) => {
-      const c = el('button', 'chip role-chip' + (r === null ? ' active' : ''));
-      c.textContent = label;
-      c.addEventListener('click', () => {
-        roleChips.querySelectorAll('.chip').forEach(x => x.classList.remove('active'));
-        c.classList.add('active');
-        roleFilter = r;
-        stop();
-        renderStep();
-      });
-      roleChips.appendChild(c);
-    };
-    mkChip(null, t('g_role_all'));
-    present.forEach(r => mkChip(r, (roleEmoji(r) || '') + ' ' + roleRu(r)));
-    body.appendChild(roleChips);
-
-    const radar = el('div');
-    body.appendChild(radar);
-    const info = el('div', 'pb-info');
-    body.appendChild(info);
-    const nav = el('div', 'pb-nav');
-    body.appendChild(nav);
-    const play = el('button', 'pb-btn pb-play', t('g_autoplay'));
-
-    function visibleSteps() {
-      const res = [];
-      for (let i = 0; i < flat.length; i++) if (!roleFilter || flat[i].step.role === roleFilter) res.push(i);
-      return res;
+    const tracks = {};
+    const order = [];
+    const events = [];
+    function trk(name) {
+      if (!tracks[name]) { tracks[name] = []; order.push(name); }
+      return tracks[name];
     }
-
-    function stop() { auto = false; if (timer) { clearTimeout(timer); timer = null; } play.textContent = t('g_autoplay'); }
-
-    function schedule() {
-      if (!auto) return;
-      const list = visibleSteps();
-      const pos = list.indexOf(idx);
-      if (pos >= list.length - 1) { stop(); return; }
-      const cur = flat[list[pos]].step;
-      const nx = flat[list[pos + 1]].step;
-      let delay = 4000;
-      if (cur.time != null && nx.time != null) {
-        const d = (nx.time - cur.time) * 1000;
-        if (d >= 1500 && d <= 12000) delay = d;
+    function addKf(name, kf) {
+      if (!kf.pos) return;
+      const a = tracks[name];
+      const last = a[a.length - 1];
+      if (last && last.time === kf.time && last.pos[0] === kf.pos[0] && last.pos[1] === kf.pos[1]) return;
+      a.push(kf);
+    }
+    flat.forEach(f => {
+      const s = f.step;
+      const t = s.time;
+      const name = s.role || '__team';
+      const list = trk(name);
+      if (s.from && s.to) {
+        const startT = list.length ? list[list.length - 1].time : Math.max(0, t - 5);
+        addKf(name, { time: startT, pos: posOf(s.from, item) });
+        addKf(name, { time: t, pos: posOf(s.to, item) });
+      } else if (s.pos) {
+        addKf(name, { time: t, pos: posOf(s.pos, item) });
       }
-      timer = setTimeout(() => { if (!auto || !body.isConnected) return; idx = list[pos + 1]; renderStep(); schedule(); }, delay);
+      (s.util || []).forEach(u => {
+        const tp = posOf(u.pos, item);
+        if (tp) events.push({ time: t, type: u.type, target: tp, track: name });
+      });
+    });
+    events.sort((a, b) => a.time - b.time);
+
+    function trackPosAt(name, t) {
+      const kfs = tracks[name];
+      if (!kfs || !kfs.length) return null;
+      if (t < kfs[0].time) return null;
+      if (t >= kfs[kfs.length - 1].time) return kfs[kfs.length - 1].pos;
+      for (let i = 0; i < kfs.length - 1; i++) {
+        const a = kfs[i], b = kfs[i + 1];
+        if (t <= b.time) {
+          const span = Math.max(0.0001, b.time - a.time);
+          const k = Math.min(1, Math.max(0, (t - a.time) / span));
+          const e = k * k * (3 - 2 * k);
+          return [a.pos[0] + (b.pos[0] - a.pos[0]) * e, a.pos[1] + (b.pos[1] - a.pos[1]) * e];
+        }
+      }
+      return kfs[kfs.length - 1].pos;
     }
 
-    function renderStep() {
-      if (timer) { clearTimeout(timer); timer = null; }
-      if (!body.isConnected) return;
-      const list = visibleSteps();
-      if (!list.length) return;
-      let pos = list.indexOf(idx);
-      if (pos < 0) { pos = 0; idx = list[0]; }
-      const fi = list[pos];
-      const st = flat[fi].step;
+    body.appendChild(el('p', 'section-text', t('g_replay_hint')));
 
-      const marks = list.map(li => {
-        const x = flat[li].step;
-        return { pos: x.pos, from: x.from, to: x.to, role: x.role, util: x.util, active: li === fi, onClick: li === fi ? null : () => { stop(); idx = li; renderStep(); } };
-      });
-      radar.innerHTML = '';
-      radar.appendChild(tacticRadar(item, marks));
+    const stage = el('div', 'map-stage t-radar t-replay-stage');
+    const img = document.createElement('img');
+    img.className = 'map-stage-img';
+    img.setAttribute('src', item.radar ? ('/static/maps/' + item.radar) : ('/static/maps/' + item.image));
+    img.setAttribute('alt', item.name);
+    img.loading = 'lazy';
+    stage.appendChild(img);
+    body.appendChild(stage);
 
-      info.innerHTML = '';
-      const meta = el('div', 'pb-step-meta');
-      meta.appendChild(el('span', 'pb-phase', t('g_phase') + ' ' + String(flat[fi].phase + 1) + ' · ' + flat[fi].phaseName));
-      if (st.time != null) meta.appendChild(el('span', 'pb-time', '⏱ ' + st.time + 'с'));
-      info.appendChild(meta);
-      const txt = el('div', 'pb-step-text');
-      txt.innerHTML = glossHtml(item, st.text);
+    const svg = document.createElementNS(svgns, 'svg');
+    svg.setAttribute('class', 't-svg');
+    svg.setAttribute('viewBox', '0 0 100 100');
+    svg.setAttribute('preserveAspectRatio', 'none');
+    stage.appendChild(svg);
+
+    order.forEach(name => {
+      const kfs = tracks[name];
+      if (kfs.length < 2) return;
+      const pts = kfs.map(k => k.pos[0] + ',' + k.pos[1]).join(' ');
+      const poly = document.createElementNS(svgns, 'polyline');
+      poly.setAttribute('class', 't-path');
+      poly.setAttribute('points', pts);
+      poly.setAttribute('fill', 'none');
+      poly.setAttribute('stroke', name === '__team' ? '#cbd5e1' : roleColor(name));
+      svg.appendChild(poly);
+    });
+
+    const markers = {};
+    order.forEach(name => {
+      const mk = el('span', 't-ply' + (name === '__team' ? ' team' : '') + (name !== '__team' ? ' r-' + name : ''));
+      mk.style.background = name === '__team' ? '#cbd5e1' : roleColor(name);
+      mk.textContent = name === '__team' ? '⚑' : (roleEmoji(name) || '•');
+      mk.style.display = 'none';
+      stage.appendChild(mk);
+      markers[name] = mk;
+    });
+
+    function trackColor(name) { return name === '__team' ? '#cbd5e1' : roleColor(name); }
+
+    function spawnBurst(ev) {
+      const from = trackPosAt(ev.track, ev.time);
+      if (from && from[0] !== ev.target[0] || from && from[1] !== ev.target[1]) {
+        const arc = document.createElementNS(svgns, 'path');
+        const cx = (from[0] + ev.target[0]) / 2;
+        const cy = Math.min(from[1], ev.target[1]) - 14;
+        arc.setAttribute('d', 'M' + from[0] + ',' + from[1] + ' Q' + cx + ',' + cy + ' ' + ev.target[0] + ',' + ev.target[1]);
+        arc.setAttribute('class', 't-arc');
+        arc.setAttribute('stroke', trackColor(ev.track));
+        arc.setAttribute('fill', 'none');
+        arc.setAttribute('stroke-dasharray', '120');
+        svg.appendChild(arc);
+        setTimeout(() => { if (arc.isConnected) arc.remove(); }, 800);
+      }
+      const burst = el('span', 't-burst');
+      burst.style.left = ev.target[0] + '%';
+      burst.style.top = ev.target[1] + '%';
+      const ring = el('span', 't-burst-ring');
+      burst.appendChild(ring);
+      burst.appendChild(el('span', 't-burst-ico', guideTypeEmoji(ev.type)));
+      stage.appendChild(burst);
+      setTimeout(() => { if (burst.isConnected) burst.remove(); }, 1000);
+    }
+
+    const tl = el('div', 't-tl');
+    const bar = el('div', 't-tl-bar');
+    const track = el('div', 't-tl-track');
+    const fill = el('div', 't-tl-fill');
+    track.appendChild(fill);
+    bar.appendChild(track);
+    const head = el('div', 't-tl-playhead');
+    bar.appendChild(head);
+    flat.forEach(f => {
+      const dt = el('button', 't-tl-dot');
+      dt.dataset.time = String(f.step.time);
+      dt.style.left = (f.step.time / maxT * 100) + '%';
+      dt.addEventListener('click', (e) => { e.stopPropagation(); seek(Number(dt.dataset.time)); });
+      bar.appendChild(dt);
+    });
+    [0, 20, 40, 60, 80, 100, 115].forEach(v => {
+      if (v > maxT) return;
+      const tk = el('span', 't-tl-tick', v === 115 ? '115' : String(v));
+      tk.style.left = (v / maxT * 100) + '%';
+      bar.appendChild(tk);
+    });
+    bar.addEventListener('click', (e) => {
+      const r = bar.getBoundingClientRect();
+      seek(((e.clientX - r.left) / r.width) * maxT);
+    });
+    tl.appendChild(bar);
+    body.appendChild(tl);
+
+    const controls = el('div', 't-r-controls');
+    const playBtn = el('button', 't-r-btn t-r-play', '▶ ' + t('g_replay_play'));
+    const restartBtn = el('button', 't-r-btn', '⟲ ' + t('g_replay_restart'));
+    const speedBtn = el('button', 't-r-btn', t('g_replay_speed') + ' ×1');
+    const timeLbl = el('span', 't-r-time', '0с');
+    controls.appendChild(restartBtn);
+    controls.appendChild(playBtn);
+    controls.appendChild(speedBtn);
+    controls.appendChild(timeLbl);
+    body.appendChild(controls);
+
+    const stepsBox = el('div', 't-r-steps');
+    body.appendChild(stepsBox);
+    const stepEls = [];
+    flat.forEach((f, i) => {
+      const s = f.step;
+      const row = el('div', 't-r-step');
+      if (s.time != null) row.appendChild(el('span', 't-r-step-time', String(s.time) + 'с'));
+      const inner = el('div', 't-r-step-inner');
+      const txt = el('div', 'g-step-text');
+      txt.innerHTML = glossHtml(item, s.text);
       bindGloss(txt, item);
-      info.appendChild(txt);
-      if (st.role) info.appendChild(el('div', 'pb-role', (roleEmoji(st.role) || '') + ' ' + roleRu(st.role)));
-      const chips = utilChips(item, st, u => openSpotVideo(item, u.pos));
-      if (chips.children.length) {
-        const row = el('div', 'pb-util-row');
-        row.appendChild(el('span', 'pb-util-title', t('g_util_video') + ':'));
-        row.appendChild(chips);
-        info.appendChild(row);
+      inner.appendChild(txt);
+      const badges = el('div', 'g-step-badges');
+      if (s.role) badges.appendChild(el('span', 'g-role-badge', (roleEmoji(s.role) || '') + ' ' + roleRu(s.role)));
+      if (s.util && s.util.length) {
+        s.util.forEach(u => {
+          const c = el('button', 'g-util ' + guideTypeCls(u.type));
+          c.textContent = guideTypeEmoji(u.type) + ' ' + guideTypeLabel(u.type);
+          c.addEventListener('click', () => { if (u.pos) openSpotVideo(item, u.pos); });
+          badges.appendChild(c);
+        });
       }
+      if (badges.children.length) inner.appendChild(badges);
+      row.appendChild(inner);
+      row.appendChild(el('span', 't-r-step-phase', String(f.phase + 1) + ' · ' + f.phaseName));
+      stepsBox.appendChild(row);
+      stepEls.push(row);
+    });
 
-      nav.innerHTML = '';
-      const prev = el('button', 'pb-btn', '‹');
-      prev.setAttribute('aria-label', t('g_prev_step'));
-      prev.addEventListener('click', () => { stop(); pos = (pos - 1 + list.length) % list.length; idx = list[pos]; renderStep(); });
-      const next = el('button', 'pb-btn pb-next', '›');
-      next.setAttribute('aria-label', t('g_next_step'));
-      next.addEventListener('click', () => { stop(); pos = (pos + 1) % list.length; idx = list[pos]; renderStep(); });
-      const stepOf = el('span', 'pb-stepof', t('g_step_of').replace('{0}', String(pos + 1)).replace('{1}', String(list.length)));
-      play.addEventListener('click', () => {
-        if (auto) { stop(); return; }
-        auto = true;
-        play.textContent = t('g_autoplay_stop');
-        schedule();
-      });
-      nav.appendChild(prev);
-      nav.appendChild(stepOf);
-      nav.appendChild(play);
-      nav.appendChild(next);
+    let cur = 0, playing = false, speed = 1, evPtr = 0, lastTs = null;
+    let lastRendered = 0;
+
+    function resetBursts() {
+      evPtr = 0;
+      stage.querySelectorAll('.t-burst, .t-arc').forEach(n => n.remove());
     }
 
-    renderStep();
+    function seek(t) {
+      cur = Math.min(maxT, Math.max(0, t));
+      if (cur < lastRendered - 0.1) resetBursts();
+      renderFrame(cur);
+      lastRendered = cur;
+    }
+
+    function updatePlayBtn() {
+      playBtn.textContent = (playing ? '❚❚ ' : '▶ ') + t(playing ? 'g_replay_pause' : 'g_replay_play');
+    }
+
+    playBtn.addEventListener('click', () => {
+      if (!playing && cur >= maxT) { cur = 0; resetBursts(); }
+      playing = !playing;
+      lastTs = null;
+      updatePlayBtn();
+    });
+    restartBtn.addEventListener('click', () => { playing = false; updatePlayBtn(); cur = 0; resetBursts(); renderFrame(0); lastRendered = 0; });
+    let speedIdx = 0;
+    const speeds = [1, 2, 0.5];
+    speedBtn.addEventListener('click', () => {
+      speedIdx = (speedIdx + 1) % speeds.length;
+      speed = speeds[speedIdx];
+      speedBtn.textContent = t('g_replay_speed') + ' ×' + speed;
+    });
+
+    function renderFrame(t) {
+      order.forEach(name => {
+        const p = trackPosAt(name, t);
+        const mk = markers[name];
+        if (!p) { mk.style.display = 'none'; return; }
+        mk.style.display = '';
+        mk.style.left = p[0] + '%';
+        mk.style.top = p[1] + '%';
+      });
+      fill.style.width = (t / maxT * 100) + '%';
+      head.style.left = (t / maxT * 100) + '%';
+      timeLbl.textContent = Math.round(t) + 'с';
+      while (evPtr < events.length && events[evPtr].time <= t) { spawnBurst(events[evPtr]); evPtr++; }
+      const curIdx = flat.reduce((acc, f, i) => (f.step.time <= t ? i : acc), -1);
+      stepEls.forEach((r, i) => {
+        const on = i === curIdx;
+        r.classList.toggle('active', on);
+        if (on && !r._scrolled) {
+          r._scrolled = true;
+          if (typeof r.scrollIntoView === 'function') r.scrollIntoView({ block: 'nearest' });
+        }
+        if (!on) r._scrolled = false;
+      });
+    }
+
+    function loop(ts) {
+      if (!body.isConnected) return;
+      if (lastTs == null) lastTs = ts;
+      const dt = (ts - lastTs) / 1000;
+      lastTs = ts;
+      if (playing) {
+        cur += dt * speed;
+        if (cur >= maxT) { cur = maxT; playing = false; updatePlayBtn(); }
+        renderFrame(cur);
+        lastRendered = cur;
+      }
+      activeRafId = raf(loop);
+    }
+
+    renderFrame(0);
+    stopActiveRaf();
+    activeRafId = raf(loop);
   }
 
 
