@@ -1,7 +1,7 @@
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
 
 from .config_loader import CONFIG
-from .content import CARDS, LESSONS, LINEUP_TYPES, MAPS, QUIZZES, TACTICS
+from .content import CARDS, LESSONS, LINEUP_TYPES, MAPS, QUIZZES, TACTICS, flatten_tactics
 from .lineups_loader import get_lineups
 
 APP_VERSION = "21"
@@ -164,7 +164,7 @@ def guide_tactics_keyboard(map_id: str) -> InlineKeyboardMarkup:
                 callback_data=f"guide_tactic:{map_id}:{tactic['id']}",
             )
         ]
-        for tactic in TACTICS.get(map_id, [])
+        for tactic in flatten_tactics(map_id)
     ]
     rows.append([InlineKeyboardButton(text="⬅️ К карте", callback_data=f"guide_map:{map_id}")])
     rows.append([InlineKeyboardButton(text="🏠 Меню", callback_data="menu")])

@@ -29,6 +29,7 @@
   let currentMap = null;
   let mapSpotKey = null;
   let mapSearchQuery = '';
+  let activeSpotId = null;
   let guidesData = null;
   const backStack = [];
   const detailCache = { team: {}, player: {}, faceit: {} };
@@ -93,9 +94,30 @@
       g_type_molotov: 'Молотов', g_type_grenade: 'Граната',
       g_lineups_empty: 'Пока нет раскидок', g_tactics_empty: 'Пока нет тактик',
       g_steps: 'Выполнение',
+      g_essence: 'Суть тактики', g_goal: 'Цель', g_buy: 'Покупка',
       g_map_hint: 'Нажми на точку на карте — увидишь раскидки с этой позиции',
       g_map_reset_spot: 'Сбросить точку', g_map_spot: 'Раскидки с этой точки', g_tactic_label: 'Тактика',
-      g_search_ph: 'Поиск по раскидкам и тактикам…'
+      g_search_ph: 'Поиск по раскидкам и тактикам…',
+      g_pick_lineups_sub: 'Видео раскидок по позициям на радаре',
+      g_pick_tactics_sub: 'Командные тактики за T и CT',
+      g_pick_side: 'Выбери сторону',
+      g_side_t: 'Террористы',
+      g_side_t_sub: 'Атака: пистолетка, эко, форс, фулл бай',
+      g_side_ct: 'Контр-террористы',
+      g_side_ct_sub: 'Оборона: пистолетка, эко, форс, фулл бай',
+      g_pick_round: 'Выбери тип раунда',
+      g_round_pistol: 'Пистолетка',
+      g_round_pistol_sub: 'Первый раунд, только пистолеты',
+      g_round_eco: 'Эко',
+      g_round_eco_sub: 'Копим деньги, минимум покупок',
+      g_round_force: 'Форс',
+      g_round_force_sub: 'Тратим всё на этот раунд',
+      g_round_full: 'Фулл бай',
+      g_round_full_sub: 'Полная закупка с гранатами',
+      g_spot_no_video: 'Видео для этой позиции скоро появится',
+      g_spot_hint: 'Нажми на точку на радаре — под ней появится видео',
+      g_spot_next: 'Следующее видео',
+      g_spot_open: 'Открыть на YouTube'
     },
     en: {
       tab_stats: 'Stats', tab_settings: 'Settings', back: 'Back',
@@ -150,9 +172,30 @@
       g_type_molotov: 'Molotov', g_type_grenade: 'Grenade',
       g_lineups_empty: 'No lineups yet', g_tactics_empty: 'No tactics yet',
       g_steps: 'Execution',
+      g_essence: 'The gist', g_goal: 'Goal', g_buy: 'Buy',
       g_map_hint: 'Tap a spot on the map to see lineups from it',
       g_map_reset_spot: 'Clear spot', g_map_spot: 'Lineups from this spot', g_tactic_label: 'Tactic',
-      g_search_ph: 'Search lineups and tactics…'
+      g_search_ph: 'Search lineups and tactics…',
+      g_pick_lineups_sub: 'Lineup videos by position on the radar',
+      g_pick_tactics_sub: 'Team tactics for T and CT',
+      g_pick_side: 'Choose a side',
+      g_side_t: 'Terrorists',
+      g_side_t_sub: 'Attack: pistol, eco, force, full buy',
+      g_side_ct: 'Counter-Terrorists',
+      g_side_ct_sub: 'Defense: pistol, eco, force, full buy',
+      g_pick_round: 'Choose round type',
+      g_round_pistol: 'Pistol',
+      g_round_pistol_sub: 'First round, pistols only',
+      g_round_eco: 'Eco',
+      g_round_eco_sub: 'Save money, minimal buys',
+      g_round_force: 'Force buy',
+      g_round_force_sub: 'Spend everything this round',
+      g_round_full: 'Full buy',
+      g_round_full_sub: 'Full loadout with utility',
+      g_spot_no_video: 'Video for this spot coming soon',
+      g_spot_hint: 'Tap a spot on the radar to watch a video',
+      g_spot_next: 'Next video',
+      g_spot_open: 'Open on YouTube'
     }
   };
 
@@ -1678,7 +1721,6 @@
     pic.appendChild(img);
     pic.appendChild(el('span', 'map-name', map.name));
     card.appendChild(pic);
-    card.appendChild(el('span', 'g-chev', '›'));
     card.addEventListener('click', () => openMap(map));
     return card;
   }
@@ -1726,7 +1768,132 @@
     mapSpotKey = null;
     lineupFilter = 'all';
     mapSearchQuery = '';
-    renderMap(item);
+    activeSpotId = null;
+    renderMapHub(item);
+  }
+
+  function pickCard(icon, title, subtitle, onClick) {
+    const card = el('div', 'pick-card');
+    card.appendChild(iconEl(icon));
+    const info = el('div', 'pick-info');
+    info.appendChild(el('div', 'pick-title', title));
+    info.appendChild(el('div', 'pick-sub', subtitle));
+    card.appendChild(info);
+    card.appendChild(el('span', 'g-chev', '>'));
+    card.addEventListener('click', onClick);
+    return card;
+  }
+
+  function renderMapHub(item) {
+    currentMap = item;
+    clear();
+    view.appendChild(gBackBtn(() => { mapSearchQuery = ''; renderGuides(); }));
+    view.appendChild(sectionTitle('guides', (item.emoji || '') + ' ' + item.name));
+    const box = el('div', 'sub-box');
+    view.appendChild(box);
+    box.appendChild(pickCard('bolt', t('g_cat_lineups'), t('g_pick_lineups_sub'), () => renderMap(item)));
+    box.appendChild(pickCard('users', t('g_cat_tactics'), t('g_pick_tactics_sub'), () => renderMapTactics(item)));
+  }
+
+  function renderMapTactics(item) {
+    currentMap = item;
+    clear();
+    view.appendChild(gBackBtn(() => renderMapHub(item)));
+    view.appendChild(sectionTitle('users', t('g_cat_tactics')));
+    view.appendChild(el('p', 'section-text', (item.emoji || '') + ' ' + item.name + ' — ' + t('g_pick_side')));
+    const box = el('div', 'sub-box');
+    view.appendChild(box);
+    box.appendChild(pickCard('bolt', t('g_side_t'), t('g_side_t_sub'), () => renderMapRounds(item, 't')));
+    box.appendChild(pickCard('users', t('g_side_ct'), t('g_side_ct_sub'), () => renderMapRounds(item, 'ct')));
+  }
+
+  function roundLabel(round) {
+    const map = { pistol: 'g_round_pistol', eco: 'g_round_eco', force: 'g_round_force', full: 'g_round_full' };
+    return t(map[round] || 'g_round_pistol');
+  }
+
+  function renderMapRounds(item, side) {
+    currentMap = item;
+    clear();
+    view.appendChild(gBackBtn(() => renderMapTactics(item)));
+    view.appendChild(sectionTitle('bolt', side === 't' ? t('g_side_t') : t('g_side_ct')));
+    view.appendChild(el('p', 'section-text', t('g_pick_round')));
+    const box = el('div', 'sub-box');
+    view.appendChild(box);
+    [['pistol', 'g_round_pistol', 'g_round_pistol_sub'], ['eco', 'g_round_eco', 'g_round_eco_sub'], ['force', 'g_round_force', 'g_round_force_sub'], ['full', 'g_round_full', 'g_round_full_sub']].forEach(entry => {
+      box.appendChild(pickCard('chevron', t(entry[1]), t(entry[2]), () => renderMapTacticList(item, side, entry[0])));
+    });
+  }
+
+  function tacticData(mapId, side, round) {
+    const m = (guidesData.tactics || {})[mapId];
+    if (m && m[side] && m[side][round]) return m[side][round];
+    return [];
+  }
+
+  function renderMapTacticList(item, side, round) {
+    currentMap = item;
+    clear();
+    view.appendChild(gBackBtn(() => renderMapRounds(item, side)));
+    view.appendChild(sectionTitle('bolt', side === 't' ? t('g_side_t') : t('g_side_ct')));
+    const ctx = el('p', 'section-text map-ctx');
+    ctx.appendChild(el('span', 'map-ctx-badge ' + (side === 't' ? 'side-t' : 'side-ct'), side === 't' ? 'T' : 'CT'));
+    ctx.appendChild(el('span', 'map-ctx-label', roundLabel(round)));
+    view.appendChild(ctx);
+    const box = el('div', 'sub-box');
+    view.appendChild(box);
+    const data = tacticData(item.id, side, round);
+    if (!data.length) {
+      box.appendChild(el('p', 'section-text', t('g_tactics_empty')));
+      return;
+    }
+    const head = el('div', 'map-list-head');
+    head.appendChild(el('span', 'map-list-title', t('g_cat_tactics') + ' · ' + data.length));
+    box.appendChild(head);
+    data.forEach(tc => box.appendChild(gTacticRow(tc, side, () => renderTacticDetail(item, tc, () => renderMapTacticList(item, side, round), { side: side, round: round }))));
+  }
+
+  function gTacticRow(tc, side, onClick) {
+    const row = el('div', 'g-row tactic-row');
+    row.appendChild(el('span', 'g-ico side-badge ' + (side === 't' ? 'side-t' : 'side-ct'), side === 't' ? 'T' : 'CT'));
+    const info = el('div', 'player-info');
+    info.appendChild(el('div', 'player-nick', tc.title));
+    if (tc.short) info.appendChild(el('div', 'tactic-desc', tc.short));
+    row.appendChild(info);
+    row.appendChild(el('span', 'g-chev', '›'));
+    row.addEventListener('click', onClick);
+    return row;
+  }
+
+  function tacticBox(icon, label, text, cls) {
+    const box = el('div', 't-box ' + (cls || ''));
+    const head = el('div', 't-box-head');
+    head.appendChild(el('span', 't-box-ico', icon));
+    head.appendChild(el('span', 't-box-label', label));
+    box.appendChild(head);
+    box.appendChild(el('div', 't-box-text', text));
+    return box;
+  }
+
+  function tacticPhases(tc) {
+    if (tc.phases && tc.phases.length) return tc.phases;
+    return [{ name: t('g_steps'), steps: tc.steps || [] }];
+  }
+
+  function gPhases(tc) {
+    const wrap = el('div', 'g-phases');
+    tacticPhases(tc).forEach((ph, i) => {
+      const block = el('div', 'g-phase');
+      const head = el('div', 'g-phase-head');
+      head.appendChild(el('span', 'g-phase-num', String(i + 1).padStart(2, '0')));
+      head.appendChild(el('span', 'g-phase-name', ph.name));
+      block.appendChild(head);
+      const ol = el('ol', 'g-steps');
+      (ph.steps || []).forEach(s => ol.appendChild(el('li', 'g-step', s)));
+      block.appendChild(ol);
+      wrap.appendChild(block);
+    });
+    return wrap;
   }
 
   function mapTabBtn(tab, label) {
@@ -1740,7 +1907,18 @@
   function renderMap(item) {
     currentMap = item;
     clear();
-    view.appendChild(gBackBtn(() => { mapSearchQuery = ''; renderGuides(); }));
+    view.appendChild(gBackBtn(() => renderMapHub(item)));
+
+    const head = el('div', 'map-head');
+    head.appendChild(el('span', 'map-head-name', (item.emoji || '') + ' ' + item.name));
+    head.appendChild(el('p', 'map-head-hint', t('g_spot_hint')));
+    view.appendChild(head);
+
+    const spots = (guidesData.spots || {})[item.id] || [];
+    const spotBtns = [];
+    const legendBtns = [];
+    const spotBox = spots.length ? el('div', 'spot-video') : null;
+
     const stage = el('div', 'map-stage');
     const img = document.createElement('img');
     img.className = 'map-stage-img';
@@ -1750,62 +1928,165 @@
     stage.appendChild(img);
     view.appendChild(stage);
 
-    const lineups = (guidesData.lineups || {})[item.id] || [];
-    const tactics = (guidesData.tactics || {})[item.id] || [];
+    function vUrl(v) { return typeof v === 'string' ? v : (v && v.url); }
+    function vTitle(v) { return typeof v === 'string' ? null : (v && v.title); }
 
-    const searchBox = el('div', 'search-box');
-    const search = el('input', 'search-input');
-    search.setAttribute('type', 'search');
-    search.setAttribute('placeholder', t('g_search_ph'));
-    if (mapSearchQuery) search.value = mapSearchQuery;
-    searchBox.appendChild(search);
-    view.appendChild(searchBox);
-
-    const listBox = el('div', 'map-list');
-    view.appendChild(listBox);
-
-    const indexedL = lineups.map(l => ({ item: l, idx: gBuildIndex(item.id, l) }));
-    const indexedT = tactics.map(tc => ({ item: tc, idx: gBuildIndex(item.id, tc) }));
-
-    function renderResults() {
-      listBox.innerHTML = '';
-      const raw = search.value.trim();
-      const q = raw.toLowerCase();
-      const qTok = gTokens(q).filter(t => !G_STOP.has(t));
-      const qTokS = qTok.map(gStem);
-      const goal = qTok.length ? gDetectGoal(item.id, qTokS) : { sites: [], routes: [] };
-
-      const pick = arr => {
-        const scored = arr.map(r => ({ r, s: gScore(r.idx, qTok).score + gGoalScore(item.id, r.idx, goal) }));
-        const hits = scored.filter(x => x.s > 0).sort((x, y) => y.s - x.s);
-        if (hits.length) return hits.map(x => x.r.item);
-        return arr
-          .filter(r => q && ((r.item.title || '').toLowerCase().indexOf(q) !== -1 || (guideTypeLabel(r.item.type) || '').toLowerCase().indexOf(q) !== -1))
-          .map(r => r.item);
-      };
-
-      const ls = (q && qTok.length) ? pick(indexedL) : lineups;
-      const ts = (q && qTok.length) ? pick(indexedT) : tactics;
-      if (!ls.length && !ts.length) {
-        listBox.appendChild(el('p', 'section-text', q ? t('not_found') + ' «' + raw + '»' : t('no_data')));
-        return;
-      }
-      if (ls.length) {
-        const lh = el('div', 'map-list-head');
-        lh.appendChild(el('span', 'map-list-title', t('g_cat_lineups') + ' · ' + ls.length));
-        listBox.appendChild(lh);
-        ls.forEach(l => listBox.appendChild(gLineupRow(l, () => renderLineupDetail(item, l))));
-      }
-      if (ts.length) {
-        const th = el('div', 'map-list-head');
-        th.appendChild(el('span', 'map-list-title', t('g_cat_tactics') + ' · ' + ts.length));
-        listBox.appendChild(th);
-        ts.forEach(tc => listBox.appendChild(gRow('T', tc.title, t('g_tactic_label'), () => renderTacticDetail(item, tc))));
-      }
+    function ytId(url) {
+      const m = String(url || '').match(/(?:youtube\.com\/(?:shorts\/|watch\?v=|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{6,})/);
+      return m ? m[1] : null;
     }
 
-    search.addEventListener('input', () => { mapSearchQuery = search.value; renderResults(); });
-    renderResults();
+    function spotMedia(v) {
+      const url = vUrl(v);
+      const id = ytId(url);
+      if (id) {
+        const frame = document.createElement('iframe');
+        frame.className = 'spot-frame';
+        frame.src = 'https://www.youtube-nocookie.com/embed/' + id;
+        frame.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share');
+        frame.setAttribute('allowfullscreen', '');
+        frame.setAttribute('loading', 'lazy');
+        frame.setAttribute('frameborder', '0');
+        frame.title = vTitle(v) || 'YouTube';
+        return frame;
+      }
+      const video = document.createElement('video');
+      video.className = 'spot-video-player';
+      video.controls = true;
+      video.preload = 'metadata';
+      video.src = url;
+      return video;
+    }
+
+    function spotThumb(v) {
+      const url = vUrl(v);
+      const th = el('div', 'spot-thumb');
+      if (vTitle(v)) th.setAttribute('title', vTitle(v));
+      const img = document.createElement('img');
+      img.loading = 'lazy';
+      img.alt = '';
+      const id = ytId(url);
+      if (id) img.src = 'https://img.youtube.com/vi/' + id + '/hqdefault.jpg';
+      th.appendChild(img);
+      th.appendChild(el('span', 'spot-thumb-play', '▶'));
+      return th;
+    }
+
+    function renderSpotVideo(spot) {
+      if (!spotBox) return;
+      spotBox.innerHTML = '';
+      if (!spot) {
+        spotBox.appendChild(el('p', 'spot-empty', t('g_spot_hint')));
+        return;
+      }
+      const videos = Array.isArray(spot.videos) ? spot.videos : (spot.video ? [spot.video] : []);
+
+      const head = el('div', 'spot-video-head');
+      head.appendChild(el('span', 'spot-pip'));
+      head.appendChild(el('span', 'spot-name', spot.name));
+      spotBox.appendChild(head);
+
+      if (!videos.length) {
+        spotBox.appendChild(el('p', 'section-text', t('g_spot_no_video')));
+        return;
+      }
+
+      const count = videos.length > 1 ? el('span', 'spot-count', '1 / ' + videos.length) : null;
+      if (count) head.appendChild(count);
+
+      const playerBox = el('div', 'spot-player');
+      spotBox.appendChild(playerBox);
+
+      let idx = 0;
+      let thumbs = null;
+
+      function render() {
+        playerBox.innerHTML = '';
+        const v = videos[idx];
+        const m = spotMedia(v);
+        if (m) playerBox.appendChild(m);
+        const title = vTitle(v);
+        if (title) playerBox.appendChild(el('div', 'spot-caption', title));
+        const o = el('a', 'spot-open', t('g_spot_open'));
+        const url = vUrl(v);
+        o.href = url;
+        o.target = '_blank';
+        o.rel = 'noopener';
+        o.addEventListener('click', (e) => {
+          e.preventDefault();
+          const tg = window.Telegram && window.Telegram.WebApp;
+          if (tg && tg.openLink) tg.openLink(url);
+          else window.open(url, '_blank');
+        });
+        playerBox.appendChild(o);
+        if (count) count.textContent = (idx + 1) + ' / ' + videos.length;
+        if (thumbs) thumbs.querySelectorAll('.spot-thumb').forEach((th, i) => th.classList.toggle('active', i === idx));
+      }
+
+      if (videos.length > 1) {
+        const nav = el('div', 'spot-nav');
+        const prev = el('button', 'spot-arrow');
+        prev.setAttribute('aria-label', t('back'));
+        prev.textContent = '‹';
+        const next = el('button', 'spot-arrow');
+        next.setAttribute('aria-label', t('g_spot_next'));
+        next.textContent = '›';
+        thumbs = el('div', 'spot-thumbs');
+        videos.forEach((u, i) => {
+          const th = spotThumb(u);
+          th.addEventListener('click', () => { idx = i; render(); });
+          thumbs.appendChild(th);
+        });
+        prev.addEventListener('click', () => { idx = (idx - 1 + videos.length) % videos.length; render(); });
+        next.addEventListener('click', () => { idx = (idx + 1) % videos.length; render(); });
+        nav.appendChild(prev);
+        nav.appendChild(thumbs);
+        nav.appendChild(next);
+        spotBox.appendChild(nav);
+      }
+
+      render();
+    }
+
+    function selectSpot(id) {
+      activeSpotId = id;
+      spotBtns.forEach(btn => btn.classList.toggle('active', btn.dataset.id === activeSpotId));
+      legendBtns.forEach(lb => lb.classList.toggle('active', lb.dataset.id === activeSpotId));
+      renderSpotVideo(spots.find(sp => sp.id === activeSpotId) || null);
+      if (activeSpotId && spotBox) spotBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    spots.forEach((s) => {
+      const b = el('button', 'spot-btn' + (activeSpotId === s.id ? ' active' : ''));
+      b.dataset.id = s.id;
+      b.style.left = s.x + '%';
+      b.style.top = s.y + '%';
+      b.setAttribute('aria-label', s.name);
+      const core = el('span', 'spot-core');
+      const lbl = el('span', 'spot-lbl', s.name);
+      b.appendChild(core);
+      b.appendChild(lbl);
+      b.addEventListener('click', () => selectSpot(activeSpotId === s.id ? null : s.id));
+      stage.appendChild(b);
+      spotBtns.push(b);
+    });
+
+    if (spots.length) {
+      const legend = el('div', 'spot-legend');
+      spots.forEach(s => {
+        const lb = el('button', 'spot-legend-btn' + (activeSpotId === s.id ? ' active' : ''));
+        lb.dataset.id = s.id;
+        lb.appendChild(el('span', 'spot-legend-dot'));
+        lb.appendChild(el('span', 'spot-legend-name', s.name));
+        lb.addEventListener('click', () => selectSpot(activeSpotId === s.id ? null : s.id));
+        legend.appendChild(lb);
+        legendBtns.push(lb);
+      });
+      view.appendChild(legend);
+    }
+
+    if (spotBox) view.appendChild(spotBox);
+    renderSpotVideo(spots.find(sp => sp.id === activeSpotId) || null);
   }
 
   function lineupSpotKey(l) {
@@ -1814,6 +2095,7 @@
   }
 
   function renderMapLineups(box, item) {
+    box.innerHTML = '';
     const data = (guidesData.lineups || {})[item.id] || [];
     const stage = el('div', 'map-stage');
     const img = document.createElement('img');
@@ -1885,7 +2167,7 @@
     const head = el('div', 'map-list-head');
     head.appendChild(el('span', 'map-list-title', t('g_cat_tactics') + ' · ' + data.length));
     box.appendChild(head);
-    data.forEach(tc => box.appendChild(gRow('T', tc.title, t('g_tactic_label'), () => renderTacticDetail(item, tc))));
+    data.forEach(tc => box.appendChild(gTacticRow(tc, 't', () => renderTacticDetail(item, tc))));
   }
 
   function guideTypeLabel(id) {
@@ -1971,10 +2253,28 @@
     view.appendChild(gSteps(l.steps));
   }
 
-  function renderTacticDetail(item, tc) {
+  function renderTacticDetail(item, tc, back, ctx) {
     clear();
-    view.appendChild(gBackBtn(() => renderMap(currentMap)));
-    view.appendChild(sectionTitle('guides', tc.title));
+    view.appendChild(gBackBtn(back || (() => renderMap(currentMap))));
+
+    const head = el('div', 'tactic-head');
+    const title = el('div', 'tactic-title');
+    title.textContent = tc.title;
+    head.appendChild(title);
+    const chips = el('div', 'tactic-chips');
+    if (ctx && ctx.side) chips.appendChild(el('span', 't-chip ' + (ctx.side === 't' ? 'side-t' : 'side-ct'), (ctx.side === 't' ? 'T' : 'CT') + ' · ' + t(ctx.side === 't' ? 'g_side_t' : 'g_side_ct')));
+    if (ctx && ctx.round) chips.appendChild(el('span', 't-chip', roundLabel(ctx.round)));
+    if (item && item.name) chips.appendChild(el('span', 't-chip t-chip-map', (item.emoji || '') + ' ' + item.name));
+    head.appendChild(chips);
+    view.appendChild(head);
+
+    if (tc.short) view.appendChild(tacticBox('◎', t('g_essence'), tc.short, 't-essence'));
+
+    const metaGrid = el('div', 'tactic-meta-grid');
+    if (tc.goal) metaGrid.appendChild(tacticBox('🎯', t('g_goal'), tc.goal, 't-goal'));
+    if (tc.buy) metaGrid.appendChild(tacticBox('💰', t('g_buy'), tc.buy, 't-buy'));
+    if (metaGrid.children.length) view.appendChild(metaGrid);
+
     const stage = el('div', 'map-stage');
     const img = document.createElement('img');
     img.className = 'map-stage-img';
@@ -1983,7 +2283,7 @@
     img.loading = 'lazy';
     stage.appendChild(img);
     view.appendChild(stage);
-    view.appendChild(gSteps(tc.steps));
+    view.appendChild(gPhases(tc));
   }
 
 

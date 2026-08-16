@@ -2,7 +2,7 @@ from aiogram import F, Router
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery
 
-from ..content import LINEUP_TYPES, MAPS, TACTICS
+from ..content import LINEUP_TYPES, MAPS, flatten_tactics, tactic_steps
 from ..keyboards import (
     guide_back_keyboard,
     guide_lineups_keyboard,
@@ -26,7 +26,7 @@ def _get_lineup(map_id: str, lineup_id: str) -> dict | None:
 
 
 def _get_tactic(map_id: str, tactic_id: str) -> dict | None:
-    return next((t for t in TACTICS.get(map_id, []) if t["id"] == tactic_id), None)
+    return next((t for t in flatten_tactics(map_id) if t["id"] == tactic_id), None)
 
 
 def _lineup_badge(lineup: dict) -> str:
@@ -56,7 +56,7 @@ async def show_map(cb: CallbackQuery) -> None:
         return
 
     lineups_count = len(LINEUPS.get(map_id, []))
-    tactics_count = len(TACTICS.get(map_id, []))
+    tactics_count = len(flatten_tactics(map_id))
 
     text = (
         f"🧭 <b>{map_data['emoji']} {map_data['name']}</b>\n\n"
@@ -125,7 +125,7 @@ async def show_tactics(cb: CallbackQuery) -> None:
         await cb.answer("Карта не найдена", show_alert=True)
         return
 
-    tactics = TACTICS.get(map_id, [])
+    tactics = flatten_tactics(map_id)
     if not tactics:
         await cb.answer("На этой карте пока нет тактик", show_alert=True)
         return
@@ -147,13 +147,25 @@ async def show_tactic(cb: CallbackQuery) -> None:
         await cb.answer("Тактика не найдена", show_alert=True)
         return
 
-    text = (
-        f"🎯 <b>{tactic['title']}</b>\n\n"
-        f"<b>{map_data['emoji']} {map_data['name']}</b>\n\n"
-        f"<b>Выполнение:</b>\n{_steps_text(tactic['steps'])}"
-    )
+    lines = [f"🎯 <b>{tactic['title']}</b>"]
+    if tactic.get("short"):
+        lines.append(f"💡 <i>{tactic['short']}</i>")
+    lines.append(f"🗺️ {map_data['emoji']} {map_data['name']}")
+    if tactic.get("goal"):
+        lines.append(f"🎯 <b>Цель:</b> {tactic['goal']}")
+    if tactic.get("buy"):
+        lines.append(f"💰 <b>Покупка:</b> {tactic['buy']}")
+    phases = tactic.get("phases")
+    if phases:
+        for phase in phases:
+            lines.append(f"\n<b>{phase['name']}:</b>")
+            lines.append(_steps_text(phase.get("steps", [])))
+    else:
+        lines.append(f"\n<b>Выполнение:</b>")
+        lines.append(_steps_text(tactic_steps(tactic)))
+
     await cb.message.edit_text(
-        text,
+        "\n".join(lines),
         parse_mode="HTML",
         reply_markup=guide_back_keyboard(map_id, to_lineups=False),
     )
