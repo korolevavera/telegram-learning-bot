@@ -346,9 +346,9 @@ const TAB_DEFS = {
       c_left: 'Left: {0}', c_restart: 'Start over',
       q_start: 'Start quiz', q_q: 'Question {0} of {1}', q_result: 'Your score: {0} of {1}',
       q_best: 'Best score: {0}', q_again: 'Try again', q_next: 'Next',
-      q_finish: 'Finish quiz', q_feedback_correct: 'вњ… Correct!',
-      q_feedback_wrong: 'вќЊ Correct answer: {0}',
-      q_finished: 'рџЏ† Quiz completed!', q_perfect: 'Excellent!', q_good: 'Not bad!', q_keep: 'Keep practicing!',
+      q_finish: 'Finish quiz', q_feedback_correct: '✅ Correct!',
+      q_feedback_wrong: '❌ Correct answer: {0}',
+      q_finished: '🏆 Quiz completed!', q_perfect: 'Excellent!', q_good: 'Not bad!', q_keep: 'Keep practicing!',
       tab_train: 'Train',
       tr_sub: 'Practice lineups on every map',
       tr_pick_map: 'Pick a map to practice',
@@ -364,8 +364,8 @@ const TAB_DEFS = {
       gm_sub: 'Test your CS2 knowledge',
       gm_play: 'Play', gm_best: 'Best: {0}', gm_played: '{0} played',
       gm_q: 'Question {0} of {1}', gm_score: 'Score: {0}/{1}',
-      gm_correct: 'вњ… Correct!', gm_wrong: 'вќЊ Wrong! Answer: {0}',
-      gm_result: 'рџЋЇ Result: {0} of {1}', gm_play_again: 'Play again',
+      gm_correct: '✅ Correct!', gm_wrong: '❌ Wrong! Answer: {0}',
+      gm_result: '🎯 Result: {0} of {1}', gm_play_again: 'Play again',
       gm_back: 'To games', gm_time: '{0} sec', gm_no_games: 'No games available',
       gm_finish: '🎉 Game over!',
       g_profile: 'Profile', g_level: 'Level', g_xp: 'XP', g_coins: 'Coins',
@@ -376,10 +376,10 @@ const TAB_DEFS = {
       shop_equip_ok: 'Equipped!', shop_no_coins: 'Not enough coins', shop_already: 'Already owned',
       shop_tab: 'Shop',
       faceit_link: 'FACEIT Link', faceit_link_btn: 'Link',
-      faceit_unlink: 'Unlink', faceit_placeholder: 'FACEIT nicknameвЂ¦',
+      faceit_unlink: 'Unlink', faceit_placeholder: 'FACEIT nickname…',
       gr_title: 'Grenade Database', gr_sub: 'Search grenades by map, side and type',
       gr_all: 'All', gr_map: 'Map', gr_side: 'Side', gr_type: 'Type',
-      gr_search: 'Search grenadesвЂ¦', gr_favs: 'Favorites',
+      gr_search: 'Search grenades…', gr_favs: 'Favorites',
       gr_difficulty: 'Difficulty', gr_train: 'TRAIN THIS', gr_trained: '✓ planned',
       gr_empty: 'No grenades found', gr_fav_empty: 'No favorite grenades yet — add with ⭐',
       gr_fav_add: 'Add to favorites', gr_fav_rm: 'Remove from favorites',
@@ -1972,7 +1972,7 @@ const TAB_DEFS = {
   }
 
   function gTokens(text) {
-    return String(text || '').toLowerCase().split(/[^a-zР°-СЏ0-9С‘С–С—С”Т‘Сћ]+/).filter(Boolean);
+    return String(text || '').toLowerCase().split(/[^a-zа-я0-9ёіїєґў]+/).filter(Boolean);
   }
 
   function gBuildIndex(mapId, item) {
@@ -3433,7 +3433,7 @@ const TAB_DEFS = {
       block.appendChild(head);
       const body = el('div', 'sec-body');
       s.split('\n').forEach(line => {
-        const clean = line.replace(/^[-вЂў]\s*/, '');
+        const clean = line.replace(/^[-—–•]\s*/, '');
         body.appendChild(el('p', 'section-text', clean));
       });
       block.appendChild(body);
