@@ -60,185 +60,185 @@ const TAB_DEFS = {
 
   const I18N = {
     ru: {
-      tab_stats: 'РЎС‚Р°С‚РёСЃС‚РёРєР°', tab_settings: 'РќР°СЃС‚СЂРѕР№РєРё', back: 'РќР°Р·Р°Рґ',
-      src_note: 'РСЃС‚РѕС‡РЅРёРєРё: bo3.gg В· FACEIT', refresh: 'РћР±РЅРѕРІРёС‚СЊ',
-      search_ph: 'РџРѕРёСЃРє РїРѕ РєРѕРјР°РЅРґР°Рј Рё РёРіСЂРѕРєР°РјвЂ¦',
-      hint: 'РќР°Р¶РјРё РЅР° РєРѕРјР°РЅРґСѓ РёР»Рё РёРіСЂРѕРєР°, С‡С‚РѕР±С‹ РѕС‚РєСЂС‹С‚СЊ РєР°СЂС‚РѕС‡РєСѓ', hint_close: 'Р—Р°РєСЂС‹С‚СЊ РїРѕРґСЃРєР°Р·РєСѓ',
-      updated: 'РћР±РЅРѕРІР»РµРЅРѕ', period: 'РїРµСЂРёРѕРґ', region: 'СЂРµРіРёРѕРЅ',
-      not_found: 'РќРёС‡РµРіРѕ РЅРµ РЅР°Р№РґРµРЅРѕ РїРѕ Р·Р°РїСЂРѕСЃСѓ', no_data: 'РќРµС‚ РґР°РЅРЅС‹С…',
-      fav_title: 'РР·Р±СЂР°РЅРЅРѕРµ', type_team: 'РљРѕРјР°РЅРґР°', type_player: 'РРіСЂРѕРє', type_faceit: 'FACEIT',
-      fav_remove: 'РЈР±СЂР°С‚СЊ РёР· РёР·Р±СЂР°РЅРЅРѕРіРѕ', fav_add: 'Р’ РёР·Р±СЂР°РЅРЅРѕРµ',
-      p90: '3 РјРµСЃСЏС†Р°', p180: '6 РјРµСЃСЏС†РµРІ', p365: '12 РјРµСЃСЏС†РµРІ',
-      p90s: '3 РјРµСЃ.', p180s: '6 РјРµСЃ.', p365s: '12 РјРµСЃ.',
-      sec_teams: 'РљРѕРјР°РЅРґС‹', sec_faceit: 'FACEIT', sec_pro: 'РџСЂРѕ-СЃС†РµРЅР°',
-      sub_teams: 'РўРѕРї-{0} В· РІРёРЅСЂРµР№С‚ Р·Р° {1}', sub_faceit: 'РўРѕРї-{0} В· СЂРµРіРёРѕРЅ {1}', sub_pro: 'РўРѕРї-{0} В· СЂРµР№С‚РёРЅРі Р·Р° {1}',
-      err_stats: 'РќРµ СѓРґР°Р»РѕСЃСЊ Р·Р°РіСЂСѓР·РёС‚СЊ СЃС‚Р°С‚РёСЃС‚РёРєСѓ', err_team: 'РќРµ СѓРґР°Р»РѕСЃСЊ Р·Р°РіСЂСѓР·РёС‚СЊ РєРѕРјР°РЅРґСѓ', err_player: 'РќРµ СѓРґР°Р»РѕСЃСЊ Р·Р°РіСЂСѓР·РёС‚СЊ РёРіСЂРѕРєР°',
-      retry: 'РџРѕРІС‚РѕСЂРёС‚СЊ',
-      stats_6m: 'РЎС‚Р°С‚РёСЃС‚РёРєР° Р·Р° 6 РјРµСЃСЏС†РµРІ', history_6m: 'РСЃС‚РѕСЂРёСЏ В· РјР°С‚С‡Рё Р·Р° 6 РјРµСЃ.',
-      roster: 'РЎРѕСЃС‚Р°РІ', achievements: 'Р”РѕСЃС‚РёР¶РµРЅРёСЏ', founded: 'РћСЃРЅРѕРІР°РЅР°: ',
-      l_matches: 'РњР°С‚С‡Рё', l_wins: 'РџРѕР±РµРґС‹', l_losses: 'РџРѕСЂР°Р¶РµРЅРёСЏ', l_winrate: 'Р’РёРЅСЂРµР№С‚',
-      l_games: 'РРіСЂ', l_round_wr: 'WR СЂР°СѓРЅРґРѕРІ', l_t: 'T-side', l_ct: 'CT-side',
-      l_pistol: 'РџРёСЃС‚РѕР»РµС‚РєРё', l_eco: 'Р­РєРѕ', l_force: 'Р¤РѕСЂСЃ-Р±Р°Р№', l_buy: 'Р¤СѓР»Р»-Р±Р°Р№', l_kd: 'K/D',
-      stat_for: 'РЎС‚Р°С‚РёСЃС‚РёРєР° ', maps_for: 'РљР°СЂС‚С‹ В· ', per_last: 'Р·Р° РїРѕСЃР»РµРґРЅРёРµ С€РµСЃС‚СЊ РјРµСЃСЏС†РµРІ',
-      career: 'РљР°СЂСЊРµСЂР° В· РєРѕРјР°РЅРґС‹',
-      story: 'Р–РёР·РЅРµРЅРЅС‹Р№ РїСѓС‚СЊ Рё РёСЃС‚РѕСЂРёСЏ СѓСЃРїРµС…Р°', personal: 'Р›РёС‡РЅС‹Рµ РґР°РЅРЅС‹Рµ',
-      b_nick: 'РџСЃРµРІРґРѕРЅРёРј', b_real: 'РќР°СЃС‚РѕСЏС‰РµРµ РёРјСЏ', b_aliases: 'РџСЃРµРІРґРѕРЅРёРјС‹', b_bday: 'Р”Р°С‚Р° СЂРѕР¶РґРµРЅРёСЏ',
-      b_country: 'РЎС‚СЂР°РЅР°', b_region: 'Р РµРіРёРѕРЅ', b_role: 'Р РѕР»СЊ', b_team: 'РљРѕРјР°РЅРґР°',
-      b_since: 'Р’ РєРѕРјР°РЅРґРµ СЃ', b_prize: 'РџСЂРёР·РѕРІС‹Рµ', b_rating: 'Р РµР№С‚РёРЅРі',
-      tags: 'РўРµРіРё', socials: 'РЎРѕС†СЃРµС‚Рё', photo_unavail: 'Р¤РѕС‚Рѕ РЅРµРґРѕСЃС‚СѓРїРЅРѕ', years: ' Р»РµС‚',
-      l_maps_n: 'РљР°СЂС‚: ', l_k: 'K: ', l_adr: 'ADR: ',
-      match_wr: 'Р’РёРЅСЂРµР№С‚ РјР°С‚С‡РµР№', game_wr: 'Р’РёРЅСЂРµР№С‚ РёРіСЂ', l_hs: 'HS%', assists: 'РђСЃСЃРёСЃС‚РѕРІ',
-      f_bio: 'Р‘РёРѕРіСЂР°С„РёСЏ', f_nick: 'РќРёРєРЅРµР№Рј', f_level: 'РЈСЂРѕРІРµРЅСЊ FACEIT', f_elo: 'Р РµР№С‚РёРЅРі ELO',
-      f_since: 'РђРєРєР°СѓРЅС‚ СЃ', f_stats: 'РЎС‚Р°С‚РёСЃС‚РёРєР° РЅР° FACEIT', f_kills: 'РЈР±РёР№СЃС‚РІ',
-      f_streak: 'РЎРµСЂРёСЏ', f_longest: 'РњР°РєСЃ. СЃРµСЂРёСЏ', f_last: 'РџРѕСЃР»РµРґРЅРёРµ РјР°С‚С‡Рё', f_maps: 'РљР°СЂС‚С‹',
-      f_matches_n: 'РњР°С‚С‡РµР№: ', f_socials: 'РЎРѕС† СЃРµС‚Рё',
-      set_theme: 'РўРµРјР° РѕС„РѕСЂРјР»РµРЅРёСЏ', set_lang: 'РЇР·С‹Рє',
-      gurren_q1: 'В«Р’РµСЂСЊ РІ РјРµРЅСЏ, С‡С‚Рѕ РІРµСЂРёС‚ РІ С‚РµР±СЏ!В» вЂ” РљР°РјРёРЅР°',
-      gurren_q2: 'В«РњРѕР№ Р±СѓСЂ РїСЂРѕР±СЊС‘С‚ Рё РЅРµР±РµСЃР°!В» вЂ” РЎРёРјРѕРЅ',
-      gurren_q3: 'В«Р’С‹С…РѕРґРё Р·Р° РїСЂРµРґРµР»С‹ РЅРµРІРѕР·РјРѕР¶РЅРѕРіРѕ!В» вЂ” РљР°РјРёРЅР°',
-      gurren_note: 'РљРѕРјР°РЅРґР° Р”Р°Р№-Р“СѓСЂСЂРµРЅ В· В«РљС‚Рѕ, РїРѕ-С‚РІРѕРµРјСѓ, РјС‹ С‚Р°РєРёРµ?!В» вЂ” РљР°РјРёРЅР° В· В«РњРѕР№ Р±СѓСЂ РїСЂРѕР±СЊС‘С‚ РЅРµР±РµСЃР°!В» вЂ” РЎРёРјРѕРЅ',
-      theme_dark: 'РўС‘РјРЅР°СЏ', theme_light: 'РЎРІРµС‚Р»Р°СЏ', theme_gurren: 'Gurren Lagann',
-      lang_ru: 'Р СѓСЃСЃРєРёР№', lang_en: 'English',
-      profile_tg: 'РџСЂРѕС„РёР»СЊ Telegram', app_label: 'РџСЂРёР»РѕР¶РµРЅРёРµ', version: 'Р’РµСЂСЃРёСЏ',
-      src_data: 'РСЃС‚РѕС‡РЅРёРєРё РґР°РЅРЅС‹С…', set_region: 'Р РµРіРёРѕРЅ FACEIT', set_period: 'РџРµСЂРёРѕРґ СЃС‚Р°С‚РёСЃС‚РёРєРё',
-      fav_empty: 'РџРѕРєР° РїСѓСЃС‚Рѕ вЂ” РґРѕР±Р°РІСЊ Р·РІС‘Р·РґРѕС‡РєРѕР№ РёР· РєР°СЂС‚РѕС‡РєРё РёРіСЂРѕРєР° РёР»Рё РєРѕРјР°РЅРґС‹',
-      fav_rm: 'РЈР±СЂР°С‚СЊ', refresh_stats: 'РћР±РЅРѕРІРёС‚СЊ СЃС‚Р°С‚РёСЃС‚РёРєСѓ', user: 'РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ',
-      app_open: 'РћС‚РєСЂРѕР№ РїСЂРёР»РѕР¶РµРЅРёРµ С‡РµСЂРµР· Р±РѕС‚Р°', load_fail: 'РќРµ СѓРґР°Р»РѕСЃСЊ Р·Р°РіСЂСѓР·РёС‚СЊ РґР°РЅРЅС‹Рµ',
-      tab_guides: 'Р“Р°Р№РґС‹',
-      g_tab_maps: 'РљР°СЂС‚С‹',
-      g_sections: 'СЂР°Р·РґРµР»РѕРІ', g_back_guides: 'Р’ РіР°Р№РґС‹',
-      g_cat_lineups: 'Р Р°СЃРєРёРґРєРё', g_cat_tactics: 'РўР°РєС‚РёРєРё',
-      g_type_all: 'Р’СЃРµ', g_type_smoke: 'РЎРјРѕРє', g_type_flash: 'Р¤Р»РµС€РєР°',
-      g_type_molotov: 'РњРѕР»РѕС‚РѕРІ', g_type_grenade: 'Р“СЂР°РЅР°С‚Р°',
-      g_lineups_empty: 'РџРѕРєР° РЅРµС‚ СЂР°СЃРєРёРґРѕРє', g_tactics_empty: 'РџРѕРєР° РЅРµС‚ С‚Р°РєС‚РёРє',
-      g_tactics_header: 'РўР°РєС‚РёРєРё РґР»СЏ Mirage', g_more: 'РџРѕРґСЂРѕР±РЅРµРµ', g_coming_soon: 'Р Р°Р·РґРµР» РІ СЂР°Р·СЂР°Р±РѕС‚РєРµ', g_tips: 'РЎРѕРІРµС‚С‹',
-      g_steps: 'Р’С‹РїРѕР»РЅРµРЅРёРµ',
-      g_essence: 'РЎСѓС‚СЊ С‚Р°РєС‚РёРєРё', g_goal: 'Р¦РµР»СЊ', g_buy: 'РџРѕРєСѓРїРєР°',
-      g_map_hint: 'РќР°Р¶РјРё РЅР° С‚РѕС‡РєСѓ РЅР° РєР°СЂС‚Рµ вЂ” СѓРІРёРґРёС€СЊ СЂР°СЃРєРёРґРєРё СЃ СЌС‚РѕР№ РїРѕР·РёС†РёРё',
-      g_map_reset_spot: 'РЎР±СЂРѕСЃРёС‚СЊ С‚РѕС‡РєСѓ', g_map_spot: 'Р Р°СЃРєРёРґРєРё СЃ СЌС‚РѕР№ С‚РѕС‡РєРё', g_tactic_label: 'РўР°РєС‚РёРєР°',
-      g_search_ph: 'РџРѕРёСЃРє РїРѕ СЂР°СЃРєРёРґРєР°Рј Рё С‚Р°РєС‚РёРєР°РјвЂ¦',
-      g_search_tactics: 'РџРѕРёСЃРє РїРѕ С‚Р°РєС‚РёРєР°РјвЂ¦',
-      g_pick_lineups_sub: 'Р’РёРґРµРѕ СЂР°СЃРєРёРґРѕРє РїРѕ РїРѕР·РёС†РёСЏРј РЅР° СЂР°РґР°СЂРµ',
-      g_pick_tactics_sub: 'РљРѕРјР°РЅРґРЅС‹Рµ С‚Р°РєС‚РёРєРё Р·Р° T Рё CT',
-      g_pick_side: 'Р’С‹Р±РµСЂРё СЃС‚РѕСЂРѕРЅСѓ',
-      g_side_t: 'РўРµСЂСЂРѕСЂРёСЃС‚С‹',
-      g_side_t_sub: 'РђС‚Р°РєР°: РїРёСЃС‚РѕР»РµС‚РєР°, СЌРєРѕ, С„РѕСЂСЃ, С„СѓР»Р» Р±Р°Р№',
-      g_side_ct: 'РљРѕРЅС‚СЂ-С‚РµСЂСЂРѕСЂРёСЃС‚С‹',
-      g_side_ct_sub: 'РћР±РѕСЂРѕРЅР°: РїРёСЃС‚РѕР»РµС‚РєР°, СЌРєРѕ, С„РѕСЂСЃ, С„СѓР»Р» Р±Р°Р№',
-      g_pick_round: 'Р’С‹Р±РµСЂРё С‚РёРї СЂР°СѓРЅРґР°',
-      g_round_pistol: 'РџРёСЃС‚РѕР»РµС‚РєР°',
-      g_round_pistol_sub: 'РџРµСЂРІС‹Р№ СЂР°СѓРЅРґ, С‚РѕР»СЊРєРѕ РїРёСЃС‚РѕР»РµС‚С‹',
-      g_round_eco: 'Р­РєРѕ',
-      g_round_eco_sub: 'РљРѕРїРёРј РґРµРЅСЊРіРё, РјРёРЅРёРјСѓРј РїРѕРєСѓРїРѕРє',
-      g_round_force: 'Р¤РѕСЂСЃ',
-      g_round_force_sub: 'РўСЂР°С‚РёРј РІСЃС‘ РЅР° СЌС‚РѕС‚ СЂР°СѓРЅРґ',
-      g_round_full: 'Р¤СѓР»Р» Р±Р°Р№',
-      g_round_full_sub: 'РџРѕР»РЅР°СЏ Р·Р°РєСѓРїРєР° СЃ РіСЂР°РЅР°С‚Р°РјРё',
-      g_spot_no_video: 'Р’РёРґРµРѕ РґР»СЏ СЌС‚РѕР№ РїРѕР·РёС†РёРё СЃРєРѕСЂРѕ РїРѕСЏРІРёС‚СЃСЏ',
-      g_spot_hint: 'РќР°Р¶РјРё РЅР° С‚РѕС‡РєСѓ РЅР° СЂР°РґР°СЂРµ вЂ” РїРѕРґ РЅРµР№ РїРѕСЏРІРёС‚СЃСЏ РІРёРґРµРѕ',
-      g_spot_next: 'РЎР»РµРґСѓСЋС‰РµРµ РІРёРґРµРѕ',
-      g_spot_open: 'РћС‚РєСЂС‹С‚СЊ РЅР° YouTube',
-      g_mode_tldr: 'РљРѕСЂРѕС‚РєРѕ', g_mode_plan: 'РЎС…РµРјР°', g_mode_replay: 'Р РµРїР»РµР№',
-      g_difficulty: 'РЎР»РѕР¶РЅРѕСЃС‚СЊ', g_roles: 'Р РѕР»Рё',
-      g_role_filter: 'РџРѕРєР°Р·Р°С‚СЊ СЂРѕР»СЊ', g_role_all: 'Р’СЃРµ СЂРѕР»Рё',
-      g_prev_step: 'РЁР°Рі РЅР°Р·Р°Рґ', g_next_step: 'РЁР°Рі РІРїРµСЂС‘Рґ',
-      g_autoplay: 'РђРІС‚РѕРїСЂРѕСЃРјРѕС‚СЂ', g_autoplay_stop: 'РЎС‚РѕРї',
-      g_step_of: 'РЁР°Рі {0} РёР· {1}', g_phase: 'Р¤Р°Р·Р°',
-      g_util_video: 'РЎРјРѕС‚СЂРµС‚СЊ СЂР°СЃРєРёРґРєСѓ', g_glossary: 'РџРѕРґСЃРєР°Р·РєР°',
-      g_replay_play: 'РЎРјРѕС‚СЂРµС‚СЊ', g_replay_pause: 'РџР°СѓР·Р°',
-      g_replay_restart: 'РЎРЅР°С‡Р°Р»Р°', g_replay_speed: 'РЎРєРѕСЂРѕСЃС‚СЊ',
-      g_replay_hint: 'РќР°Р¶РјРё В«РЎРјРѕС‚СЂРµС‚СЊВ» вЂ” РёРіСЂРѕРєРё СЂР°Р·С‹РіСЂР°СЋС‚ С‚Р°РєС‚РёРєСѓ РїРѕ С‚Р°Р№РјР»Р°Р№РЅСѓ, РєР°Рє РІ СЂРµР°Р»СЊРЅРѕРј СЂР°СѓРЅРґРµ.',
-      tab_home: 'Р“Р»Р°РІРЅР°СЏ', tab_learn: 'РћР±СѓС‡РµРЅРёРµ',
-      h_welcome: 'Р”РѕР±СЂРѕ РїРѕР¶Р°Р»РѕРІР°С‚СЊ, {0}!', h_sub: 'РўРІРѕР№ РїСѓС‚СЊ Рє РјР°СЃС‚РµСЂСЃС‚РІСѓ CS2',
-      h_continue: 'РџСЂРѕРґРѕР»Р¶РёС‚СЊ РѕР±СѓС‡РµРЅРёРµ', h_learn: 'РћР±СѓС‡РµРЅРёРµ', h_maps: 'Р“Р°Р№РґС‹', h_stats: 'РЎС‚Р°С‚РёСЃС‚РёРєР°',
-      h_learn_sub: 'РЈСЂРѕРєРё, РєР°СЂС‚РѕС‡РєРё Рё С‚РµСЃС‚С‹ РґР»СЏ РЅРѕРІРёС‡РєРѕРІ',
-      h_maps_sub: 'Р Р°СЃРєРёРґРєРё, С‚Р°РєС‚РёРєРё Рё СЂРµРїР»РµРё',
-      h_stats_sub: 'FACEIT, РєРѕРјР°РЅРґС‹ Рё РёРіСЂРѕРєРё',
-      h_progress: 'РўРІРѕР№ РїСЂРѕРіСЂРµСЃСЃ',
-      h_lessons: 'РЈСЂРѕРєРё', h_cards: 'РљР°СЂС‚РѕС‡РєРё', h_quizzes: 'РўРµСЃС‚С‹',
-      h_of: '{0} РёР· {1}',
-      h_best: 'Р›СѓС‡С€РёР№ СЂРµР·СѓР»СЊС‚Р°С‚: {0}',
-      l_lessons: 'РЈСЂРѕРєРё', l_cards: 'РљР°СЂС‚РѕС‡РєРё', l_quizzes: 'РўРµСЃС‚С‹',
-      l_lessons_sub: 'РџРѕС€Р°РіРѕРІРѕРµ РѕР±СѓС‡РµРЅРёРµ РѕСЃРЅРѕРІР°Рј',
-      l_cards_sub: 'Р—Р°РїРѕРјРёРЅР°РµРј С‚РµСЂРјРёРЅС‹', l_quizzes_sub: 'РџСЂРѕРІРµСЂСЊ СЃРµР±СЏ',
-      l_done: 'вњ“ РїСЂРѕР№РґРµРЅРѕ', l_questions: 'РІРѕРїСЂРѕСЃРѕРІ', l_sections: 'СЂР°Р·РґРµР»РѕРІ',
-      l_open: 'РћС‚РєСЂС‹С‚СЊ', l_lesson_open: 'РќР°С‡Р°С‚СЊ СѓСЂРѕРє',
-      l_check: 'РџСЂРѕРІРµСЂРёС‚СЊ', l_correct: 'вњ… Р’РµСЂРЅРѕ!', l_wrong: 'вќЊ РџСЂР°РІРёР»СЊРЅС‹Р№ РѕС‚РІРµС‚: {0}',
-      l_finished: 'рџЋ‰ РЈСЂРѕРє РїСЂРѕР№РґРµРЅ!', l_lesson_repeat: 'РџРѕРІС‚РѕСЂРёС‚СЊ',
-      c_front: 'РўРµСЂРјРёРЅ', c_back: 'Р—РЅР°С‡РµРЅРёРµ', c_show: 'РџРѕРєР°Р·Р°С‚СЊ РѕС‚РІРµС‚',
-      c_known: 'Р—РЅР°СЋ', c_unknown: 'РќРµ Р·РЅР°СЋ', c_done: 'рџЋ‰ Р’СЃРµ РєР°СЂС‚РѕС‡РєРё РІС‹СѓС‡РµРЅС‹!',
-      c_left: 'РћСЃС‚Р°Р»РѕСЃСЊ: {0}', c_restart: 'РќР°С‡Р°С‚СЊ Р·Р°РЅРѕРІРѕ',
-      q_start: 'РќР°С‡Р°С‚СЊ С‚РµСЃС‚', q_q: 'Р’РѕРїСЂРѕСЃ {0} РёР· {1}', q_result: 'РўРІРѕР№ СЂРµР·СѓР»СЊС‚Р°С‚: {0} РёР· {1}',
-      q_best: 'Р›СѓС‡С€РёР№ СЂРµР·СѓР»СЊС‚Р°С‚: {0}', q_again: 'РџСЂРѕР№С‚Рё РµС‰С‘ СЂР°Р·', q_next: 'РЎР»РµРґСѓСЋС‰РёР№',
-      q_finish: 'Р—Р°РІРµСЂС€РёС‚СЊ С‚РµСЃС‚', q_feedback_correct: 'вњ… Р’РµСЂРЅРѕ!',
-      q_feedback_wrong: 'вќЊ РџСЂР°РІРёР»СЊРЅС‹Р№ РѕС‚РІРµС‚: {0}',
-      q_finished: 'рџЏ† РўРµСЃС‚ Р·Р°РІРµСЂС€С‘РЅ!', q_perfect: 'РћС‚Р»РёС‡РЅРѕ!', q_good: 'РќРµРїР»РѕС…Рѕ!', q_keep: 'РўСЂРµРЅРёСЂСѓР№СЃСЏ РґР°Р»СЊС€Рµ!',
-      tab_train: 'РўСЂРµРЅРёСЂРѕРІРєР°',
-      tr_sub: 'РџСЂР°РєС‚РёРєСѓР№ СЂР°СЃРєРёРґРєРё РЅР° РєР°Р¶РґРѕР№ РєР°СЂС‚Рµ',
-      tr_pick_map: 'Р’С‹Р±РµСЂРё РєР°СЂС‚Сѓ РґР»СЏ С‚СЂРµРЅРёСЂРѕРІРєРё',
-      tr_attempts: '{0} РїСЂР°РєС‚РёРє', tr_practice: 'РџСЂР°РєС‚РёРєРѕРІР°С‚СЊ', tr_practiced: 'вњ“ РѕС‚СЂР°Р±РѕС‚Р°РЅРѕ',
-      tr_checklist: 'Р§РµРє-Р»РёСЃС‚ РїСЂР°РєС‚РёРєРё',
-      tr_check1: 'РР·СѓС‡Рё С€Р°РіРё Рё С‚РѕС‡РєСѓ Р±СЂРѕСЃРєР°',
-      tr_check2: 'РћС‚РєСЂРѕР№ РєР°СЂС‚Сѓ Рё РЅР°Р№РґРё РїРѕР·РёС†РёСЋ',
-      tr_check3: 'Р’С‹РїРѕР»РЅРё Р±СЂРѕСЃРѕРє РІ С‚СЂРµРЅРёСЂРѕРІРєРµ',
-      tr_ready: 'РћС‚СЂР°Р±РѕС‚Р°Р»!', tr_reset: 'РЎР±СЂРѕСЃРёС‚СЊ', tr_empty: 'РџРѕРєР° РЅРµС‚ СЂР°СЃРєРёРґРѕРє РЅР° СЌС‚РѕР№ РєР°СЂС‚Рµ',
-      tr_progress: 'РћС‚СЂР°Р±РѕС‚Р°РЅРѕ: {0} РёР· {1}',
-      tr_spot_here: 'РўРѕС‡РєР° Р±СЂРѕСЃРєР°',
-      tab_games: 'РњРёРЅРё-РёРіСЂС‹',
-      gm_sub: 'РџСЂРѕРІРµСЂСЊ СЃРІРѕРё Р·РЅР°РЅРёСЏ CS2',
-      gm_play: 'РРіСЂР°С‚СЊ', gm_best: 'Р›СѓС‡С€РёР№: {0}', gm_played: '{0} РёРіСЂ',
-      gm_q: 'Р’РѕРїСЂРѕСЃ {0} РёР· {1}', gm_score: 'РЎС‡С‘С‚: {0}/{1}',
-      gm_correct: 'вњ… Р’РµСЂРЅРѕ!', gm_wrong: 'вќЊ РќРµРІРµСЂРЅРѕ! РџСЂР°РІРёР»СЊРЅРѕ: {0}',
-      gm_result: 'рџЋЇ Р РµР·СѓР»СЊС‚Р°С‚: {0} РёР· {1}', gm_play_again: 'РРіСЂР°С‚СЊ РµС‰С‘ СЂР°Р·',
-      gm_back: 'Рљ РёРіСЂР°Рј', gm_time: '{0} СЃРµРє', gm_no_games: 'РќРµС‚ РґРѕСЃС‚СѓРїРЅС‹С… РёРіСЂ',
-      gm_finish: 'рџЋ‰ РРіСЂР° Р·Р°РІРµСЂС€РµРЅР°!',
-      g_profile: 'РџСЂРѕС„РёР»СЊ', g_level: 'РЈСЂРѕРІРµРЅСЊ', g_xp: 'РћРїС‹С‚', g_coins: 'РњРѕРЅРµС‚С‹',
-      g_streak: 'РґРЅРµР№ РїРѕРґСЂСЏРґ', g_achievements: 'Р”РѕСЃС‚РёР¶РµРЅРёСЏ', g_ach_count: '{0} РёР· {1}',
-      lb_title: 'РўР°Р±Р»РёС†Р° Р»РёРґРµСЂРѕРІ', lb_your_rank: 'РўРІРѕС‘ РјРµСЃС‚Рѕ: #{0}',
-      shop_title: 'РњР°РіР°Р·РёРЅ', shop_buy: 'РљСѓРїРёС‚СЊ', shop_equip: 'РќР°РґРµС‚СЊ',
-      shop_owned: 'вњ“ РєСѓРїР»РµРЅРѕ', shop_equipped: 'вњ“ РЅР°РґРµС‚Рѕ', shop_buy_ok: 'РљСѓРїР»РµРЅРѕ!',
-      shop_equip_ok: 'РќР°РґРµС‚Рѕ!', shop_no_coins: 'РќРµ С…РІР°С‚Р°РµС‚ РјРѕРЅРµС‚', shop_already: 'РЈР¶Рµ РєСѓРїР»РµРЅРѕ',
-      shop_tab: 'РњР°РіР°Р·РёРЅ',
-      faceit_link: 'РџСЂРёРІСЏР·РєР° FACEIT', faceit_link_btn: 'РџСЂРёРІСЏР·Р°С‚СЊ',
-      faceit_unlink: 'РћС‚РІСЏР·Р°С‚СЊ', faceit_placeholder: 'РќРёРєРЅРµР№Рј FACEITвЂ¦',
-      gr_title: 'Р‘Р°Р·Р° РіСЂР°РЅР°С‚', gr_sub: 'РС‰Рё РіСЂР°РЅР°С‚С‹ РїРѕ РєР°СЂС‚Рµ, СЃС‚РѕСЂРѕРЅРµ Рё С‚РёРїСѓ',
-      gr_all: 'Р’СЃРµ', gr_map: 'РљР°СЂС‚Р°', gr_side: 'РЎС‚РѕСЂРѕРЅР°', gr_type: 'РўРёРї',
-      gr_search: 'РџРѕРёСЃРє РіСЂР°РЅР°С‚вЂ¦', gr_favs: 'РР·Р±СЂР°РЅРЅРѕРµ',
-      gr_difficulty: 'РЎР»РѕР¶РЅРѕСЃС‚СЊ', gr_train: 'РўР Р•РќРР РћР’РђРўР¬', gr_trained: 'вњ“ РІ РїР»Р°РЅРµ',
-      gr_empty: 'Р“СЂР°РЅР°С‚ РЅРµ РЅР°Р№РґРµРЅРѕ', gr_fav_empty: 'РџРѕРєР° РЅРµС‚ РёР·Р±СЂР°РЅРЅС‹С… РіСЂР°РЅР°С‚ вЂ” РґРѕР±Р°РІСЊ в…',
-      gr_fav_add: 'Р’ РёР·Р±СЂР°РЅРЅРѕРµ', gr_fav_rm: 'РЈР±СЂР°С‚СЊ РёР· РёР·Р±СЂР°РЅРЅРѕРіРѕ',
-      gr_total: 'Р“СЂР°РЅР°С‚: {0}',
-      tp_today: 'РЎРµРіРѕРґРЅСЏС€РЅРёР№ РїР»Р°РЅ', tp_reco: 'Р РµРєРѕРјРµРЅРґР°С†РёСЏ',
-      tp_do: 'Р’С‹РїРѕР»РЅРёС‚СЊ', tp_done: 'вњ“ Р’С‹РїРѕР»РЅРµРЅРѕ',
-      tp_min: '{0} РјРёРЅ', tp_progress: 'Р’С‹РїРѕР»РЅРµРЅРѕ {0} РёР· {1}',
-      tp_time: 'Р’СЂРµРјСЏ РЅР° С‚СЂРµРЅРёСЂРѕРІРєСѓ', tp_goal: 'Р¦РµР»СЊ',
-      tp_goal_aim: 'Р›СѓС‡С€Рµ Р°РёРј', tp_goal_utility: 'Р›СѓС‡С€Рµ СѓС‚РёР»РёС‚Р°',
-      tp_goal_game_sense: 'Р›СѓС‡С€Рµ РіРµР№Рј-СЃРµРЅСЃ', tp_goal_movement: 'Р›СѓС‡С€Рµ РґРІРёР¶РµРЅРёРµ',
-      tp_goal_faceit10: 'Р”Рѕ FACEIT 10',
-      tp_saved: 'вњ“ РЎРѕС…СЂР°РЅРµРЅРѕ', tp_skill_level: 'РќР°РІС‹РєРё',
-      gm_react_wait: 'Р–РґРёвЂ¦', gm_react_go: 'Р–РњР!', gm_react_too_soon: 'РЎР»РёС€РєРѕРј СЂР°РЅРѕ!',
-      gm_react_attempt: 'РџРѕРїС‹С‚РєР° {0} РёР· {1}', gm_react_hit: 'вњ“ РџРѕРїР°Р»!',
-      gm_aim_hit: 'Р¦РµР»РµР№: {0}', gm_aim_miss: 'РњРёРјРѕ!',
-      gm_daily: 'Р—Р°РґР°РЅРёРµ РґРЅСЏ', gm_daily_done: 'вњ“ Р’С‹РїРѕР»РЅРµРЅРѕ',
-      gm_daily_bonus: '+20 XP Р·Р° Р·Р°РґР°РЅРёРµ РґРЅСЏ', gm_daily_play: 'РРіСЂР°С‚СЊ',
-      ch_title: 'Р§РµР»Р»РµРЅРґР¶Рё РЅРµРґРµР»Рё', ch_sub: 'РќРѕРІС‹Рµ Р·Р°РґР°РЅРёСЏ РєР°Р¶РґС‹Р№ РїРѕРЅРµРґРµР»СЊРЅРёРє. Р’С‹РїРѕР»РЅСЏР№ вЂ” Р·Р°Р±РёСЂР°Р№ РЅР°РіСЂР°РґСѓ!',
-      ch_week: 'РќРµРґРµР»СЏ {0}', ch_progress: '{0} / {1}', ch_claim: 'Р—Р°Р±СЂР°С‚СЊ', ch_claimed: 'вњ“ РџРѕР»СѓС‡РµРЅРѕ',
-      ch_done: 'Р’С‹РїРѕР»РЅРµРЅРѕ', ch_xp_coins: '+{0} XP В· +{1} рџЄ™', ch_empty: 'Р§РµР»Р»РµРЅРґР¶Рё РїРѕРєР° РЅРµ РіРѕС‚РѕРІС‹.',
-      h_challenge: 'Р§РµР»Р»РµРЅРґР¶Рё РЅРµРґРµР»Рё', h_challenge_sub: 'РќР°РіСЂР°РґС‹ Р·Р° Р°РєС‚РёРІРЅРѕСЃС‚СЊ',
-      fr_title: 'Р”СЂСѓР·СЊСЏ', fr_sub: 'Р”РѕР±Р°РІР»СЏР№ РґСЂСѓР·РµР№ РїРѕ ID, СЃРѕСЂРµРІРЅСѓР№СЃСЏ РІ XP',
-      fr_add_ph: 'Telegram ID РґСЂСѓРіР°', fr_add: 'Р”РѕР±Р°РІРёС‚СЊ', fr_requests: 'Р’С…РѕРґСЏС‰РёРµ Р·Р°РїСЂРѕСЃС‹',
-      fr_empty: 'РџРѕРєР° РЅРµС‚ РґСЂСѓР·РµР№. Р”РѕР±Р°РІСЊ РїРѕ ID!', fr_accept: 'РџСЂРёРЅСЏС‚СЊ', fr_remove: 'РЈРґР°Р»РёС‚СЊ',
-      fr_sent: 'вњ“ Р—Р°РїСЂРѕСЃ РѕС‚РїСЂР°РІР»РµРЅ', fr_error: 'РћС€РёР±РєР°: {0}', fr_lb: 'Р›РёРґРµСЂР±РѕСЂРґ РґСЂСѓР·РµР№',
-      h_friends: 'Р”СЂСѓР·СЊСЏ', h_friends_sub: 'Р—Р°РїСЂРѕСЃС‹ Рё Р»РёРґРµСЂР±РѕСЂРґ',
-      shop_avatars: 'РђРІР°С‚Р°СЂС‹', shop_badges: 'Р‘РµР№РґР¶Рё', shop_soldout: 'Р Р°СЃРїСЂРѕРґР°РЅРѕ',
-      shop_rarity_common: 'РћР±С‹С‡РЅС‹Р№', shop_rarity_rare: 'Р РµРґРєРёР№',
-      shop_rarity_epic: 'Р­РїРёС‡РµСЃРєРёР№', shop_rarity_legendary: 'Р›РµРіРµРЅРґР°СЂРЅС‹Р№',
-      faceit_sync: 'РЎРёРЅС…СЂРѕРЅРёР·РёСЂРѕРІР°С‚СЊ',
+      tab_stats: 'Статистика', tab_settings: 'Настройки', back: 'Назад',
+      src_note: 'Источники: bo3.gg · FACEIT', refresh: 'Обновить',
+      search_ph: 'Поиск по командам и игрокам…',
+      hint: 'Нажми на команду или игрока, чтобы открыть карточку', hint_close: 'Закрыть подсказку',
+      updated: 'Обновлено', period: 'период', region: 'регион',
+      not_found: 'Ничего не найдено по запросу', no_data: 'Нет данных',
+      fav_title: 'Избранное', type_team: 'Команда', type_player: 'Игрок', type_faceit: 'FACEIT',
+      fav_remove: 'Убрать из избранного', fav_add: 'В избранное',
+      p90: '3 месяца', p180: '6 месяцев', p365: '12 месяцев',
+      p90s: '3 мес.', p180s: '6 мес.', p365s: '12 мес.',
+      sec_teams: 'Команды', sec_faceit: 'FACEIT', sec_pro: 'Про-сцена',
+      sub_teams: 'Топ-{0} · винрейт за {1}', sub_faceit: 'Топ-{0} · регион {1}', sub_pro: 'Топ-{0} · рейтинг за {1}',
+      err_stats: 'Не удалось загрузить статистику', err_team: 'Не удалось загрузить команду', err_player: 'Не удалось загрузить игрока',
+      retry: 'Повторить',
+      stats_6m: 'Статистика за 6 месяцев', history_6m: 'История · матчи за 6 мес.',
+      roster: 'Состав', achievements: 'Достижения', founded: 'Основана: ',
+      l_matches: 'Матчи', l_wins: 'Победы', l_losses: 'Поражения', l_winrate: 'Винрейт',
+      l_games: 'Игр', l_round_wr: 'WR раундов', l_t: 'T-side', l_ct: 'CT-side',
+      l_pistol: 'Пистолетки', l_eco: 'Эко', l_force: 'Форс-бай', l_buy: 'Фулл-бай', l_kd: 'K/D',
+      stat_for: 'Статистика ', maps_for: 'Карты · ', per_last: 'за последние шесть месяцев',
+      career: 'Карьера · команды',
+      story: 'Жизненный путь и история успеха', personal: 'Личные данные',
+      b_nick: 'Псевдоним', b_real: 'Настоящее имя', b_aliases: 'Псевдонимы', b_bday: 'Дата рождения',
+      b_country: 'Страна', b_region: 'Регион', b_role: 'Роль', b_team: 'Команда',
+      b_since: 'В команде с', b_prize: 'Призовые', b_rating: 'Рейтинг',
+      tags: 'Теги', socials: 'Соцсети', photo_unavail: 'Фото недоступно', years: ' лет',
+      l_maps_n: 'Карт: ', l_k: 'K: ', l_adr: 'ADR: ',
+      match_wr: 'Винрейт матчей', game_wr: 'Винрейт игр', l_hs: 'HS%', assists: 'Ассистов',
+      f_bio: 'Биография', f_nick: 'Никнейм', f_level: 'Уровень FACEIT', f_elo: 'Рейтинг ELO',
+      f_since: 'Аккаунт с', f_stats: 'Статистика на FACEIT', f_kills: 'Убийств',
+      f_streak: 'Серия', f_longest: 'Макс. серия', f_last: 'Последние матчи', f_maps: 'Карты',
+      f_matches_n: 'Матчей: ', f_socials: 'Соц сети',
+      set_theme: 'Тема оформления', set_lang: 'Язык',
+      gurren_q1: '«Верь в меня, что верит в тебя!» — Камина',
+      gurren_q2: '«Мой бур пробьёт и небеса!» — Симон',
+      gurren_q3: '«Выходи за пределы невозможного!» — Камина',
+      gurren_note: 'Команда Дай-Гуррен · «Кто, по-твоему, мы такие?!» — Камина · «Мой бур пробьёт небеса!» — Симон',
+      theme_dark: 'Тёмная', theme_light: 'Светлая', theme_gurren: 'Gurren Lagann',
+      lang_ru: 'Русский', lang_en: 'English',
+      profile_tg: 'Профиль Telegram', app_label: 'Приложение', version: 'Версия',
+      src_data: 'Источники данных', set_region: 'Регион FACEIT', set_period: 'Период статистики',
+      fav_empty: 'Пока пусто — добавь звёздочкой из карточки игрока или команды',
+      fav_rm: 'Убрать', refresh_stats: 'Обновить статистику', user: 'Пользователь',
+      app_open: 'Открой приложение через бота', load_fail: 'Не удалось загрузить данные',
+      tab_guides: 'Гайды',
+      g_tab_maps: 'Карты',
+      g_sections: 'разделов', g_back_guides: 'В гайды',
+      g_cat_lineups: 'Раскидки', g_cat_tactics: 'Тактики',
+      g_type_all: 'Все', g_type_smoke: 'Смок', g_type_flash: 'Флешка',
+      g_type_molotov: 'Молотов', g_type_grenade: 'Граната',
+      g_lineups_empty: 'Пока нет раскидок', g_tactics_empty: 'Пока нет тактик',
+      g_tactics_header: 'Тактики для Mirage', g_more: 'Подробнее', g_coming_soon: 'Раздел в разработке', g_tips: 'Советы',
+      g_steps: 'Выполнение',
+      g_essence: 'Суть тактики', g_goal: 'Цель', g_buy: 'Покупка',
+      g_map_hint: 'Нажми на точку на карте — увидишь раскидки с этой позиции',
+      g_map_reset_spot: 'Сбросить точку', g_map_spot: 'Раскидки с этой точки', g_tactic_label: 'Тактика',
+      g_search_ph: 'Поиск по раскидкам и тактикам…',
+      g_search_tactics: 'Поиск по тактикам…',
+      g_pick_lineups_sub: 'Видео раскидок по позициям на радаре',
+      g_pick_tactics_sub: 'Командные тактики за T и CT',
+      g_pick_side: 'Выбери сторону',
+      g_side_t: 'Террористы',
+      g_side_t_sub: 'Атака: пистолетка, эко, форс, фулл бай',
+      g_side_ct: 'Контр-террористы',
+      g_side_ct_sub: 'Оборона: пистолетка, эко, форс, фулл бай',
+      g_pick_round: 'Выбери тип раунда',
+      g_round_pistol: 'Пистолетка',
+      g_round_pistol_sub: 'Первый раунд, только пистолеты',
+      g_round_eco: 'Эко',
+      g_round_eco_sub: 'Копим деньги, минимум покупок',
+      g_round_force: 'Форс',
+      g_round_force_sub: 'Тратим всё на этот раунд',
+      g_round_full: 'Фулл бай',
+      g_round_full_sub: 'Полная закупка с гранатами',
+      g_spot_no_video: 'Видео для этой позиции скоро появится',
+      g_spot_hint: 'Нажми на точку на радаре — под ней появится видео',
+      g_spot_next: 'Следующее видео',
+      g_spot_open: 'Открыть на YouTube',
+      g_mode_tldr: 'Коротко', g_mode_plan: 'Схема', g_mode_replay: 'Реплей',
+      g_difficulty: 'Сложность', g_roles: 'Роли',
+      g_role_filter: 'Показать роль', g_role_all: 'Все роли',
+      g_prev_step: 'Шаг назад', g_next_step: 'Шаг вперёд',
+      g_autoplay: 'Автопросмотр', g_autoplay_stop: 'Стоп',
+      g_step_of: 'Шаг {0} из {1}', g_phase: 'Фаза',
+      g_util_video: 'Смотреть раскидку', g_glossary: 'Подсказка',
+      g_replay_play: 'Смотреть', g_replay_pause: 'Пауза',
+      g_replay_restart: 'Сначала', g_replay_speed: 'Скорость',
+      g_replay_hint: 'Нажми «Смотреть» — игроки разыграют тактику по таймлайну, как в реальном раунде.',
+      tab_home: 'Главная', tab_learn: 'Обучение',
+      h_welcome: 'Добро пожаловать, {0}!', h_sub: 'Твой путь к мастерству CS2',
+      h_continue: 'Продолжить обучение', h_learn: 'Обучение', h_maps: 'Гайды', h_stats: 'Статистика',
+      h_learn_sub: 'Уроки, карточки и тесты для новичков',
+      h_maps_sub: 'Раскидки, тактики и реплеи',
+      h_stats_sub: 'FACEIT, команды и игроки',
+      h_progress: 'Твой прогресс',
+      h_lessons: 'Уроки', h_cards: 'Карточки', h_quizzes: 'Тесты',
+      h_of: '{0} из {1}',
+      h_best: 'Лучший результат: {0}',
+      l_lessons: 'Уроки', l_cards: 'Карточки', l_quizzes: 'Тесты',
+      l_lessons_sub: 'Пошаговое обучение основам',
+      l_cards_sub: 'Запоминаем термины', l_quizzes_sub: 'Проверь себя',
+      l_done: '✓ пройдено', l_questions: 'вопросов', l_sections: 'разделов',
+      l_open: 'Открыть', l_lesson_open: 'Начать урок',
+      l_check: 'Проверить', l_correct: '✅ Верно!', l_wrong: '❌ Правильный ответ: {0}',
+      l_finished: '🎉 Урок пройден!', l_lesson_repeat: 'Повторить',
+      c_front: 'Термин', c_back: 'Значение', c_show: 'Показать ответ',
+      c_known: 'Знаю', c_unknown: 'Не знаю', c_done: '🎉 Все карточки выучены!',
+      c_left: 'Осталось: {0}', c_restart: 'Начать заново',
+      q_start: 'Начать тест', q_q: 'Вопрос {0} из {1}', q_result: 'Твой результат: {0} из {1}',
+      q_best: 'Лучший результат: {0}', q_again: 'Пройти ещё раз', q_next: 'Следующий',
+      q_finish: 'Завершить тест', q_feedback_correct: '✅ Верно!',
+      q_feedback_wrong: '❌ Правильный ответ: {0}',
+      q_finished: '🏆 Тест завершён!', q_perfect: 'Отлично!', q_good: 'Неплохо!', q_keep: 'Тренируйся дальше!',
+      tab_train: 'Тренировка',
+      tr_sub: 'Практикуй раскидки на каждой карте',
+      tr_pick_map: 'Выбери карту для тренировки',
+      tr_attempts: '{0} практик', tr_practice: 'Практиковать', tr_practiced: '✓ отработано',
+      tr_checklist: 'Чек-лист практики',
+      tr_check1: 'Изучи шаги и точку броска',
+      tr_check2: 'Открой карту и найди позицию',
+      tr_check3: 'Выполни бросок в тренировке',
+      tr_ready: 'Отработал!', tr_reset: 'Сбросить', tr_empty: 'Пока нет раскидок на этой карте',
+      tr_progress: 'Отработано: {0} из {1}',
+      tr_spot_here: 'Точка броска',
+      tab_games: 'Мини-игры',
+      gm_sub: 'Проверь свои знания CS2',
+      gm_play: 'Играть', gm_best: 'Лучший: {0}', gm_played: '{0} игр',
+      gm_q: 'Вопрос {0} из {1}', gm_score: 'Счёт: {0}/{1}',
+      gm_correct: '✅ Верно!', gm_wrong: '❌ Неверно! Правильно: {0}',
+      gm_result: '🎯 Результат: {0} из {1}', gm_play_again: 'Играть ещё раз',
+      gm_back: 'К играм', gm_time: '{0} сек', gm_no_games: 'Нет доступных игр',
+      gm_finish: '🎉 Игра завершена!',
+      g_profile: 'Профиль', g_level: 'Уровень', g_xp: 'Опыт', g_coins: 'Монеты',
+      g_streak: 'дней подряд', g_achievements: 'Достижения', g_ach_count: '{0} из {1}',
+      lb_title: 'Таблица лидеров', lb_your_rank: 'Твоё место: #{0}',
+      shop_title: 'Магазин', shop_buy: 'Купить', shop_equip: 'Надеть',
+      shop_owned: '✓ куплено', shop_equipped: '✓ надето', shop_buy_ok: 'Куплено!',
+      shop_equip_ok: 'Надето!', shop_no_coins: 'Не хватает монет', shop_already: 'Уже куплено',
+      shop_tab: 'Магазин',
+      faceit_link: 'Привязка FACEIT', faceit_link_btn: 'Привязать',
+      faceit_unlink: 'Отвязать', faceit_placeholder: 'Никнейм FACEIT…',
+      gr_title: 'База гранат', gr_sub: 'Ищи гранаты по карте, стороне и типу',
+      gr_all: 'Все', gr_map: 'Карта', gr_side: 'Сторона', gr_type: 'Тип',
+      gr_search: 'Поиск гранат…', gr_favs: 'Избранное',
+      gr_difficulty: 'Сложность', gr_train: 'ТРЕНИРОВАТЬ', gr_trained: '✓ в плане',
+      gr_empty: 'Гранат не найдено', gr_fav_empty: 'Пока нет избранных гранат — добавь ★',
+      gr_fav_add: 'В избранное', gr_fav_rm: 'Убрать из избранного',
+      gr_total: 'Гранат: {0}',
+      tp_today: 'Сегодняшний план', tp_reco: 'Рекомендация',
+      tp_do: 'Выполнить', tp_done: '✓ Выполнено',
+      tp_min: '{0} мин', tp_progress: 'Выполнено {0} из {1}',
+      tp_time: 'Время на тренировку', tp_goal: 'Цель',
+      tp_goal_aim: 'Лучше аим', tp_goal_utility: 'Лучше утилита',
+      tp_goal_game_sense: 'Лучше гейм-сенс', tp_goal_movement: 'Лучше движение',
+      tp_goal_faceit10: 'До FACEIT 10',
+      tp_saved: '✓ Сохранено', tp_skill_level: 'Навыки',
+      gm_react_wait: 'Жди…', gm_react_go: 'ЖМИ!', gm_react_too_soon: 'Слишком рано!',
+      gm_react_attempt: 'Попытка {0} из {1}', gm_react_hit: '✓ Попал!',
+      gm_aim_hit: 'Целей: {0}', gm_aim_miss: 'Мимо!',
+      gm_daily: 'Задание дня', gm_daily_done: '✓ Выполнено',
+      gm_daily_bonus: '+20 XP за задание дня', gm_daily_play: 'Играть',
+      ch_title: 'Челленджи недели', ch_sub: 'Новые задания каждый понедельник. Выполняй — забирай награду!',
+      ch_week: 'Неделя {0}', ch_progress: '{0} / {1}', ch_claim: 'Забрать', ch_claimed: '✓ Получено',
+      ch_done: 'Выполнено', ch_xp_coins: '+{0} XP · +{1} 🪙', ch_empty: 'Челленджи пока не готовы.',
+      h_challenge: 'Челленджи недели', h_challenge_sub: 'Награды за активность',
+      fr_title: 'Друзья', fr_sub: 'Добавляй друзей по ID, соревнуйся в XP',
+      fr_add_ph: 'Telegram ID друга', fr_add: 'Добавить', fr_requests: 'Входящие запросы',
+      fr_empty: 'Пока нет друзей. Добавь по ID!', fr_accept: 'Принять', fr_remove: 'Удалить',
+      fr_sent: '✓ Запрос отправлен', fr_error: 'Ошибка: {0}', fr_lb: 'Лидерборд друзей',
+      h_friends: 'Друзья', h_friends_sub: 'Запросы и лидерборд',
+      shop_avatars: 'Аватары', shop_badges: 'Бейджи', shop_soldout: 'Распродано',
+      shop_rarity_common: 'Обычный', shop_rarity_rare: 'Редкий',
+      shop_rarity_epic: 'Эпический', shop_rarity_legendary: 'Легендарный',
+      faceit_sync: 'Синхронизировать',
     },
     en: {
       tab_stats: 'Stats', tab_settings: 'Settings', back: 'Back',
-      src_note: 'Sources: bo3.gg В· FACEIT', refresh: 'Refresh',
-      search_ph: 'Search teams and playersвЂ¦',
+      src_note: 'Sources: bo3.gg · FACEIT', refresh: 'Refresh',
+      search_ph: 'Search teams and players…',
       hint: 'Tap a team or player to open their card', hint_close: 'Close hint',
       updated: 'Updated', period: 'period', region: 'region',
       not_found: 'Nothing found for', no_data: 'No data',
@@ -247,16 +247,16 @@ const TAB_DEFS = {
       p90: '3 months', p180: '6 months', p365: '12 months',
       p90s: '3 mo.', p180s: '6 mo.', p365s: '12 mo.',
       sec_teams: 'Teams', sec_faceit: 'FACEIT', sec_pro: 'Pro scene',
-      sub_teams: 'Top {0} В· winrate {1}', sub_faceit: 'Top {0} В· region {1}', sub_pro: 'Top {0} В· rating {1}',
+      sub_teams: 'Top {0} · winrate {1}', sub_faceit: 'Top {0} · region {1}', sub_pro: 'Top {0} · rating {1}',
       err_stats: 'Failed to load stats', err_team: 'Failed to load team', err_player: 'Failed to load player',
       retry: 'Retry',
-      stats_6m: '6-month stats', history_6m: 'History В· matches 6 mo.',
+      stats_6m: '6-month stats', history_6m: 'History · matches 6 mo.',
       roster: 'Roster', achievements: 'Achievements', founded: 'Founded: ',
       l_matches: 'Matches', l_wins: 'Wins', l_losses: 'Losses', l_winrate: 'Winrate',
       l_games: 'Games', l_round_wr: 'Round WR', l_t: 'T-side', l_ct: 'CT-side',
       l_pistol: 'Pistols', l_eco: 'Eco', l_force: 'Force', l_buy: 'Full buy', l_kd: 'K/D',
-      stat_for: 'Stats for ', maps_for: 'Maps В· ', per_last: 'the last 6 months',
-      career: 'Career В· teams',
+      stat_for: 'Stats for ', maps_for: 'Maps · ', per_last: 'the last 6 months',
+      career: 'Career · teams',
       story: 'Life story and path to success', personal: 'Personal info',
       b_nick: 'Nickname', b_real: 'Real name', b_aliases: 'Aliases', b_bday: 'Date of birth',
       b_country: 'Country', b_region: 'Region', b_role: 'Role', b_team: 'Team',
@@ -269,15 +269,15 @@ const TAB_DEFS = {
       f_streak: 'Streak', f_longest: 'Longest streak', f_last: 'Recent matches', f_maps: 'Maps',
       f_matches_n: 'Matches: ', f_socials: 'Social links',
       set_theme: 'Theme', set_lang: 'Language',
-      gurren_q1: '"Believe in the me that believes in you!" вЂ” Kamina',
-      gurren_q2: '"My drill is the drill that will pierce the heavens!" вЂ” Simon',
-      gurren_q3: '"Go beyond the impossible and kick reason to the curb!" вЂ” Kamina',
-      gurren_note: 'Team Dai-Gurren В· "Who the hell do you think we are?!" вЂ” Kamina В· "My drill will pierce the heavens!" вЂ” Simon',
+      gurren_q1: '\"Believe in the me that believes in you!\" — Kamina',
+      gurren_q2: '\"My drill is the drill that will pierce the heavens!\" — Simon',
+      gurren_q3: '\"Go beyond the impossible and kick reason to the curb!\" — Kamina',
+      gurren_note: 'Team Dai-Gurren · \"Who the hell do you think we are?!\" — Kamina · \"My drill will pierce the heavens!\" — Simon',
       theme_dark: 'Dark', theme_light: 'Light', theme_gurren: 'Gurren Lagann',
       lang_ru: 'Russian', lang_en: 'English',
       profile_tg: 'Telegram profile', app_label: 'App', version: 'Version',
       src_data: 'Data sources', set_region: 'FACEIT region', set_period: 'Stats period',
-      fav_empty: 'Empty вЂ” add with the star on a player or team card',
+      fav_empty: 'Empty — add with the star on a player or team card',
       fav_rm: 'Remove', refresh_stats: 'Refresh stats', user: 'User',
       app_open: 'Open the app from the bot', load_fail: 'Failed to load data',
       tab_guides: 'Guides',
@@ -292,8 +292,8 @@ const TAB_DEFS = {
       g_essence: 'The gist', g_goal: 'Goal', g_buy: 'Buy',
       g_map_hint: 'Tap a spot on the map to see lineups from it',
       g_map_reset_spot: 'Clear spot', g_map_spot: 'Lineups from this spot', g_tactic_label: 'Tactic',
-      g_search_ph: 'Search lineups and tacticsвЂ¦',
-      g_search_tactics: 'Search tacticsвЂ¦',
+      g_search_ph: 'Search lineups and tactics…',
+      g_search_tactics: 'Search tactics…',
       g_pick_lineups_sub: 'Lineup videos by position on the radar',
       g_pick_tactics_sub: 'Team tactics for T and CT',
       g_pick_side: 'Choose a side',
@@ -323,7 +323,7 @@ const TAB_DEFS = {
       g_util_video: 'Watch the lineup', g_glossary: 'Hint',
       g_replay_play: 'Watch', g_replay_pause: 'Pause',
       g_replay_restart: 'Restart', g_replay_speed: 'Speed',
-      g_replay_hint: 'Hit "Watch" вЂ” players run the tactic on the timeline, like a real round.',
+      g_replay_hint: 'Hit \"Watch\" — players run the tactic on the timeline, like a real round.',
       tab_home: 'Home', tab_learn: 'Learn',
       h_welcome: 'Welcome, {0}!', h_sub: 'Your path to CS2 mastery',
       h_continue: 'Continue learning', h_learn: 'Learn', h_maps: 'Guides', h_stats: 'Stats',
@@ -337,12 +337,12 @@ const TAB_DEFS = {
       l_lessons: 'Lessons', l_cards: 'Flashcards', l_quizzes: 'Quizzes',
       l_lessons_sub: 'Step-by-step basics',
       l_cards_sub: 'Learn the terms', l_quizzes_sub: 'Test yourself',
-      l_done: 'вњ“ done', l_questions: 'questions', l_sections: 'sections',
+      l_done: '✓ done', l_questions: 'questions', l_sections: 'sections',
       l_open: 'Open', l_lesson_open: 'Start lesson',
-      l_check: 'Check', l_correct: 'вњ… Correct!', l_wrong: 'вќЊ Correct answer: {0}',
-      l_finished: 'рџЋ‰ Lesson completed!', l_lesson_repeat: 'Repeat',
+      l_check: 'Check', l_correct: '✅ Correct!', l_wrong: '❌ Correct answer: {0}',
+      l_finished: '🎉 Lesson completed!', l_lesson_repeat: 'Repeat',
       c_front: 'Term', c_back: 'Meaning', c_show: 'Show answer',
-      c_known: 'Know it', c_unknown: "Don't know", c_done: 'рџЋ‰ All flashcards learned!',
+      c_known: 'Know it', c_unknown: "Don't know", c_done: '🎉 All flashcards learned!',
       c_left: 'Left: {0}', c_restart: 'Start over',
       q_start: 'Start quiz', q_q: 'Question {0} of {1}', q_result: 'Your score: {0} of {1}',
       q_best: 'Best score: {0}', q_again: 'Try again', q_next: 'Next',
@@ -352,7 +352,7 @@ const TAB_DEFS = {
       tab_train: 'Train',
       tr_sub: 'Practice lineups on every map',
       tr_pick_map: 'Pick a map to practice',
-      tr_attempts: '{0} practices', tr_practice: 'Practice', tr_practiced: 'вњ“ drilled',
+      tr_attempts: '{0} practices', tr_practice: 'Practice', tr_practiced: '✓ drilled',
       tr_checklist: 'Practice checklist',
       tr_check1: 'Study the steps and throw position',
       tr_check2: 'Open the map and find the spot',
@@ -367,12 +367,12 @@ const TAB_DEFS = {
       gm_correct: 'вњ… Correct!', gm_wrong: 'вќЊ Wrong! Answer: {0}',
       gm_result: 'рџЋЇ Result: {0} of {1}', gm_play_again: 'Play again',
       gm_back: 'To games', gm_time: '{0} sec', gm_no_games: 'No games available',
-      gm_finish: 'рџЋ‰ Game over!',
+      gm_finish: '🎉 Game over!',
       g_profile: 'Profile', g_level: 'Level', g_xp: 'XP', g_coins: 'Coins',
       g_streak: 'day streak', g_achievements: 'Achievements', g_ach_count: '{0} of {1}',
       lb_title: 'Leaderboard', lb_your_rank: 'Your rank: #{0}',
       shop_title: 'Shop', shop_buy: 'Buy', shop_equip: 'Equip',
-      shop_owned: 'вњ“ owned', shop_equipped: 'вњ“ equipped', shop_buy_ok: 'Purchased!',
+      shop_owned: '✓ owned', shop_equipped: '✓ equipped', shop_buy_ok: 'Purchased!',
       shop_equip_ok: 'Equipped!', shop_no_coins: 'Not enough coins', shop_already: 'Already owned',
       shop_tab: 'Shop',
       faceit_link: 'FACEIT Link', faceit_link_btn: 'Link',
@@ -380,31 +380,31 @@ const TAB_DEFS = {
       gr_title: 'Grenade Database', gr_sub: 'Search grenades by map, side and type',
       gr_all: 'All', gr_map: 'Map', gr_side: 'Side', gr_type: 'Type',
       gr_search: 'Search grenadesвЂ¦', gr_favs: 'Favorites',
-      gr_difficulty: 'Difficulty', gr_train: 'TRAIN THIS', gr_trained: 'вњ“ planned',
-      gr_empty: 'No grenades found', gr_fav_empty: 'No favorite grenades yet вЂ” add with в…',
+      gr_difficulty: 'Difficulty', gr_train: 'TRAIN THIS', gr_trained: '✓ planned',
+      gr_empty: 'No grenades found', gr_fav_empty: 'No favorite grenades yet — add with ⭐',
       gr_fav_add: 'Add to favorites', gr_fav_rm: 'Remove from favorites',
       gr_total: 'Grenades: {0}',
       tp_today: 'Today\'s plan', tp_reco: 'Recommendation',
-      tp_do: 'Complete', tp_done: 'вњ“ Done',
+      tp_do: 'Complete', tp_done: '✓ Done',
       tp_min: '{0} min', tp_progress: 'Done {0} of {1}',
       tp_time: 'Training time', tp_goal: 'Goal',
       tp_goal_aim: 'Better aim', tp_goal_utility: 'Better utility',
       tp_goal_game_sense: 'Better game sense', tp_goal_movement: 'Better movement',
       tp_goal_faceit10: 'Reach FACEIT 10',
-      tp_saved: 'вњ“ Saved', tp_skill_level: 'Skills',
-      gm_react_wait: 'WaitвЂ¦', gm_react_go: 'TAP!', gm_react_too_soon: 'Too early!',
-      gm_react_attempt: 'Attempt {0} of {1}', gm_react_hit: 'вњ“ Hit!',
+      tp_saved: '✓ Saved', tp_skill_level: 'Skills',
+      gm_react_wait: 'Wait…', gm_react_go: 'TAP!', gm_react_too_soon: 'Too early!',
+      gm_react_attempt: 'Attempt {0} of {1}', gm_react_hit: '✓ Hit!',
       gm_aim_hit: 'Targets: {0}', gm_aim_miss: 'Miss!',
-      gm_daily: 'Daily Challenge', gm_daily_done: 'вњ“ Done',
+      gm_daily: 'Daily Challenge', gm_daily_done: '✓ Done',
       gm_daily_bonus: '+20 XP for the daily challenge', gm_daily_play: 'Play',
       ch_title: 'Weekly Challenges', ch_sub: 'New challenges every Monday. Complete them and claim your reward!',
-      ch_week: 'Week {0}', ch_progress: '{0} / {1}', ch_claim: 'Claim', ch_claimed: 'вњ“ Claimed',
-      ch_done: 'Done', ch_xp_coins: '+{0} XP В· +{1} рџЄ™', ch_empty: 'No challenges yet.',
+      ch_week: 'Week {0}', ch_progress: '{0} / {1}', ch_claim: 'Claim', ch_claimed: '✓ Claimed',
+      ch_done: 'Done', ch_xp_coins: '+{0} XP · +{1} 🪙', ch_empty: 'No challenges yet.',
       h_challenge: 'Weekly Challenges', h_challenge_sub: 'Rewards for activity',
       fr_title: 'Friends', fr_sub: 'Add friends by ID, compete in XP',
       fr_add_ph: 'Friend Telegram ID', fr_add: 'Add', fr_requests: 'Incoming requests',
       fr_empty: 'No friends yet. Add by ID!', fr_accept: 'Accept', fr_remove: 'Remove',
-      fr_sent: 'вњ“ Request sent', fr_error: 'Error: {0}', fr_lb: 'Friends leaderboard',
+      fr_sent: '✓ Request sent', fr_error: 'Error: {0}', fr_lb: 'Friends leaderboard',
       h_friends: 'Friends', h_friends_sub: 'Requests and leaderboard',
       shop_avatars: 'Avatars', shop_badges: 'Badges', shop_soldout: 'Sold out',
       shop_rarity_common: 'Common', shop_rarity_rare: 'Rare',
@@ -504,14 +504,14 @@ const TAB_DEFS = {
   }
 
   function formatMoney(v) {
-    if (v == null || isNaN(v)) return 'вЂ”';
+    if (v == null || isNaN(v)) return '—';
     if (v >= 1000000) return '$' + (v / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
     if (v >= 1000) return '$' + (v / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
     return '$' + v;
   }
 
   function countUp(node, target, decimals, dur) {
-    if (target == null || isNaN(target)) { node.textContent = 'вЂ”'; return; }
+    if (target == null || isNaN(target)) { node.textContent = '—'; return; }
     const t0 = performance.now();
     const d = dur || 900;
     function frame(now) {
@@ -621,10 +621,10 @@ const TAB_DEFS = {
     const active = isFav(item.type, item.key);
     const b = el('button', 'star-btn' + (active ? ' active' : ''));
     b.setAttribute('aria-label', t('fav_add'));
-    b.textContent = active ? 'в…' : 'в†';
+    b.textContent = active ? '★' : '☆';
     b.addEventListener('click', () => {
       toggleFav(item);
-      b.textContent = isFav(item.type, item.key) ? 'в…' : 'в†';
+      b.textContent = isFav(item.type, item.key) ? '★' : '☆';
       b.classList.toggle('active');
     });
     return b;
@@ -649,7 +649,7 @@ const TAB_DEFS = {
     if (p.slug) row.dataset.slug = p.slug;
     if (p.id) row.dataset.id = p.id;
     const rank = el('div', 'player-rank');
-    rank.textContent = p.rank != null ? p.rank : 'вЂ”';
+    rank.textContent = p.rank != null ? p.rank : '—';
     if (p.rank === 1) rank.classList.add('top1');
     else if (p.rank === 2 || p.rank === 3) rank.classList.add('top2');
 
@@ -719,7 +719,7 @@ const TAB_DEFS = {
     const section = el('div', 'stat-section');
     const head = el('button', 'sec-head');
     const lc = secLocalized(sec);
-    head.appendChild(el('div', 'section-title', lc.title + (lc.subtitle ? ' В· ' + lc.subtitle : '')));
+    head.appendChild(el('div', 'section-title', lc.title + (lc.subtitle ? ' · ' + lc.subtitle : '')));
     const chev = el('span', 'chev');
     chev.innerHTML = ICONS.chevron;
     head.appendChild(chev);
@@ -765,7 +765,7 @@ const TAB_DEFS = {
       row.appendChild(info);
       const star = el('button', 'star-btn active');
       star.setAttribute('aria-label', t('fav_remove'));
-      star.textContent = 'в…';
+      star.textContent = '★';
       star.addEventListener('click', (e) => {
         e.stopPropagation();
         toggleFav(f);
@@ -788,7 +788,7 @@ const TAB_DEFS = {
     listWrap.innerHTML = '';
     const sections = (data && data.sections) || [];
     if (sections.length) {
-      listWrap.appendChild(el('p', 'updated-note', t('updated') + ': ' + new Date(data.generated_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }) + ' В· ' + t('period') + ' ' + periodShort() + ' В· ' + t('region') + ' ' + (data.region || currentRegion)));
+      listWrap.appendChild(el('p', 'updated-note', t('updated') + ': ' + new Date(data.generated_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }) + ' · ' + t('period') + ' ' + periodShort() + ' · ' + t('region') + ' ' + (data.region || currentRegion)));
     }
     const q = (query || '').trim().toLowerCase();
     const favs = loadFavs();
@@ -801,7 +801,7 @@ const TAB_DEFS = {
       listWrap.appendChild(renderSection({ ...sec, items }, !!q));
     });
     if (!any) {
-      listWrap.appendChild(el('p', 'section-text', q ? t('not_found') + ' В«' + query + 'В»' : t('no_data')));
+      listWrap.appendChild(el('p', 'section-text', q ? t('not_found') + ' «' + query + '»' : t('no_data')));
     }
     if (animate !== false) animateAll();
   }
@@ -847,7 +847,7 @@ const TAB_DEFS = {
       hint.appendChild(el('span', null, t('hint')));
       const hintX = el('button', 'hint-x');
       hintX.setAttribute('aria-label', t('hint_close'));
-      hintX.textContent = 'вњ•';
+      hintX.textContent = '✕';
       hintX.addEventListener('click', () => {
         hint.remove();
         try { localStorage.setItem(ONB_KEY, '1'); } catch (e) {}
@@ -954,7 +954,7 @@ const TAB_DEFS = {
     const row = el('div', 'a-row');
     row.appendChild(iconEl('trophy'));
     const info = el('div', 'a-info');
-    info.appendChild(el('div', 'a-title', (a.title || '') + (a.tournament ? ' В· ' + a.tournament : '')));
+    info.appendChild(el('div', 'a-title', (a.title || '') + (a.tournament ? ' · ' + a.tournament : '')));
     const meta = el('div', 'player-meta');
     if (a.date) meta.appendChild(el('span', null, a.date));
     if (a.tier) meta.appendChild(el('span', 'tier-badge', a.tier.toUpperCase()));
@@ -973,7 +973,7 @@ const TAB_DEFS = {
     hinfo.appendChild(el('div', 't-name', team.name + (team.acronym ? ' ' + team.acronym : '')));
     const badges = el('div', 't-badges');
     if (team.rank != null) badges.appendChild(el('span', 'rank-badge', '#' + team.rank));
-    if (team.rank_diff) badges.appendChild(el('span', 'delta-badge', (team.rank_diff > 0 ? 'в–І' : 'в–ј') + ' ' + Math.abs(team.rank_diff)));
+    if (team.rank_diff) badges.appendChild(el('span', 'delta-badge', (team.rank_diff > 0 ? '▲' : '▼') + ' ' + Math.abs(team.rank_diff)));
     if (team.country_code) badges.appendChild(el('span', 'c-badge', team.country_code.toUpperCase()));
     hinfo.appendChild(badges);
     const meta = el('div', 't-meta');
@@ -1076,7 +1076,7 @@ const TAB_DEFS = {
   function bioRow(label, value) {
     const row = el('div', 'b-row');
     row.appendChild(el('div', 'b-lab', label));
-    row.appendChild(el('div', 'b-val', value != null && value !== '' ? value : 'вЂ”'));
+    row.appendChild(el('div', 'b-val', value != null && value !== '' ? value : '—'));
     return row;
   }
 
@@ -1103,7 +1103,7 @@ const TAB_DEFS = {
     if (m.avg_damage != null) sub.appendChild(el('span', null, t('l_adr') + formatNum(m.avg_damage, 1)));
     info.appendChild(sub);
     row.appendChild(info);
-    row.appendChild(el('div', 'm-score', m.avg_rating != null ? formatNum(m.avg_rating, 2) : 'вЂ”'));
+    row.appendChild(el('div', 'm-score', m.avg_rating != null ? formatNum(m.avg_rating, 2) : '—'));
     return row;
   }
 
@@ -1231,7 +1231,7 @@ const TAB_DEFS = {
     }
     if (p.joined_team_at) bio.appendChild(bioRow(t('b_since'), String(p.joined_team_at).slice(0, 10)));
     bio.appendChild(bioRow(t('b_prize'), formatMoney(p.total_prize)));
-    bio.appendChild(bioRow(t('b_rating'), p.rating != null ? formatNum(p.rating, 2) : 'вЂ”'));
+    bio.appendChild(bioRow(t('b_rating'), p.rating != null ? formatNum(p.rating, 2) : '—'));
     bioBox.appendChild(bio);
 
     const tags = p.tags || [];
@@ -1336,7 +1336,7 @@ const TAB_DEFS = {
     if (m.kd != null) sub.appendChild(el('span', null, 'K/D: ' + formatNum(m.kd, 2)));
     info.appendChild(sub);
     row.appendChild(info);
-    row.appendChild(el('div', 'm-score', m.winrate != null ? formatNum(m.winrate, 1) + '%' : 'вЂ”'));
+    row.appendChild(el('div', 'm-score', m.winrate != null ? formatNum(m.winrate, 1) + '%' : '—'));
     return row;
   }
 
@@ -1515,7 +1515,7 @@ const TAB_DEFS = {
     hinfo.appendChild(el('div', 't-name', currentUser ? currentUser.first_name : t('user')));
     const meta = el('div', 't-meta');
     meta.appendChild(el('span', null, t('profile_tg')));
-    meta.appendChild(el('span', 'rank-badge', 'ID ' + (currentUser ? currentUser.id : 'вЂ”')));
+    meta.appendChild(el('span', 'rank-badge', 'ID ' + (currentUser ? currentUser.id : '—')));
     hinfo.appendChild(meta);
     prof.appendChild(hinfo);
     view.appendChild(prof);
@@ -1523,7 +1523,7 @@ const TAB_DEFS = {
     const info = el('div', 'b-list');
     info.appendChild(bioRow(t('app_label'), 'CS2 COACH'));
     info.appendChild(bioRow(t('version'), '1.1'));
-    info.appendChild(bioRow(t('src_data'), 'bo3.gg В· FACEIT'));
+    info.appendChild(bioRow(t('src_data'), 'bo3.gg · FACEIT'));
     view.appendChild(info);
 
     view.appendChild(sectionTitle('settings', t('set_theme')));
@@ -1631,7 +1631,7 @@ const TAB_DEFS = {
       faceitBox.appendChild(unlinked);
     } else {
       const input = el('input', 'q-input');
-      input.setAttribute('placeholder', t('faceit_placeholder') || 'FACEIT nicknameвЂ¦');
+      input.setAttribute('placeholder', t('faceit_placeholder') || 'FACEIT nickname…');
       input.setAttribute('type', 'text');
       faceitBox.appendChild(input);
       const linkBtn = el('button', 'link-btn');
@@ -1751,123 +1751,123 @@ const TAB_DEFS = {
   }
 
   const GUIDE_TYPES = {
-    smoke: { key: 'g_type_smoke', cls: 'lt-smoke', emoji: 'рџ’Ё' },
-    flash: { key: 'g_type_flash', cls: 'lt-flash', emoji: 'вњЁ' },
-    molotov: { key: 'g_type_molotov', cls: 'lt-molotov', emoji: 'рџ”Ґ' },
-    grenade: { key: 'g_type_grenade', cls: 'lt-grenade', emoji: 'рџ’Ј' }
+    smoke: { key: 'g_type_smoke', cls: 'lt-smoke', emoji: '💨' },
+    flash: { key: 'g_type_flash', cls: 'lt-flash', emoji: '✨' },
+    molotov: { key: 'g_type_molotov', cls: 'lt-molotov', emoji: '🔥' },
+    grenade: { key: 'g_type_grenade', cls: 'lt-grenade', emoji: '💣' }
   };
 
-  const G_STOP = new Set(['РЅР°', 'РІ', 'РёР·', 'Рё', 'Рє', 'Р·Р°', 'РѕС‚', 'РїРѕ', 'СЃРѕ', 'СЃ', 'Сѓ', 'РґР»СЏ', 'РґРѕ', 'РІРѕ', 'С‡С‚Рѕ', 'РєР°Рє', 'РЅРµ', 'Р¶Рµ', 'Р±С‹', 'РїСЂРё', 'РЅР°Рґ', 'РїРѕРґ', 'РѕР±', 'РїСЂРѕ', 'Р±РµР·', 'РјРЅРµ', 'РЅСѓР¶РЅРѕ', 'РЅР°РґРѕ', 'С…РѕС‡Сѓ', 'С…РѕС‚РµР»', 'С‡РµСЂРµР·', 'РјРѕР¶РЅРѕ', 'С‚РёРїР°', 'РµСЃР»Рё', 'РєРѕРіРґР°', 'РЅСѓР¶РµРЅ', 'РЅСѓР¶РЅР°', 'РІСЃРµ', 'РІСЃС‘', 'РїРѕРєР°Р¶Рё', 'РїРѕРєР°Р·Р°С‚СЊ', 'РїРѕСЃРѕРІРµС‚СѓР№', 'РґР°Р№', 'С‡С‚РѕР±С‹', 'СЏ', 'РёРіСЂР°СЋ', 'РёРіСЂР°С‚СЊ', 'РёРіСЂР°РµРј', 'РєР°РєРѕР№', 'РєР°РєРёРµ', 'РєР°РєР°СЏ', 'РіРґРµ', 'СЌС‚Рѕ', 'РёР»Рё', 'С‚РѕР¶Рµ', 'РѕС‡РµРЅСЊ']);
+  const G_STOP = new Set(['на', 'в', 'из', 'и', 'к', 'за', 'от', 'по', 'со', 'с', 'у', 'для', 'до', 'во', 'что', 'как', 'не', 'же', 'бы', 'при', 'над', 'под', 'об', 'про', 'без', 'мне', 'нужно', 'надо', 'хочу', 'хотел', 'через', 'можно', 'типа', 'если', 'когда', 'нужен', 'нужна', 'все', 'всё', 'покажи', 'показать', 'посоветуй', 'дай', 'чтобы', 'я', 'играю', 'играть', 'играем', 'какой', 'какие', 'какая', 'где', 'это', 'или', 'тоже', 'очень']);
 
   const G_TYPE_SYN = {
-    smoke: ['СЃРјРѕРє', 'РґС‹Рј', 'СЃРјРѕСѓРє', 'smoke', 'oneway', 'РІР°РЅРІРµР№'],
-    flash: ['С„Р»РµС€РєР°', 'С„Р»РµС€', 'СЃРІРµС‚Р°С€', 'РІСЃРїС‹С€РєР°', 'flash', 'СЃРІРµС‚РѕС€СѓРјРѕРІР°СЏ', 'С„Р»РµС€Р±Р°РЅРі'],
-    molotov: ['РјРѕР»РѕС‚РѕРІ', 'РјРѕР»РѕС‚', 'Р·Р°Р¶РёРіР°С‚РµР»СЊРЅР°СЏ', 'РјРѕР»РѕС‚РѕРІРѕРј', 'molotov', 'Р·Р°Р¶РёРіР°С‚РµР»СЊРЅС‹Р№'],
-    grenade: ['РіСЂР°РЅР°С‚Р°', 'РіСЂР°РЅР°С‚', 'grenade', 'РіСЂР°РЅР°С‚С‹']
+    smoke: ['смок', 'дым', 'смоук', 'smoke', 'oneway', 'ванвей'],
+    flash: ['флешка', 'флеш', 'светаш', 'вспышка', 'flash', 'светошумовая', 'флешбанг'],
+    molotov: ['молотов', 'молот', 'зажигательная', 'молотовом', 'molotov', 'зажигательный'],
+    grenade: ['граната', 'гранат', 'grenade', 'гранаты']
   };
 
   const G_TERMS = [
-    { keys: ['РІС‹С…РѕРґ', 'РІС‹Р№С‚Рё', 'РІС‹Р±РµР¶Р°С‚СЊ', 'РІС‹С…РѕРґРёС‚СЊ', 'РІС‹Р»РµР·С‚СЊ'], w: 2 },
-    { keys: ['Р·Р°С…РѕРґ', 'Р·Р°Р№С‚Рё', 'Р·Р°С…РѕРґРёС‚', 'Р·Р°С…РѕРґРёС‚СЊ'], w: 2 },
-    { keys: ['РїСѓС€', 'РїСѓС€РёС‚СЊ', 'РїСѓС€РёРј'], w: 2 },
-    { keys: ['РєРѕРЅС‚СЂРѕР»СЊ', 'РєРѕРЅС‚СЂРѕР»РёСЂРѕРІР°С‚СЊ'], w: 2 },
-    { keys: ['РїРµСЂРµРєСЂС‹С‚СЊ', 'РїРµСЂРµРєСЂС‹РІР°РµС‚', 'РїРµСЂРµРєСЂС‹С‚РёСЏ'], w: 2 },
-    { keys: ['Р·Р°РєСЂС‹С‚СЊ', 'Р·Р°РєСЂС‹РІР°РµС‚'], w: 2 },
-    { keys: ['СѓР±СЂР°С‚СЊ', 'СѓР±РёСЂР°РµС‚', 'РІС‹Р¶РёРіР°РµС‚', 'РІС‹Р¶РµС‡СЊ'], w: 2 },
-    { keys: ['РґРµС„РѕР»С‚', 'default'], w: 2 },
-    { keys: ['СЂРµС‚РµРєРµР№С‚', 'СЂРµС‚РµР№Рє'], w: 2 },
-    { keys: ['СЃР°Р№С‚', 'site', 'С‚РѕС‡РєР°'], w: 2 },
-    { keys: ['СЏС‰РёРє', 'СЏС‰РёРєР°', 'box', 'Р±РѕРєСЃ'], w: 2 },
-    { keys: ['РїСЂРѕР№С‚Рё', 'РїСЂРѕС…РѕРґ', 'РїСЂРѕС…РѕРґРёС‚СЊ', 'РїСЂРѕР№РґС‘Рј', 'РїСЂРѕС…РѕРґРёРј'], w: 2 },
-    { keys: ['РІР·СЏС‚СЊ', 'Р·Р°РЅСЏС‚СЊ', 'Р·Р°Р±РёСЂР°С‚СЊ', 'Р·Р°Р±РёСЂР°РµРј'], w: 2 },
-    { keys: ['РёРґС‚Рё', 'РёРґС‘Рј', 'РёРґРµРј', 'РїРѕР№С‚Рё', 'Р·Р°С…РѕРґРёРј'], w: 2 }
+    { keys: ['выход', 'выйти', 'выбежать', 'выходить', 'вылезть'], w: 2 },
+    { keys: ['заход', 'зайти', 'заходит', 'заходить'], w: 2 },
+    { keys: ['пуш', 'пушить', 'пушим'], w: 2 },
+    { keys: ['контроль', 'контролировать'], w: 2 },
+    { keys: ['перекрыть', 'перекрывает', 'перекрытия'], w: 2 },
+    { keys: ['закрыть', 'закрывает'], w: 2 },
+    { keys: ['убрать', 'убирает', 'выжигает', 'выжечь'], w: 2 },
+    { keys: ['дефолт', 'default'], w: 2 },
+    { keys: ['ретекейт', 'ретейк'], w: 2 },
+    { keys: ['сайт', 'site', 'точка'], w: 2 },
+    { keys: ['ящик', 'ящика', 'box', 'бокс'], w: 2 },
+    { keys: ['пройти', 'проход', 'проходить', 'пройдём', 'проходим'], w: 2 },
+    { keys: ['взять', 'занять', 'забирать', 'забираем'], w: 2 },
+    { keys: ['идти', 'идём', 'идем', 'пойти', 'заходим'], w: 2 }
   ];
 
   const G_LOC = {
     mirage: [
-      { name: 'window', aliases: ['РѕРєРЅРѕ', 'window', 'РІРёРЅРґРѕСѓ'] },
-      { name: 'ct', aliases: ['РєС‚', 'ct'] },
-      { name: 'jungle', aliases: ['РґР¶Р°РЅРіР»', 'jungle', 'РїР°Р»СЊРјР°'] },
-      { name: 'stairs', aliases: ['Р»РµСЃС‚РЅРёС†Р°', 'Р»РµСЃС‚РЅРёС†Сѓ', 'stairs'] },
-      { name: 'underpass', aliases: ['Р°РЅРґРµСЂРїР°СЃ', 'underpass'] },
-      { name: 'apartments', aliases: ['Р°РїР°СЂС‚Р°РјРµРЅС‚С‹', 'apartments', 'Р°РїСЃС‹'] },
-      { name: 'ramp', aliases: ['СЂР°РјРї', 'ramp'] },
-      { name: 'short', aliases: ['С€РѕСЂС‚', 'short'] },
-      { name: 'a', aliases: ['Р°', 'Р°Р№', 'a'] },
-      { name: 'b', aliases: ['Р±', 'Р±Рё', 'b'] }
+      { name: 'window', aliases: ['окно', 'window', 'виндоу'] },
+      { name: 'ct', aliases: ['кт', 'ct'] },
+      { name: 'jungle', aliases: ['джангл', 'jungle', 'пальма'] },
+      { name: 'stairs', aliases: ['лестница', 'лестницу', 'stairs'] },
+      { name: 'underpass', aliases: ['андерпас', 'underpass'] },
+      { name: 'apartments', aliases: ['апартаменты', 'apartments', 'апсы'] },
+      { name: 'ramp', aliases: ['рамп', 'ramp'] },
+      { name: 'short', aliases: ['шорт', 'short'] },
+      { name: 'a', aliases: ['а', 'ай', 'a'] },
+      { name: 'b', aliases: ['б', 'би', 'b'] }
     ],
     dust2: [
-      { name: 'xbox', aliases: ['xbox', 'Р±РѕРєСЃ', 'СЏС‰РёРє'] },
-      { name: 'mid', aliases: ['mid', 'РјРёРґ'] },
-      { name: 'long', aliases: ['long', 'Р»РѕРЅРі', 'РґР»РёРЅРЅР°СЏ', 'РґР»РёРЅРЅСѓСЋ'] },
-      { name: 'window', aliases: ['РѕРєРЅРѕ', 'window', 'РІРёРЅРґРѕСѓ'] },
-      { name: 'short', aliases: ['short', 'С€РѕСЂС‚', 'РєРѕС€РєР°', 'cat', 'catwalk'] },
-      { name: 'goose', aliases: ['goose', 'РіРѕСѓР·', 'РіСѓСЃСЊ', 'РіСѓСЃСЏ', 'РіСѓСЃ'] },
-      { name: 'ct', aliases: ['ct', 'РєС‚'] },
-      { name: 'tunnels', aliases: ['С‚СѓРЅРЅРµР»Рё', 'С‚СѓРЅРЅРµР»', 'tunnels'] },
-      { name: 'doors', aliases: ['РґРІРµСЂРё', 'doors'] },
-      { name: 'a', aliases: ['Р°', 'Р°Р№', 'a'] },
-      { name: 'b', aliases: ['Р±', 'Р±Рё', 'b'] }
+      { name: 'xbox', aliases: ['xbox', 'бокс', 'ящик'] },
+      { name: 'mid', aliases: ['mid', 'мид'] },
+      { name: 'long', aliases: ['long', 'лонг', 'длинная', 'длинную'] },
+      { name: 'window', aliases: ['окно', 'window', 'виндоу'] },
+      { name: 'short', aliases: ['short', 'шорт', 'кошка', 'cat', 'catwalk'] },
+      { name: 'goose', aliases: ['goose', 'гоуз', 'гусь', 'гуся', 'гус'] },
+      { name: 'ct', aliases: ['ct', 'кт'] },
+      { name: 'tunnels', aliases: ['туннели', 'туннел', 'tunnels'] },
+      { name: 'doors', aliases: ['двери', 'doors'] },
+      { name: 'a', aliases: ['а', 'ай', 'a'] },
+      { name: 'b', aliases: ['б', 'би', 'b'] }
     ],
     inferno: [
-      { name: 'banana', aliases: ['banana', 'Р±Р°РЅР°РЅ', 'Р±Р°РЅР°РЅСѓ'] },
-      { name: 'ct', aliases: ['ct', 'РєС‚'] },
-      { name: 'coffins', aliases: ['coffins', 'РєРѕС„С„РёРЅСЃ', 'РіСЂРѕР±С‹'] },
-      { name: 'mid', aliases: ['mid', 'РјРёРґ'] },
-      { name: 'library', aliases: ['library', 'Р»Р°Р№Р±СЂР°СЂРё', 'Р±РёР±Р»РёРѕС‚РµРєР°'] },
-      { name: 'arch', aliases: ['Р°СЂРєР°', 'arch', 'Р°СЂРєРё', 'Р°СЂРєСѓ'] },
-      { name: 'apartments', aliases: ['Р°РїР°СЂС‚Р°РјРµРЅС‚С‹', 'apartments', 'Р°РїСЃС‹'] },
-      { name: 'a', aliases: ['Р°', 'Р°Р№', 'a'] },
-      { name: 'b', aliases: ['Р±', 'Р±Рё', 'b'] }
+      { name: 'banana', aliases: ['banana', 'банан', 'банану'] },
+      { name: 'ct', aliases: ['ct', 'кт'] },
+      { name: 'coffins', aliases: ['coffins', 'коффинс', 'гробы'] },
+      { name: 'mid', aliases: ['mid', 'мид'] },
+      { name: 'library', aliases: ['library', 'лайбрари', 'библиотека'] },
+      { name: 'arch', aliases: ['арка', 'arch', 'арки', 'арку'] },
+      { name: 'apartments', aliases: ['апартаменты', 'apartments', 'апсы'] },
+      { name: 'a', aliases: ['а', 'ай', 'a'] },
+      { name: 'b', aliases: ['б', 'би', 'b'] }
     ],
     nuke: [
-      { name: 'outside', aliases: ['outside', 'Р°СѓС‚СЃР°Р№Рґ', 'Р°СѓС‚'] },
-      { name: 'secret', aliases: ['secret', 'СЃРµРєСЂРµС‚'] },
-      { name: 'ramp', aliases: ['ramp', 'СЂР°РјРї'] },
-      { name: 'hut', aliases: ['hut', 'С…Р°С‚'] },
-      { name: 'a', aliases: ['Р°', 'Р°Р№', 'a'] },
-      { name: 'b', aliases: ['Р±', 'Р±Рё', 'b'] }
+      { name: 'outside', aliases: ['outside', 'аутсайд', 'аут'] },
+      { name: 'secret', aliases: ['secret', 'секрет'] },
+      { name: 'ramp', aliases: ['ramp', 'рамп'] },
+      { name: 'hut', aliases: ['hut', 'хат'] },
+      { name: 'a', aliases: ['а', 'ай', 'a'] },
+      { name: 'b', aliases: ['б', 'би', 'b'] }
     ],
     ancient: [
-      { name: 'mid', aliases: ['mid', 'РјРёРґ'] },
-      { name: 'cave', aliases: ['cave', 'РєРµР№РІ', 'РїРµС‰РµСЂР°'] },
-      { name: 'main', aliases: ['main', 'РјРµР№РЅ'] },
-      { name: 'a', aliases: ['Р°', 'Р°Р№', 'a'] },
-      { name: 'b', aliases: ['Р±', 'Р±Рё', 'b'] }
+      { name: 'mid', aliases: ['mid', 'мид'] },
+      { name: 'cave', aliases: ['cave', 'кейв', 'пещера'] },
+      { name: 'main', aliases: ['main', 'мейн'] },
+      { name: 'a', aliases: ['а', 'ай', 'a'] },
+      { name: 'b', aliases: ['б', 'би', 'b'] }
     ],
     overpass: [
-      { name: 'monster', aliases: ['monster', 'РјРѕРЅСЃС‚СЂ'] },
-      { name: 'short', aliases: ['short', 'С€РѕСЂС‚'] },
-      { name: 'construction', aliases: ['construction', 'РєРѕРЅСЃС‚СЂР°РєС€РЅ', 'СЃС‚СЂРѕР№РєР°'] },
-      { name: 'connector', aliases: ['connector', 'РєРѕРЅРЅРµРєС‚РѕСЂ'] },
-      { name: 'a', aliases: ['Р°', 'Р°Р№', 'a'] },
-      { name: 'b', aliases: ['Р±', 'Р±Рё', 'b'] }
+      { name: 'monster', aliases: ['monster', 'монстр'] },
+      { name: 'short', aliases: ['short', 'шорт'] },
+      { name: 'construction', aliases: ['construction', 'констракшн', 'стройка'] },
+      { name: 'connector', aliases: ['connector', 'коннектор'] },
+      { name: 'a', aliases: ['а', 'ай', 'a'] },
+      { name: 'b', aliases: ['б', 'би', 'b'] }
     ],
     anubis: [
-      { name: 'mid', aliases: ['mid', 'РјРёРґ'] },
-      { name: 'main', aliases: ['main', 'РјРµР№РЅ'] },
-      { name: 'a', aliases: ['Р°', 'Р°Р№', 'a'] },
-      { name: 'b', aliases: ['Р±', 'Р±Рё', 'b'] }
+      { name: 'mid', aliases: ['mid', 'мид'] },
+      { name: 'main', aliases: ['main', 'мейн'] },
+      { name: 'a', aliases: ['а', 'ай', 'a'] },
+      { name: 'b', aliases: ['б', 'би', 'b'] }
     ],
     vertigo: [
-      { name: 'ramp', aliases: ['ramp', 'СЂР°РјРї'] },
-      { name: 'main', aliases: ['main', 'РјРµР№РЅ'] },
-      { name: 'a', aliases: ['Р°', 'Р°Р№', 'a'] },
-      { name: 'b', aliases: ['Р±', 'Р±Рё', 'b'] }
+      { name: 'ramp', aliases: ['ramp', 'рамп'] },
+      { name: 'main', aliases: ['main', 'мейн'] },
+      { name: 'a', aliases: ['а', 'ай', 'a'] },
+      { name: 'b', aliases: ['б', 'би', 'b'] }
     ],
     train: [
-      { name: 'ladder', aliases: ['ladder', 'Р»РµСЃС‚РЅРёС†Р°', 'Р»Р°РґРµСЂ'] },
-      { name: 'ivy', aliases: ['ivy', 'Р°Р№РІРё'] },
-      { name: 'main', aliases: ['main', 'РјРµР№РЅ'] },
-      { name: 'a', aliases: ['Р°', 'Р°Р№', 'a'] },
-      { name: 'b', aliases: ['Р±', 'Р±Рё', 'b'] }
+      { name: 'ladder', aliases: ['ladder', 'лестница', 'ладер'] },
+      { name: 'ivy', aliases: ['ivy', 'айви'] },
+      { name: 'main', aliases: ['main', 'мейн'] },
+      { name: 'a', aliases: ['а', 'ай', 'a'] },
+      { name: 'b', aliases: ['б', 'би', 'b'] }
     ],
     cache: [
-      { name: 'mid', aliases: ['mid', 'РјРёРґ'] },
-      { name: 'highway', aliases: ['highway', 'С…Р°Р№РІРµР№'] },
-      { name: 'main', aliases: ['main', 'РјРµР№РЅ'] },
-      { name: 'a', aliases: ['Р°', 'Р°Р№', 'a'] },
-      { name: 'b', aliases: ['Р±', 'Р±Рё', 'b'] }
+      { name: 'mid', aliases: ['mid', 'мид'] },
+      { name: 'highway', aliases: ['highway', 'хайвей'] },
+      { name: 'main', aliases: ['main', 'мейн'] },
+      { name: 'a', aliases: ['а', 'ай', 'a'] },
+      { name: 'b', aliases: ['б', 'би', 'b'] }
     ]
   };
 
@@ -1914,16 +1914,16 @@ const TAB_DEFS = {
     }
   };
 
-  const G_SITE_W = { 'Р°': 'a', 'a': 'a', 'Р°Р№': 'a', 'ai': 'a', 'Р±': 'b', 'b': 'b', 'Р±Рё': 'b', 'Р±СЌ': 'b', 'be': 'b' };
+  const G_SITE_W = { 'а': 'a', 'a': 'a', 'ай': 'a', 'ai': 'a', 'б': 'b', 'b': 'b', 'би': 'b', 'бэ': 'b', 'be': 'b' };
 
-  const G_TR_ALPHA = 'Р°Р±РІРіРґРµС‘Р¶Р·РёР№РєР»РјРЅРѕРїСЂСЃС‚СѓС„С…С†С‡С€С‰СЉС‹СЊСЌСЋСЏС–С—С”Т‘Сћabcdefghijklmnopqrstuvwxyz0123456789';
+  const G_TR_ALPHA = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюяіїєґўabcdefghijklmnopqrstuvwxyz0123456789';
   const G_TR = {
-    'sh': 'С€', 'ch': 'С‡', 'zh': 'Р¶', 'ts': 'С†', 'ya': 'СЏ', 'yu': 'СЋ', 'ye': 'Рµ',
-    'yo': 'С‘', 'kh': 'С…', 'ph': 'С„', 'dz': 'РґР·', 'a': 'Р°', 'b': 'Р±', 'v': 'РІ',
-    'g': 'Рі', 'd': 'Рґ', 'e': 'Рµ', 'z': 'Р·', 'i': 'Рё', 'y': 'Р№', 'k': 'Рє', 'l': 'Р»',
-    'm': 'Рј', 'n': 'РЅ', 'o': 'Рѕ', 'p': 'Рї', 'r': 'СЂ', 's': 'СЃ', 't': 'С‚', 'u': 'Сѓ',
-    'f': 'С„', 'h': 'С…', 'c': 'С†', 'x': 'РєСЃ', 'w': 'РІ', 'q': 'Рє', 'j': 'РґР¶',
-    'С–': 'Рё', 'С—': 'Рё', 'С”': 'Рµ', 'Т‘': 'Рі'
+    'sh': 'ш', 'ch': 'ч', 'zh': 'ж', 'ts': 'ц', 'ya': 'я', 'yu': 'ю', 'ye': 'е',
+    'yo': 'ё', 'kh': 'х', 'ph': 'ф', 'dz': 'дз', 'a': 'а', 'b': 'б', 'v': 'в',
+    'g': 'г', 'd': 'д', 'e': 'е', 'z': 'з', 'i': 'и', 'y': 'й', 'k': 'к', 'l': 'л',
+    'm': 'м', 'n': 'н', 'o': 'о', 'p': 'п', 'r': 'р', 's': 'с', 't': 'т', 'u': 'у',
+    'f': 'ф', 'h': 'х', 'c': 'ц', 'x': 'кс', 'w': 'в', 'q': 'к', 'j': 'дж',
+    'і': 'и', 'ї': 'и', 'є': 'е', 'ґ': 'г'
   };
   const _gNearCache = new Map();
 
@@ -1964,7 +1964,7 @@ const TAB_DEFS = {
 
   function gStem(w) {
     if (!w || w.length <= 3) return w;
-    const sufs = ['РёСЏРјРё', 'СЏРјРё', 'РѕРіРѕ', 'РµРіРѕ', 'РѕРјСѓ', 'РµРјСѓ', 'РёРјРё', 'С‹РјРё', 'Р°СЏ', 'СЏСЏ', 'С‹Р№', 'РёР№', 'РѕР№', 'РѕРµ', 'РµРµ', 'СѓСЋ', 'СЋСЋ', 'Р°С…', 'СЏС…', 'Р°Рј', 'СЏРј', 'РѕРј', 'РµРј', 'С‹Рј', 'РёРј', 'РѕРІ', 'РµРІ', 'РµР№', 'Р°', 'СЏ', 'С‹', 'Рё', 'Рµ', 'Сѓ', 'СЋ', 'Рѕ', 'СЊ'];
+    const sufs = ['иями', 'ями', 'ого', 'его', 'ому', 'ему', 'ими', 'ыми', 'ая', 'яя', 'ый', 'ий', 'ой', 'ое', 'ее', 'ую', 'юю', 'ах', 'ях', 'ам', 'ям', 'ом', 'ем', 'ым', 'им', 'ов', 'ев', 'ей', 'а', 'я', 'ы', 'и', 'е', 'у', 'ю', 'о', 'ь'];
     for (const s of sufs) {
       if (w.length - s.length >= 3 && w.endsWith(s)) return w.slice(0, -s.length);
     }
@@ -2096,7 +2096,7 @@ const TAB_DEFS = {
     info.appendChild(el('div', 'player-nick', title));
     if (meta) info.appendChild(el('div', 'player-meta', meta));
     row.appendChild(info);
-    row.appendChild(el('span', 'g-chev', 'вЂє'));
+    row.appendChild(el('span', 'g-chev', '›'));
     row.addEventListener('click', onClick);
     return row;
   }
@@ -2190,7 +2190,7 @@ const TAB_DEFS = {
     view.appendChild(gBackBtn(() => renderMapHub(item)));
 
     const header = el('div', 'tac-header');
-    header.appendChild(el('span', 'tac-header-icon', 'рџЏњпёЏ'));
+    header.appendChild(el('span', 'tac-header-icon', '🏜️'));
     header.appendChild(el('span', 'tac-header-name', t('g_tactics_header')));
     view.appendChild(header);
 
@@ -2231,7 +2231,7 @@ const TAB_DEFS = {
       listBox.innerHTML = '';
       const list = currentList();
       const head = el('div', 'tac-list-head');
-      head.appendChild(el('span', 'tac-list-title', t(filter.side === 't' ? 'g_side_t' : 'g_side_ct') + ' В· ' + roundLabel(filter.round)));
+      head.appendChild(el('span', 'tac-list-title', t(filter.side === 't' ? 'g_side_t' : 'g_side_ct') + ' · ' + roundLabel(filter.round)));
       head.appendChild(el('span', 'tac-list-n', String(list.length)));
       listBox.appendChild(head);
       if (!list.length) {
@@ -2241,7 +2241,7 @@ const TAB_DEFS = {
       list.forEach(tc => {
         const card = el('div', 'tactic-card');
         card.addEventListener('click', () => openTacSheet(tc));
-        card.appendChild(el('span', 'tactic-icon', tc.icon || 'рџЋЇ'));
+        card.appendChild(el('span', 'tactic-icon', tc.icon || '🎯'));
         const body = el('div', 'tactic-body');
         body.appendChild(el('div', 'tactic-name', tc.title));
         if (tc.short) body.appendChild(el('div', 'tactic-desc', tc.short));
@@ -2261,12 +2261,12 @@ const TAB_DEFS = {
     const overlay = el('div', 'tac-sheet');
     const panel = el('div', 'tac-sheet-panel');
     const head = el('div', 'tac-sheet-head');
-    head.appendChild(el('span', 'tac-sheet-icon', tc.icon || 'рџЋЇ'));
+    head.appendChild(el('span', 'tac-sheet-icon', tc.icon || '🎯'));
     const titles = el('div', 'tac-sheet-titles');
     titles.appendChild(el('div', 'tac-sheet-title', tc.title));
     if (tc.short) titles.appendChild(el('div', 'tac-sheet-sub', tc.short));
     head.appendChild(titles);
-    const close = el('button', 'tac-sheet-close', 'вњ•');
+    const close = el('button', 'tac-sheet-close', '✕');
     close.setAttribute('aria-label', t('back'));
     close.addEventListener('click', closeTacSheet);
     head.appendChild(close);
@@ -2282,8 +2282,8 @@ const TAB_DEFS = {
       return box;
     }
 
-    if (tc.goal) panel.appendChild(tacBox('рџЋЇ', t('g_goal'), tc.goal, 't-goal'));
-    if (tc.buy) panel.appendChild(tacBox('рџ›’', t('g_buy'), tc.buy, 't-buy'));
+    if (tc.goal) panel.appendChild(tacBox('🎯', t('g_goal'), tc.goal, 't-goal'));
+    if (tc.buy) panel.appendChild(tacBox('🛒', t('g_buy'), tc.buy, 't-buy'));
     panel.appendChild(el('div', 'tac-sheet-label', t('g_steps')));
     const ol = el('ol', 'g-steps');
     (tc.steps || []).forEach(s => ol.appendChild(el('li', 'g-step', s)));
@@ -2319,22 +2319,22 @@ const TAB_DEFS = {
       (ph.steps || []).forEach(s => { if (s.time != null && s.time > lastT) lastT = s.time; });
     });
     if (tc.difficulty) parts.push(diffBadge(tc));
-    if (nSteps) parts.push(nSteps + ' в¤·');
-    if (lastT) parts.push('вЏ± ' + lastT + 'СЃ');
-    return parts.join(' В· ');
+    if (nSteps) parts.push(nSteps + ' ⤷');
+    if (lastT) parts.push('⏱ ' + lastT + 'с');
+    return parts.join(' · ');
   }
 
   function gTacticRow(tc, side, onClick) {
     const row = el('div', 'g-row tactic-row');
     const badgeCls = side === 't' ? 'side-t' : (side === 'ct' ? 'side-ct' : 'side-none');
-    row.appendChild(el('span', 'g-ico ' + badgeCls, side === 't' ? 'T' : (side === 'ct' ? 'CT' : 'В·')));
+    row.appendChild(el('span', 'g-ico ' + badgeCls, side === 't' ? 'T' : (side === 'ct' ? 'CT' : '·')));
     const info = el('div', 'player-info');
     info.appendChild(el('div', 'player-nick', tc.title));
     if (tc.short) info.appendChild(el('div', 'tactic-desc', tc.short));
     const meta = tacticMeta(tc);
     if (meta) info.appendChild(el('div', 'player-meta', meta));
     row.appendChild(info);
-    row.appendChild(el('span', 'g-chev', 'вЂє'));
+    row.appendChild(el('span', 'g-chev', '›'));
     row.addEventListener('click', onClick);
     return row;
   }
@@ -2435,7 +2435,7 @@ const TAB_DEFS = {
       const id = ytId(url);
       if (id) img.src = 'https://img.youtube.com/vi/' + id + '/hqdefault.jpg';
       th.appendChild(img);
-      th.appendChild(el('span', 'spot-thumb-play', 'в–¶'));
+      th.appendChild(el('span', 'spot-thumb-play', '▶'));
       return th;
     }
 
@@ -2494,10 +2494,10 @@ const TAB_DEFS = {
         const nav = el('div', 'spot-nav');
         const prev = el('button', 'spot-arrow');
         prev.setAttribute('aria-label', t('back'));
-        prev.textContent = 'вЂ№';
+        prev.textContent = '‹';
         const next = el('button', 'spot-arrow');
         next.setAttribute('aria-label', t('g_spot_next'));
-        next.textContent = 'вЂє';
+        next.textContent = '›';
         thumbs = el('div', 'spot-thumbs');
         videos.forEach((u, i) => {
           const th = spotThumb(u);
@@ -2571,7 +2571,7 @@ const TAB_DEFS = {
 
   function guideTypeEmoji(id) {
     const gt = GUIDE_TYPES[id];
-    return gt ? gt.emoji : 'рџ’Ј';
+    return gt ? gt.emoji : '💣';
   }
 
   function gStepCount(steps) {
@@ -2579,9 +2579,9 @@ const TAB_DEFS = {
     if (lang === 'en') return n + (n === 1 ? ' step' : ' steps');
     const d10 = n % 10, d100 = n % 100;
     let p;
-    if (d10 === 1 && d100 !== 11) p = 'С€Р°Рі';
-    else if (d10 >= 2 && d10 <= 4 && (d100 < 12 || d100 > 14)) p = 'С€Р°РіР°';
-    else p = 'С€Р°РіРѕРІ';
+    if (d10 === 1 && d100 !== 11) p = 'шаг';
+    else if (d10 >= 2 && d10 <= 4 && (d100 < 12 || d100 > 14)) p = 'шага';
+    else p = 'шагов';
     return n + ' ' + p;
   }
 
@@ -2592,7 +2592,7 @@ const TAB_DEFS = {
     info.appendChild(el('div', 'player-nick', l.title));
     info.appendChild(el('div', 'player-meta', gStepCount(l.steps)));
     row.appendChild(info);
-    row.appendChild(el('span', 'g-chev', 'вЂє'));
+    row.appendChild(el('span', 'g-chev', '›'));
     row.addEventListener('click', onClick);
     return row;
   }
@@ -2644,7 +2644,7 @@ const TAB_DEFS = {
   function roleColor(r) { return ROLE_COLORS[r] || '#9aa0b5'; }
   function roleEmoji(r) { const d = (guidesData.roles || {})[r]; return d ? d.emoji : ''; }
   function roleRu(r) { const d = (guidesData.roles || {})[r]; return d ? (d.ru || r) : r; }
-  function diffBadge(tc) { const n = tc.difficulty || 0; let s = ''; for (let i = 1; i <= 3; i++) s += (i <= n ? 'в—Џ' : 'в—‹'); return s; }
+  function diffBadge(tc) { const n = tc.difficulty || 0; let s = ''; for (let i = 1; i <= 3; i++) s += (i <= n ? '●' : '○'); return s; }
   function diffName(tc) { const d = (guidesData.difficulty || {})[tc.difficulty]; return d ? (lang === 'en' ? d.en : d.ru) : ''; }
   function posOf(id, item) { const m = (guidesData.positions || {})[item.id] || {}; return m[id] || null; }
   function spotName(item, id) { const sp = (guidesData.spots || {})[item.id] || []; const f = sp.find(s => s.id === id); return f ? f.name : null; }
@@ -2656,7 +2656,7 @@ const TAB_DEFS = {
     let out = String(text);
     keys.forEach(k => {
       if (out.indexOf('<span class="g-term"') !== -1 && out.indexOf('>' + k + '<') !== -1) return;
-      const re = new RegExp('(?<![a-zР°-СЏС‘])(' + k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')(?![a-zР°-СЏС‘])', 'gi');
+      const re = new RegExp('(?<![a-zа-яё])(' + k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')(?![a-zа-яё])', 'gi');
       out = out.replace(re, '<span class="g-term" data-term="' + k + '">$1</span>');
     });
     return out;
@@ -2676,7 +2676,7 @@ const TAB_DEFS = {
     const pop = el('div', 'g-term-pop');
     const head = el('div', 'g-term-pop-head');
     head.appendChild(el('span', 'g-term-pop-name', data.name || key));
-    const close = el('button', 'g-term-pop-close', 'вњ•');
+    const close = el('button', 'g-term-pop-close', '✕');
     close.addEventListener('click', removeTermPop);
     head.appendChild(close);
     pop.appendChild(head);
@@ -2775,7 +2775,7 @@ const TAB_DEFS = {
       const c = el('button', 'g-util ' + guideTypeCls(u.type));
       c.textContent = guideTypeEmoji(u.type);
       const hasVideo = u.pos && spotExists(item, u.pos);
-      c.title = guideTypeLabel(u.type) + (hasVideo ? ' В· ' + t('g_util_video') : (u.pos && posOf(u.pos, item) ? ' В· ' + t('g_spot_no_video') : ''));
+      c.title = guideTypeLabel(u.type) + (hasVideo ? ' · ' + t('g_util_video') : (u.pos && posOf(u.pos, item) ? ' · ' + t('g_spot_no_video') : ''));
       c.addEventListener('click', (e) => { e.stopPropagation(); if (onOpen) onOpen(u, hasVideo); });
       chips.appendChild(c);
     });
@@ -2817,7 +2817,7 @@ const TAB_DEFS = {
     title.textContent = tc.title;
     head.appendChild(title);
     const chips = el('div', 'tactic-chips');
-    if (ctx && ctx.side) chips.appendChild(el('span', 't-chip ' + (ctx.side === 't' ? 'side-t' : 'side-ct'), (ctx.side === 't' ? 'T' : 'CT') + ' В· ' + t(ctx.side === 't' ? 'g_side_t' : 'g_side_ct')));
+    if (ctx && ctx.side) chips.appendChild(el('span', 't-chip ' + (ctx.side === 't' ? 'side-t' : 'side-ct'), (ctx.side === 't' ? 'T' : 'CT') + ' · ' + t(ctx.side === 't' ? 'g_side_t' : 'g_side_ct')));
     if (ctx && ctx.round) chips.appendChild(el('span', 't-chip', roundLabel(ctx.round)));
     if (tc.difficulty) chips.appendChild(el('span', 't-chip t-diff', diffBadge(tc) + ' ' + diffName(tc)));
     if (item && item.name) chips.appendChild(el('span', 't-chip t-chip-map', (item.emoji || '') + ' ' + item.name));
@@ -2849,10 +2849,10 @@ const TAB_DEFS = {
     });
 
     function renderTldr(root) {
-      if (tc.short) root.appendChild(tacticBox('в—Ћ', t('g_essence'), tc.short, 't-essence'));
+      if (tc.short) root.appendChild(tacticBox('◎', t('g_essence'), tc.short, 't-essence'));
       const meta = el('div', 'tactic-meta-grid');
-      if (tc.goal) meta.appendChild(tacticBox('рџЋЇ', t('g_goal'), tc.goal, 't-goal'));
-      if (tc.buy) meta.appendChild(tacticBox('рџ’°', t('g_buy'), tc.buy, 't-buy'));
+      if (tc.goal) meta.appendChild(tacticBox('🎯', t('g_goal'), tc.goal, 't-goal'));
+      if (tc.buy) meta.appendChild(tacticBox('💰', t('g_buy'), tc.buy, 't-buy'));
       if (meta.children.length) root.appendChild(meta);
       const phases = tacticPhases(tc);
       const marks = [];
@@ -2863,17 +2863,17 @@ const TAB_DEFS = {
         const c = el('div', 't-phase-chip');
         c.appendChild(el('span', 't-phase-chip-num', String(i + 1).padStart(2, '0')));
         c.appendChild(el('span', 't-phase-chip-name', ph.name));
-        c.appendChild(el('span', 't-phase-chip-steps', String((ph.steps || []).length) + ' в¤·'));
+        c.appendChild(el('span', 't-phase-chip-steps', String((ph.steps || []).length) + ' ⤷'));
         chipsWrap.appendChild(c);
       });
       if (chipsWrap.children.length) root.appendChild(chipsWrap);
     }
 
     function renderPlan(root) {
-      if (tc.short) root.appendChild(tacticBox('в—Ћ', t('g_essence'), tc.short, 't-essence'));
+      if (tc.short) root.appendChild(tacticBox('◎', t('g_essence'), tc.short, 't-essence'));
       const meta = el('div', 'tactic-meta-grid');
-      if (tc.goal) meta.appendChild(tacticBox('рџЋЇ', t('g_goal'), tc.goal, 't-goal'));
-      if (tc.buy) meta.appendChild(tacticBox('рџ’°', t('g_buy'), tc.buy, 't-buy'));
+      if (tc.goal) meta.appendChild(tacticBox('🎯', t('g_goal'), tc.goal, 't-goal'));
+      if (tc.buy) meta.appendChild(tacticBox('💰', t('g_buy'), tc.buy, 't-buy'));
       if (meta.children.length) root.appendChild(meta);
       const phases = tacticPhases(tc);
       const marks = [];
@@ -2886,7 +2886,7 @@ const TAB_DEFS = {
         head.appendChild(el('span', 'g-phase-num', String(i + 1).padStart(2, '0')));
         head.appendChild(el('span', 'g-phase-name', ph.name));
         const times = (ph.steps || []).map(s => s.time).filter(x => x != null);
-        if (times.length) head.appendChild(el('span', 'g-phase-time', 'вЏ± ' + Math.min.apply(null, times) + 'вЂ“' + Math.max.apply(null, times) + 'СЃ'));
+        if (times.length) head.appendChild(el('span', 'g-phase-time', '⏱ ' + Math.min.apply(null, times) + '–' + Math.max.apply(null, times) + 'с'));
         block.appendChild(head);
         const ol = el('ol', 'g-steps');
         (ph.steps || []).forEach(s => {
@@ -2897,7 +2897,7 @@ const TAB_DEFS = {
           li.appendChild(txt);
           const badges = el('div', 'g-step-badges');
           if (s.role) badges.appendChild(el('span', 'g-role-badge', (roleEmoji(s.role) || '') + ' ' + roleRu(s.role)));
-          if (s.time != null) badges.appendChild(el('span', 'g-time-badge', 'вЏ± ' + s.time + 'СЃ'));
+          if (s.time != null) badges.appendChild(el('span', 'g-time-badge', '⏱ ' + s.time + 'с'));
           if (s.util && s.util.length) {
             s.util.forEach(u => {
               const c = el('button', 'g-util ' + guideTypeCls(u.type));
@@ -3010,7 +3010,7 @@ const TAB_DEFS = {
     order.forEach(name => {
       const mk = el('span', 't-ply' + (name === '__team' ? ' team' : '') + (name !== '__team' ? ' r-' + name : ''));
       mk.style.background = name === '__team' ? '#cbd5e1' : roleColor(name);
-      mk.textContent = name === '__team' ? 'вљ‘' : (roleEmoji(name) || 'вЂў');
+      mk.textContent = name === '__team' ? '⚑' : (roleEmoji(name) || '•');
       mk.style.display = 'none';
       stage.appendChild(mk);
       markers[name] = mk;
@@ -3071,10 +3071,10 @@ const TAB_DEFS = {
     body.appendChild(tl);
 
     const controls = el('div', 't-r-controls');
-    const playBtn = el('button', 't-r-btn t-r-play', 'в–¶ ' + t('g_replay_play'));
-    const restartBtn = el('button', 't-r-btn', 'вџІ ' + t('g_replay_restart'));
-    const speedBtn = el('button', 't-r-btn', t('g_replay_speed') + ' Г—1');
-    const timeLbl = el('span', 't-r-time', '0СЃ');
+    const playBtn = el('button', 't-r-btn t-r-play', '▶ ' + t('g_replay_play'));
+    const restartBtn = el('button', 't-r-btn', '⟲ ' + t('g_replay_restart'));
+    const speedBtn = el('button', 't-r-btn', t('g_replay_speed') + ' ×1');
+    const timeLbl = el('span', 't-r-time', '0с');
     controls.appendChild(restartBtn);
     controls.appendChild(playBtn);
     controls.appendChild(speedBtn);
@@ -3087,7 +3087,7 @@ const TAB_DEFS = {
     flat.forEach((f, i) => {
       const s = f.step;
       const row = el('div', 't-r-step');
-      if (s.time != null) row.appendChild(el('span', 't-r-step-time', String(s.time) + 'СЃ'));
+      if (s.time != null) row.appendChild(el('span', 't-r-step-time', String(s.time) + 'с'));
       const inner = el('div', 't-r-step-inner');
       const txt = el('div', 'g-step-text');
       txt.innerHTML = glossHtml(item, s.text);
@@ -3105,7 +3105,7 @@ const TAB_DEFS = {
       }
       if (badges.children.length) inner.appendChild(badges);
       row.appendChild(inner);
-      row.appendChild(el('span', 't-r-step-phase', String(f.phase + 1) + ' В· ' + f.phaseName));
+      row.appendChild(el('span', 't-r-step-phase', String(f.phase + 1) + ' · ' + f.phaseName));
       stepsBox.appendChild(row);
       stepEls.push(row);
     });
@@ -3126,7 +3126,7 @@ const TAB_DEFS = {
     }
 
     function updatePlayBtn() {
-      playBtn.textContent = (playing ? 'вќљвќљ ' : 'в–¶ ') + t(playing ? 'g_replay_pause' : 'g_replay_play');
+      playBtn.textContent = (playing ? '❚❚ ' : '▶ ') + t(playing ? 'g_replay_pause' : 'g_replay_play');
     }
 
     playBtn.addEventListener('click', () => {
@@ -3141,7 +3141,7 @@ const TAB_DEFS = {
     speedBtn.addEventListener('click', () => {
       speedIdx = (speedIdx + 1) % speeds.length;
       speed = speeds[speedIdx];
-      speedBtn.textContent = t('g_replay_speed') + ' Г—' + speed;
+      speedBtn.textContent = t('g_replay_speed') + ' ×' + speed;
     });
 
     function renderFrame(t) {
@@ -3155,7 +3155,7 @@ const TAB_DEFS = {
       });
       fill.style.width = (t / maxT * 100) + '%';
       head.style.left = (t / maxT * 100) + '%';
-      timeLbl.textContent = Math.round(t) + 'СЃ';
+      timeLbl.textContent = Math.round(t) + 'с';
       while (evPtr < events.length && events[evPtr].time <= t) { spawnBurst(events[evPtr]); evPtr++; }
       const curIdx = flat.reduce((acc, f, i) => (f.step.time <= t ? i : acc), -1);
       stepEls.forEach((r, i) => {
@@ -3229,12 +3229,12 @@ const TAB_DEFS = {
     const name = currentUser ? currentUser.first_name : t('user');
     const hero = el('div', 't-hero home-hero');
     const AVATAR_ICONS = {
-      avatar_rifler: 'рџ”«', avatar_awper: 'рџЋЇ', avatar_grenadier: 'рџ’Ј',
-      avatar_phantom: 'рџ‘Ѕ', avatar_eagle: 'рџ¦…', avatar_flame: 'рџ”Ґ'
+      avatar_rifler: '🔫', avatar_awper: '🎯', avatar_grenadier: '💣',
+      avatar_phantom: '👽', avatar_eagle: '🦅', avatar_flame: '🔥'
     };
     const myAvatar = (profileCache && profileCache.equipped_avatar && AVATAR_ICONS[profileCache.equipped_avatar]) || null;
     const myBadge = profileCache && profileCache.equipped_badge ? profileCache.equipped_badge : null;
-    const BADGE_ICONS = { badge_win10: 'рџҐ€', badge_clutch: 'рџ‘‘', badge_god: 'рџ€' };
+    const BADGE_ICONS = { badge_win10: '🥈', badge_clutch: '👑', badge_god: '😈' };
     const ava = el('div', 'avatar hero-logo');
     ava.appendChild(el('span', null, myAvatar || name.charAt(0).toUpperCase()));
     hero.appendChild(ava);
@@ -3254,7 +3254,7 @@ const TAB_DEFS = {
         pGrid.appendChild(progressStat('Coins', profile.coins || 0, 9999, 'bolt'));
         view.appendChild(pGrid);
         if (profile.streak > 0) {
-          view.appendChild(el('p', 'muted-note', (profile.streak) + ' ' + (t('g_streak') || 'day streak') + ' рџ”Ґ'));
+          view.appendChild(el('p', 'muted-note', (profile.streak) + ' ' + (t('g_streak') || 'day streak') + ' 🔥'));
         }
       }
     } catch (e) {}
@@ -3282,14 +3282,14 @@ const TAB_DEFS = {
         const lbList = el('div', 'g-list');
         lbRes.leaderboard.leaders.slice(0, 10).forEach(entry => {
           const row = el('div', 'g-row');
-          const rankText = entry.rank <= 3 ? ['рџҐ‡','рџҐ€','рџҐ‰'][entry.rank-1] : '#' + entry.rank;
+          const rankText = entry.rank <= 3 ? ['🥇','🥈','🥉'][entry.rank-1] : '#' + entry.rank;
           row.appendChild(el('div', 'g-ico', rankText));
           const info = el('div', 'player-info');
           info.appendChild(el('div', 'player-nick' + (entry.is_me ? ' highlight' : ''),
             'User #' + entry.user_id));
           const meta = el('div', 'player-meta');
-          meta.appendChild(el('span', null, 'Lv.' + entry.level + ' В· ' + entry.xp + ' XP'));
-          if (entry.streak > 1) meta.appendChild(el('span', null, 'рџ”Ґ' + entry.streak));
+          meta.appendChild(el('span', null, 'Lv.' + entry.level + ' · ' + entry.xp + ' XP'));
+          if (entry.streak > 1) meta.appendChild(el('span', null, '🔥' + entry.streak));
           info.appendChild(meta);
           row.appendChild(info);
           lbList.appendChild(row);
@@ -3317,7 +3317,7 @@ const TAB_DEFS = {
             const a = allAch[id];
             const unlocked = earned.has(id);
             const card = el('div', 'ach-card' + (unlocked ? ' unlocked' : ''));
-            card.appendChild(el('div', 'ach-icon', unlocked ? a.icon : 'рџ”’'));
+            card.appendChild(el('div', 'ach-icon', unlocked ? a.icon : '🔒'));
             card.appendChild(el('div', 'ach-name', lang === 'ru' ? a.name_ru : a.name));
             achGrid.appendChild(card);
           });
@@ -3333,7 +3333,7 @@ const TAB_DEFS = {
     actions.appendChild(pickCard('stats', t('h_stats'), t('h_stats_sub'), () => switchTab('stats')));
     actions.appendChild(pickCard('trophy', t('h_challenge'), t('h_challenge_sub'), () => renderChallenges()));
     actions.appendChild(pickCard('stats', t('h_friends'), t('h_friends_sub'), () => renderFriends()));
-    actions.appendChild(pickCard('bolt', t('shop_title'), (profileCache ? profileCache.coins : 0) + ' рџЄ™ вЂ” ' + (t('shop_tab') || 'Shop'), () => renderShop()));
+    actions.appendChild(pickCard('bolt', t('shop_title'), (profileCache ? profileCache.coins : 0) + ' 🪙 — ' + (t('shop_tab') || 'Shop'), () => renderShop()));
     view.appendChild(actions);
 
     currentPage = () => renderHome();
@@ -3378,12 +3378,12 @@ const TAB_DEFS = {
   function lessonRow(lesson, done) {
     const row = el('div', 'g-row');
     const ico = el('div', 'g-ico');
-    ico.textContent = done ? 'вњ…' : 'рџ“';
+    ico.textContent = done ? '✅' : '📘';
     row.appendChild(ico);
     const info = el('div', 'player-info');
     info.appendChild(el('div', 'player-nick', lesson.title));
     const meta = el('div', 'player-meta');
-    meta.appendChild(el('span', null, lesson.sections.length + ' ' + t('l_sections') + ' В· ' + lesson.questions.length + ' ' + t('l_questions')));
+    meta.appendChild(el('span', null, lesson.sections.length + ' ' + t('l_sections') + ' · ' + lesson.questions.length + ' ' + t('l_questions')));
     if (done) meta.appendChild(el('span', 'ok-badge', t('l_done')));
     info.appendChild(meta);
     row.appendChild(info);
@@ -3426,7 +3426,7 @@ const TAB_DEFS = {
     (lesson.sections || []).forEach((s, i) => {
       const block = el('div', 'lesson-block');
       const head = el('button', 'sec-head');
-      head.appendChild(el('div', 'section-title', 'В§ ' + (i + 1)));
+      head.appendChild(el('div', 'section-title', '§ ' + (i + 1)));
       const chev = el('span', 'chev');
       chev.innerHTML = ICONS.chevron;
       head.appendChild(chev);
@@ -3461,7 +3461,7 @@ const TAB_DEFS = {
       questionBox.appendChild(el('p', 'q-text', (qi + 1) + '. ' + q.q));
       const input = el('input', 'q-input');
       input.setAttribute('type', 'text');
-      input.setAttribute('placeholder', t('l_check') + 'вЂ¦');
+      input.setAttribute('placeholder', t('l_check') + '…');
       input.addEventListener('keydown', (e) => { if (e.key === 'Enter') check(); });
       const checkBtn = el('button', 'link-btn');
       checkBtn.appendChild(iconEl('check'));
@@ -3597,7 +3597,7 @@ const TAB_DEFS = {
     const list = el('div', 'g-list');
     quizzes.forEach(quiz => {
       const row = el('div', 'g-row');
-      row.appendChild(el('div', 'g-ico', 'рџ§Є'));
+      row.appendChild(el('div', 'g-ico', '🧪'));
       const info = el('div', 'player-info');
       info.appendChild(el('div', 'player-nick', quiz.title));
       const meta = el('div', 'player-meta');
@@ -3713,7 +3713,7 @@ const TAB_DEFS = {
         const lineups = (g.lineups || {})[map.id] || [];
         const done = Object.keys(practice[map.id] || {}).length;
         const row = el('div', 'g-row');
-        row.appendChild(el('div', 'g-ico', map.emoji || 'рџ—єпёЏ'));
+        row.appendChild(el('div', 'g-ico', map.emoji || '🗺️'));
         const info = el('div', 'player-info');
         info.appendChild(el('div', 'player-nick', map.name));
         const meta = el('div', 'player-meta');
@@ -3753,7 +3753,7 @@ const TAB_DEFS = {
 
     if (weakest) {
       root.appendChild(sectionTitle('bolt', t('tp_reco')));
-      root.appendChild(el('div', 'reco-card', (weakest.icon || 'рџЋЇ') + ' ' + (lang === 'ru' ? weakest.text_ru : weakest.text_en)));
+      root.appendChild(el('div', 'reco-card', (weakest.icon || '🎯') + ' ' + (lang === 'ru' ? weakest.text_ru : weakest.text_en)));
     }
 
     root.appendChild(sectionTitle('trophy', t('tp_skill_level')));
@@ -3761,14 +3761,14 @@ const TAB_DEFS = {
     Object.keys(skills).forEach(sid => {
       const s = skills[sid];
       const weak = weakest && weakest.skill_id === sid;
-      skillGrid.appendChild(progressStat((weak ? 'вљЎ ' : '') + (lang === 'ru' ? s.name_ru : s.name), s.level || 0, 100, weak ? 'bolt' : 'trophy'));
+      skillGrid.appendChild(progressStat((weak ? '⚡ ' : '') + (lang === 'ru' ? s.name_ru : s.name), s.level || 0, 100, weak ? 'bolt' : 'trophy'));
     });
     root.appendChild(skillGrid);
 
     const list = el('div', 'g-list');
     plan.forEach(task => {
       const row = el('div', 'g-row' + (task.completed ? ' done' : ''));
-      row.appendChild(el('span', 'l-badge', (skills[task.skill_id] || {}).icon || 'рџЋЇ'));
+      row.appendChild(el('span', 'l-badge', (skills[task.skill_id] || {}).icon || '🎯'));
       const info = el('div', 'player-info');
       info.appendChild(el('div', 'player-nick', lang === 'ru' ? task.title_ru : task.title));
       info.appendChild(el('div', 'player-meta', t('tp_min').replace('{0}', task.duration_min)));
@@ -3862,9 +3862,9 @@ const TAB_DEFS = {
     const checklist = el('div', 'tr-checklist');
     checklist.appendChild(el('div', 'tr-checklist-title', t('tr_checklist')));
     const items = [
-      ['рџ“–', t('tr_check1')],
-      ['рџ—єпёЏ', t('tr_check2')],
-      ['рџ’Ј', t('tr_check3')]
+      ['📖', t('tr_check1')],
+      ['🗺️', t('tr_check2')],
+      ['💣', t('tr_check3')]
     ];
     const marks = items.map(it => {
       const line = el('div', 'tr-check');
@@ -3877,7 +3877,7 @@ const TAB_DEFS = {
       line.addEventListener('click', () => {
         const on = mk.dataset.checked !== '1';
         mk.dataset.checked = on ? '1' : '0';
-        mk.textContent = on ? 'вњ“' : ' ';
+        mk.textContent = on ? '✓' : ' ';
       });
       checklist.appendChild(line);
       return mk;
@@ -3915,7 +3915,7 @@ function grenadeTypeCls(type) { return guideTypeCls(type); }
 function grenadeTypeEmoji(type) { return guideTypeEmoji(type); }
 
 function difficultyStars(d) {
-  return 'в…'.repeat(Math.max(1, Math.min(3, d || 1)));
+  return '★'.repeat(Math.max(1, Math.min(3, d || 1)));
 }
 
 function grenadeRow(g, favs, onClick) {
@@ -3924,10 +3924,10 @@ function grenadeRow(g, favs, onClick) {
   const info = el('div', 'player-info');
   info.appendChild(el('div', 'player-nick', g.title));
   const meta = el('div', 'player-meta');
-  meta.appendChild(el('span', null, g.map_name + ' В· ' + (g.side || 'T') + ' В· ' + (g.site || 'вЂ”') + ' В· ' + difficultyStars(g.difficulty)));
+  meta.appendChild(el('span', null, g.map_name + ' · ' + (g.side || 'T') + ' · ' + (g.site || '—') + ' · ' + difficultyStars(g.difficulty)));
   info.appendChild(meta);
   row.appendChild(info);
-  const star = el('span', 'fav-star' + (favs.has('grenade:' + g.id) ? ' active' : ''), favs.has('grenade:' + g.id) ? 'в…' : 'в†');
+  const star = el('span', 'fav-star' + (favs.has('grenade:' + g.id) ? ' active' : ''), favs.has('grenade:' + g.id) ? '★' : '☆');
   star.addEventListener('click', (e) => {
     e.stopPropagation();
     toggleGrenadeFav(g, favs, star);
@@ -3959,7 +3959,7 @@ async function toggleGrenadeFav(g, favs, star) {
       favs.add(key);
     }
     if (star) {
-      star.textContent = favs.has(key) ? 'в…' : 'в†';
+      star.textContent = favs.has(key) ? '★' : '☆';
       star.classList.toggle('active', favs.has(key));
     }
   } catch (e) {}
@@ -3993,7 +3993,7 @@ async function renderGrenades() {
     search.setAttribute('placeholder', t('gr_search'));
     search.addEventListener('input', () => { state.q = search.value.trim().toLowerCase(); render(); });
     row2.appendChild(search);
-    const favBtn = el('button', 'link-btn' + (state.favOnly ? ' active' : ''), t('gr_favs') + ' в…');
+    const favBtn = el('button', 'link-btn' + (state.favOnly ? ' active' : ''), t('gr_favs') + ' ★');
     favBtn.addEventListener('click', () => { state.favOnly = !state.favOnly; favBtn.classList.toggle('active', state.favOnly); render(); });
     row2.appendChild(favBtn);
     filters.appendChild(row2);
@@ -4050,14 +4050,14 @@ function renderGrenadeDetail(g, favs) {
   view.appendChild(title);
   const meta = el('div', 'player-meta');
   meta.appendChild(el('span', 'ok-badge', g.map_name));
-  meta.appendChild(el('span', null, (g.side || 'T') + ' В· ' + (g.site || 'вЂ”')));
+  meta.appendChild(el('span', null, (g.side || 'T') + ' · ' + (g.site || '—')));
   meta.appendChild(el('span', null, t('gr_difficulty') + ': ' + difficultyStars(g.difficulty)));
   view.appendChild(meta);
   const steps = g.steps && g.steps.length ? g.steps : [];
   if (steps.length) view.appendChild(gSteps(steps));
 
   const isFav = favs.has('grenade:' + g.id);
-  const favBtn = el('button', 'link-btn', (isFav ? 'в… ' : 'в† ') + (isFav ? t('gr_fav_rm') : t('gr_fav_add')));
+  const favBtn = el('button', 'link-btn', (isFav ? '★ ' : '☆ ') + (isFav ? t('gr_fav_rm') : t('gr_fav_add')));
   favBtn.addEventListener('click', async () => {
     await toggleGrenadeFav(g, favs, null);
     renderGrenadeDetail(g, favs);
@@ -4068,7 +4068,7 @@ function renderGrenadeDetail(g, favs) {
   trainBtn.appendChild(iconEl('drill'));
   trainBtn.appendChild(document.createTextNode(t('gr_train')));
   trainBtn.addEventListener('click', async () => {
-    trainBtn.textContent = t('gr_trained') + ' вњ“';
+    trainBtn.textContent = t('gr_trained') + ' ✓';
     trainBtn.classList.add('ok');
     await api.post('/api/training', { map_id: g.map, lineup_id: g.id }).then(syncProfile).catch(() => {});
   });
@@ -4124,10 +4124,10 @@ async function renderFriends() {
       box.appendChild(sectionTitle('stats', t('fr_requests') + ' (' + requests.length + ')'));
       requests.forEach(f => {
         const row = el('div', 'g-row');
-        row.appendChild(el('div', 'g-ico', 'рџ‘¤'));
+        row.appendChild(el('div', 'g-ico', '👤'));
         const info = el('div', 'player-info');
         info.appendChild(el('div', 'player-nick', f.name));
-        info.appendChild(el('div', 'player-meta', 'Lv' + f.level + ' В· ' + f.xp + ' XP'));
+        info.appendChild(el('div', 'player-meta', 'Lv' + f.level + ' · ' + f.xp + ' XP'));
         row.appendChild(info);
         const acc = el('button', 'link-btn', t('fr_accept'));
         acc.addEventListener('click', async () => {
@@ -4145,10 +4145,10 @@ async function renderFriends() {
     friends.forEach((f, i) => {
       const row = el('div', 'g-row');
       row.appendChild(el('span', 'g-chev', '#' + (i + 1)));
-      row.appendChild(el('div', 'g-ico', 'рџ‘¤'));
+      row.appendChild(el('div', 'g-ico', '👤'));
       const info = el('div', 'player-info');
       info.appendChild(el('div', 'player-nick', f.name));
-      info.appendChild(el('div', 'player-meta', 'Lv' + f.level + ' В· ' + f.xp + ' XP'));
+      info.appendChild(el('div', 'player-meta', 'Lv' + f.level + ' · ' + f.xp + ' XP'));
       row.appendChild(info);
       const rm = el('button', 'link-btn', t('fr_remove'));
       rm.addEventListener('click', async () => {
@@ -4566,9 +4566,9 @@ async function renderShop() {
         const meta = el('div', 'player-meta');
         const rarity = item.rarity || {};
         meta.appendChild(el('span', 'shop-rarity', rarity.name_ru || rarity.name || ''));
-        meta.appendChild(el('span', null, item.price + ' рџЄ™'));
+        meta.appendChild(el('span', null, item.price + ' 🪙'));
         if (item.stock_left != null) {
-          meta.appendChild(el('span', 'shop-stock', (item.stock_left > 0 ? item.stock_left + ' ' : '') + (lang === 'ru' ? 'РІ РЅР°Р»РёС‡РёРё' : 'left')));
+          meta.appendChild(el('span', 'shop-stock', (item.stock_left > 0 ? item.stock_left + ' ' : '') + (lang === 'ru' ? 'в наличии' : 'left')));
         }
         info.appendChild(meta);
         row.appendChild(info);
@@ -4672,10 +4672,10 @@ async function init() {
   function showOnboarding() {
     const overlay = el('div', 'onboard-overlay');
     const steps = [
-      { icon: 'bolt', title_ru: 'CS2 COACH', title_en: 'CS2 COACH', text_ru: 'РўРІРѕР№ РїРµСЂСЃРѕРЅР°Р»СЊРЅС‹Р№ С‚СЂРµРЅРµСЂ РїРѕ Counter-Strike 2', text_en: 'Your personal Counter-Strike 2 trainer' },
-      { icon: 'learn', title_ru: 'РЈС‡РёСЃСЊ', title_en: 'Learn', text_ru: 'РљР°СЂС‚РѕС‡РєРё, С‚РµСЃС‚С‹ Рё СѓСЂРѕРєРё РїРѕ РѕСЃРЅРѕРІР°Рј CS2', text_en: 'Cards, quizzes and lessons on CS2 fundamentals' },
-      { icon: 'drill', title_ru: 'РўСЂРµРЅРёСЂСѓР№СЃСЏ', title_en: 'Train', text_ru: 'РџСЂР°РєС‚РёРєСѓР№ Р»Р°Р№РЅР°РїС‹ Рё СѓС‚РёР»РёС‚Рё РЅР° РєР°СЂС‚Р°С…', text_en: 'Practice lineups and utility on maps' },
-      { icon: 'stats', title_ru: 'РЎРѕСЂРµРІРЅСѓР№СЃСЏ', title_en: 'Compete', text_ru: 'РњРёРЅРё-РёРіСЂС‹, РґРѕСЃС‚РёР¶РµРЅРёСЏ Рё СЂРµР№С‚РёРЅРі РёРіСЂРѕРєРѕРІ', text_en: 'Mini-games, achievements and player leaderboard' },
+      { icon: 'bolt', title_ru: 'CS2 COACH', title_en: 'CS2 COACH', text_ru: 'Твой персональный тренер по Counter-Strike 2', text_en: 'Your personal Counter-Strike 2 trainer' },
+      { icon: 'learn', title_ru: 'Учись', title_en: 'Learn', text_ru: 'Карточки, тесты и уроки по основам CS2', text_en: 'Cards, quizzes and lessons on CS2 fundamentals' },
+      { icon: 'drill', title_ru: 'Тренируйся', title_en: 'Train', text_ru: 'Практикуй лайнапы и утилити на картах', text_en: 'Practice lineups and utility on maps' },
+      { icon: 'stats', title_ru: 'Соревнуйся', title_en: 'Compete', text_ru: 'Мини-игры, достижения и рейтинг игроков', text_en: 'Mini-games, achievements and player leaderboard' },
     ];
     let step = 0;
 
@@ -4697,7 +4697,7 @@ async function init() {
       card.appendChild(dots);
 
       const nextBtn = el('button', 'onboard-btn');
-      nextBtn.textContent = step < steps.length - 1 ? (lang === 'ru' ? 'Р”Р°Р»РµРµ' : 'Next') : (lang === 'ru' ? 'РќР°С‡Р°С‚СЊ!' : 'Start!');
+      nextBtn.textContent = step < steps.length - 1 ? (lang === 'ru' ? 'Далее' : 'Next') : (lang === 'ru' ? 'Начать!' : 'Start!');
       nextBtn.addEventListener('click', () => {
         if (step < steps.length - 1) {
           step++;
@@ -4711,7 +4711,7 @@ async function init() {
       card.appendChild(nextBtn);
 
       const skipBtn = el('button', 'onboard-skip');
-      skipBtn.textContent = lang === 'ru' ? 'РџСЂРѕРїСѓСЃС‚РёС‚СЊ' : 'Skip';
+      skipBtn.textContent = lang === 'ru' ? 'Пропустить' : 'Skip';
       skipBtn.addEventListener('click', () => {
         localStorage.setItem('cs2_onboarded', '1');
         overlay.remove();

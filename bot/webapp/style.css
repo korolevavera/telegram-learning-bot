@@ -1465,7 +1465,7 @@ html[data-theme="gurren"] .tab.active .tab-ico { filter: drop-shadow(0 0 8px rgb
 
 
 
-/* ===================== РўР°РєС‚РёРєРё v3: Р РµРїР»РµР№, РЎС…РµРјР°, РљРѕСЂРѕС‚РєРѕ ===================== */
+/* ===================== Тактики v3: Реплей, Схема, Коротко ===================== */
 
 .t-mode-tabs { display: flex; gap: 8px; margin: 14px 0 6px; }
 .t-mode-tab {
@@ -1484,7 +1484,7 @@ html[data-theme="gurren"] .tab.active .tab-ico { filter: drop-shadow(0 0 8px rgb
 
 .t-diff { font-variant-numeric: tabular-nums; letter-spacing: 2px; color: var(--gold); }
 
-/* вЂ” Р РµРїР»РµР№ вЂ” */
+/* — Реплей — */
 
 .t-replay-stage { position: relative; border-radius: 14px; overflow: hidden; box-shadow: 0 8px 30px rgba(0,0,0,.45), inset 0 0 40px rgba(0,0,0,.35); }
 .t-replay-stage::after {
@@ -1586,7 +1586,7 @@ html[data-theme="gurren"] .tab.active .tab-ico { filter: drop-shadow(0 0 8px rgb
 .t-r-step-inner .g-step-text { font-size: 14px; line-height: 1.55; }
 .t-r-step-inner .g-step-badges { margin-top: 7px; }
 
-/* вЂ” РЎС…РµРјР° Рё РљРѕСЂРѕС‚РєРѕ вЂ” */
+/* — Схема и Коротко — */
 
 .t-phase-chips { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
 .t-phase-chip {
@@ -1601,7 +1601,7 @@ html[data-theme="gurren"] .tab.active .tab-ico { filter: drop-shadow(0 0 8px rgb
 .t-phase-chip-name { flex: 1; font-size: 13.5px; color: var(--text); font-weight: 600; }
 .t-phase-chip-steps { font-size: 12px; color: var(--muted); }
 
-/* вЂ” Р Р°РґР°СЂ-СЃС…РµРјС‹ (tacticRadar) вЂ” */
+/* — Радар-схемы (tacticRadar) — */
 
 .t-radar { position: relative; border-radius: 14px; overflow: hidden; box-shadow: 0 8px 30px rgba(0,0,0,.45); }
 .t-svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
