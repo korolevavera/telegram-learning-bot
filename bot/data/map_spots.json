@@ -1,0 +1,434 @@
+{
+ "mirage": [
+  {
+   "id": "t-spawn",
+   "name": "Спавн террористов",
+   "x": 88.1,
+   "y": 35.5,
+   "videos": [
+    {
+     "url": "https://youtube.com/shorts/pF6F3ahkWUg",
+     "title": "Смок в конектор"
+    },
+    {
+     "url": "https://youtube.com/shorts/KdXu0cjM0gk",
+     "title": "Смок в окно"
+    },
+    {
+     "url": "https://youtube.com/shorts/jCM8lp5P9NY",
+     "title": "Смок на шорт"
+    },
+    {
+     "url": "https://youtube.com/shorts/lN6_dVaCNNU",
+     "title": "Ван вей смок"
+    }
+   ]
+  },
+  {
+   "id": "ct-spawn",
+   "name": "Спавн CT",
+   "x": 26.4,
+   "y": 70.7,
+   "videos": [
+    {
+     "url": "https://youtube.com/shorts/tf6knwNEBOg",
+     "title": "Смок на страт мида"
+    },
+    {
+     "url": "https://youtube.com/shorts/AjtxpMkw7D8",
+     "title": "Смок в яму"
+    },
+    {
+     "url": "https://youtube.com/shorts/wYxXwqY01jY",
+     "title": "Смок на ковры"
+    },
+    {
+     "url": "https://youtube.com/shorts/5akjMbi1irk",
+     "title": "Смок в яму с сити"
+    },
+    {
+     "url": "https://youtube.com/shorts/IQQhXkw_nY8",
+     "title": "Смок на шорт"
+    },
+    {
+     "url": "https://youtube.com/shorts/FG0hTt4u_3g",
+     "title": "Смок в апартаменты"
+    }
+   ]
+  },
+  {
+   "id": "top-mid",
+   "name": "Топ мид",
+   "x": 65.1,
+   "y": 39.3,
+   "videos": [
+    {
+     "url": "https://youtube.com/shorts/AkWEMjKd-bs",
+     "title": "Молотов в окно"
+    }
+   ]
+  },
+  {
+   "id": "mid-boxes",
+   "name": "Белые ящики мид",
+   "x": 71.9,
+   "y": 46.1,
+   "videos": [
+    {
+     "url": "https://youtube.com/shorts/5gPSSP-qiEs",
+     "title": "Смок в окно"
+    },
+    {
+     "url": "https://youtube.com/shorts/NKYshzRYVGc",
+     "title": "Смок на шорт"
+    }
+   ]
+  },
+  {
+   "id": "under-window",
+   "name": "Андер виндоу",
+   "x": 43.4,
+   "y": 40.4,
+   "videos": [
+    {
+     "url": "https://youtube.com/shorts/N-kiqF4HqE8",
+     "title": "Молотов в джангл"
+    }
+   ]
+  },
+  {
+   "id": "apps-exit",
+   "name": "Выход в андер (апартаменты B)",
+   "x": 56.8,
+   "y": 17,
+   "videos": [
+    {
+     "url": "https://youtube.com/shorts/rIZJPeRquA0",
+     "title": "Молотов на форест"
+    },
+    {
+     "url": "https://youtube.com/shorts/qPHN2xPMAdY",
+     "title": "Фулл раскид B"
+    },
+    {
+     "url": "https://youtube.com/shorts/lqcZeXAPUMs",
+     "title": "Молотов на балкон B"
+    }
+   ]
+  },
+  {
+   "id": "tetris",
+   "name": "Тетрис",
+   "x": 63.4,
+   "y": 63.3,
+   "videos": [
+    {
+     "url": "https://youtube.com/shorts/VL2qnpFf1Z4",
+     "title": "Сетап молотовов на A"
+    },
+    {
+     "url": "https://youtube.com/shorts/C-87MrRqF_4",
+     "title": "Молотов на андер палас"
+    }
+   ]
+  },
+  {
+   "id": "jungle",
+   "name": "Джангл",
+   "x": 42.7,
+   "y": 62.4,
+   "videos": [
+    {
+     "url": "https://youtube.com/shorts/nDBXqpLEIIE",
+     "title": "Молотов на стул"
+    }
+   ]
+  },
+  {
+   "id": "pit",
+   "name": "Яма",
+   "x": 77.4,
+   "y": 57.8,
+   "videos": [
+    {
+     "url": "https://youtube.com/shorts/H1JgDKO5CJE",
+     "title": "Молотов на фаер бокс"
+    },
+    {
+     "url": "https://youtube.com/shorts/FG0hTt4u_3g",
+     "title": "Смок в апартаменты"
+    }
+   ]
+  }
+ ],
+ "dust2": [
+  {
+   "id": "sp-1",
+   "name": "Смок · Дым на Xbox (mid)",
+   "x": 18,
+   "y": 18,
+   "videos": []
+  },
+  {
+   "id": "sp-2",
+   "name": "Смок · Дым на Long",
+   "x": 20,
+   "y": 64,
+   "videos": []
+  },
+  {
+   "id": "sp-3",
+   "name": "Смок · Дым на окно B",
+   "x": 46,
+   "y": 40,
+   "videos": []
+  },
+  {
+   "id": "sp-4",
+   "name": "Молотов · Молотов на Goose (A)",
+   "x": 24,
+   "y": 70,
+   "videos": []
+  },
+  {
+   "id": "sp-5",
+   "name": "Смок · One-way на mid",
+   "x": 40,
+   "y": 30,
+   "videos": []
+  },
+  {
+   "id": "sp-6",
+   "name": "Смок · Дым на CT spawn (A take)",
+   "x": 14,
+   "y": 12,
+   "videos": []
+  }
+ ],
+ "inferno": [
+  {
+   "id": "sp-1",
+   "name": "Смок · Дым на Banana",
+   "x": 50,
+   "y": 64,
+   "videos": []
+  },
+  {
+   "id": "sp-2",
+   "name": "Смок · Дым на CT (A take)",
+   "x": 28,
+   "y": 46,
+   "videos": []
+  },
+  {
+   "id": "sp-3",
+   "name": "Молотов · Молотов на Coffins",
+   "x": 46,
+   "y": 68,
+   "videos": []
+  },
+  {
+   "id": "sp-4",
+   "name": "Смок · Дым на Top Mid",
+   "x": 36,
+   "y": 34,
+   "videos": []
+  },
+  {
+   "id": "sp-5",
+   "name": "Смок · One-way на Banana",
+   "x": 44,
+   "y": 60,
+   "videos": []
+  },
+  {
+   "id": "sp-6",
+   "name": "Молотов · Молотов на Library (B)",
+   "x": 58,
+   "y": 50,
+   "videos": []
+  }
+ ],
+ "nuke": [
+  {
+   "id": "sp-1",
+   "name": "Смок · Дым на outside",
+   "x": 18,
+   "y": 56,
+   "videos": []
+  },
+  {
+   "id": "sp-2",
+   "name": "Молотов · Молотов на Secret",
+   "x": 46,
+   "y": 44,
+   "videos": []
+  },
+  {
+   "id": "sp-3",
+   "name": "Молотов · Молотов на A ramp",
+   "x": 42,
+   "y": 36,
+   "videos": []
+  },
+  {
+   "id": "sp-4",
+   "name": "Смок · One-way на A (hut)",
+   "x": 36,
+   "y": 30,
+   "videos": []
+  }
+ ],
+ "ancient": [
+  {
+   "id": "sp-1",
+   "name": "Смок · Дым на mid",
+   "x": 32,
+   "y": 36,
+   "videos": []
+  },
+  {
+   "id": "sp-2",
+   "name": "Молотов · Молотов на A site",
+   "x": 62,
+   "y": 60,
+   "videos": []
+  },
+  {
+   "id": "sp-3",
+   "name": "Смок · Дым на B (cave)",
+   "x": 38,
+   "y": 70,
+   "videos": []
+  },
+  {
+   "id": "sp-4",
+   "name": "Смок · One-way на B",
+   "x": 42,
+   "y": 66,
+   "videos": []
+  }
+ ],
+ "overpass": [
+  {
+   "id": "sp-1",
+   "name": "Смок · Дым на Monster",
+   "x": 32,
+   "y": 34,
+   "videos": []
+  },
+  {
+   "id": "sp-2",
+   "name": "Молотов · Молотов на A site",
+   "x": 46,
+   "y": 52,
+   "videos": []
+  },
+  {
+   "id": "sp-3",
+   "name": "Смок · Дым на B short",
+   "x": 56,
+   "y": 62,
+   "videos": []
+  },
+  {
+   "id": "sp-4",
+   "name": "Смок · One-way на A (construction)",
+   "x": 52,
+   "y": 58,
+   "videos": []
+  }
+ ],
+ "anubis": [
+  {
+   "id": "sp-1",
+   "name": "Смок · Дым на mid",
+   "x": 36,
+   "y": 36,
+   "videos": []
+  },
+  {
+   "id": "sp-2",
+   "name": "Молотов · Молотов на A site",
+   "x": 62,
+   "y": 64,
+   "videos": []
+  },
+  {
+   "id": "sp-3",
+   "name": "Смок · Дым на B",
+   "x": 40,
+   "y": 68,
+   "videos": []
+  }
+ ],
+ "vertigo": [
+  {
+   "id": "sp-1",
+   "name": "Смок · Дым на A ramp",
+   "x": 52,
+   "y": 40,
+   "videos": []
+  },
+  {
+   "id": "sp-2",
+   "name": "Смок · Дым на B site",
+   "x": 34,
+   "y": 58,
+   "videos": []
+  },
+  {
+   "id": "sp-3",
+   "name": "Молотов · Молотов на A site",
+   "x": 60,
+   "y": 52,
+   "videos": []
+  }
+ ],
+ "train": [
+  {
+   "id": "sp-1",
+   "name": "Смок · Дым на ladder (A)",
+   "x": 30,
+   "y": 62,
+   "videos": []
+  },
+  {
+   "id": "sp-2",
+   "name": "Молотов · Молотов на Ivy (B)",
+   "x": 58,
+   "y": 36,
+   "videos": []
+  },
+  {
+   "id": "sp-3",
+   "name": "Смок · Дым на A main",
+   "x": 28,
+   "y": 60,
+   "videos": []
+  }
+ ],
+ "cache": [
+  {
+   "id": "sp-1",
+   "name": "Смок · Дым на mid (Z)",
+   "x": 38,
+   "y": 34,
+   "videos": []
+  },
+  {
+   "id": "sp-2",
+   "name": "Смок · Дым на A site",
+   "x": 62,
+   "y": 58,
+   "videos": []
+  },
+  {
+   "id": "sp-3",
+   "name": "Молотов · Молотов на B site",
+   "x": 34,
+   "y": 62,
+   "videos": []
+  }
+ ]
+}

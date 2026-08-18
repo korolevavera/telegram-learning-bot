@@ -54,6 +54,9 @@ def merge_lineups(lineups: dict[str, list[dict]]) -> dict[str, list[dict]]:
                 "type": entry.get("type", "default"),
                 "title": entry.get("name", lineup_id),
                 "steps": _steps_from(entry.get("description", "")),
+                "side": entry.get("side", "T"),
+                "site": entry.get("site", "A"),
+                "difficulty": entry.get("difficulty", 1),
             }
             if entry.get("video_url"):
                 new_lineup["video"] = entry["video_url"]
@@ -67,4 +70,43 @@ def get_lineups() -> dict[str, list[dict]]:
     from .content import LINEUPS
 
     merged = {map_id: [dict(lineup) for lineup in lineups] for map_id, lineups in LINEUPS.items()}
-    return merge_lineups(merged)
+    merged = merge_lineups(merged)
+    _apply_admin_overrides(merged)
+    return merged
+
+
+def _apply_admin_overrides(lineups: dict[str, list[dict]]) -> None:
+    """Применить переопределения гранат от админа (поверх JSON-файлов)."""
+    import asyncio
+
+    from .content import MAPS
+    from .services import get_cached_overrides
+
+    try:
+        asyncio.get_running_loop()
+    except RuntimeError:
+        return
+
+    overrides = get_cached_overrides("grenade")
+    if not overrides:
+        return
+    if not overrides:
+        return
+    for lineup_id, data in overrides.items():
+        map_id = str(data.get("map") or "").strip().lower()
+        if map_id not in {m["id"] for m in MAPS}:
+            continue
+        target = next((l for l in lineups.get(map_id, []) if l["id"] == lineup_id), None)
+        entry = {
+            "id": lineup_id,
+            "type": data.get("type", "default"),
+            "title": data.get("title", lineup_id),
+            "steps": [s for s in (data.get("steps") or []) if s],
+            "side": data.get("side", "T"),
+            "site": data.get("site", "A"),
+            "difficulty": int(data.get("difficulty") or 1),
+        }
+        if target is None:
+            lineups.setdefault(map_id, []).append(entry)
+        else:
+            target.update(entry)

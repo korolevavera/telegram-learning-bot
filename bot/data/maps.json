@@ -1,0 +1,72 @@
+[
+  {
+    "id": "dust2",
+    "name": "Dust II",
+    "image": "dust2.jpg",
+    "radar": "dust2.png",
+    "emoji": "🏜️"
+  },
+  {
+    "id": "mirage",
+    "name": "Mirage",
+    "image": "mirage.jpg",
+    "radar": "mirage.png",
+    "emoji": "🕌"
+  },
+  {
+    "id": "inferno",
+    "name": "Inferno",
+    "image": "inferno.jpg",
+    "radar": "inferno.png",
+    "emoji": "🔥"
+  },
+  {
+    "id": "nuke",
+    "name": "Nuke",
+    "image": "nuke.jpg",
+    "radar": "nuke.png",
+    "emoji": "☢️"
+  },
+  {
+    "id": "ancient",
+    "name": "Ancient",
+    "image": "ancient.jpg",
+    "radar": "ancient.png",
+    "emoji": "🏛️"
+  },
+  {
+    "id": "overpass",
+    "name": "Overpass",
+    "image": "overpass.jpg",
+    "radar": "overpass.png",
+    "emoji": "🌉"
+  },
+  {
+    "id": "anubis",
+    "name": "Anubis",
+    "image": "anubis.jpg",
+    "radar": "anubis.png",
+    "emoji": "🐫"
+  },
+  {
+    "id": "vertigo",
+    "name": "Vertigo",
+    "image": "vertigo.jpg",
+    "radar": "vertigo.png",
+    "emoji": "🏢"
+  },
+  {
+    "id": "train",
+    "name": "Train",
+    "image": "train.jpg",
+    "radar": "train.png",
+    "emoji": "🚂"
+  },
+  {
+    "id": "cache",
+    "name": "Cache",
+    "image": "cache.jpg",
+    "radar": "cache.png",
+    "emoji": "📦"
+  }
+]

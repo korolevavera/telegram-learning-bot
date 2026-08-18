@@ -1,6 +1,34 @@
 .venv/
 __pycache__/
 *.pyc
+*.pyo
 .env
 *.db
 *.sqlite3
+
+# Pytest
+.pytest_cache/
+
+# Coverage
+htmlcov/
+.coverage
+.coverage.*
+
+# Build
+dist/
+build/
+*.egg-info/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+
+# Temp files
+*.bak
+*.tmp

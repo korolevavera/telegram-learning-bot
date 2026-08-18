@@ -1,0 +1,44 @@
+{
+  "entry": {
+    "ru": "Энтри",
+    "en": "Entry",
+    "emoji": "⚡",
+    "cls": "r-entry"
+  },
+  "support": {
+    "ru": "Саппорт",
+    "en": "Support",
+    "emoji": "🛡️",
+    "cls": "r-support"
+  },
+  "awp": {
+    "ru": "AWP",
+    "en": "AWP",
+    "emoji": "🎯",
+    "cls": "r-awp"
+  },
+  "lurker": {
+    "ru": "Луркер",
+    "en": "Lurker",
+    "emoji": "🦝",
+    "cls": "r-lurker"
+  },
+  "rifler": {
+    "ru": "Рифлер",
+    "en": "Rifler",
+    "emoji": "🔫",
+    "cls": "r-rifler"
+  },
+  "anchor": {
+    "ru": "Якорь",
+    "en": "Anchor",
+    "emoji": "⚓",
+    "cls": "r-anchor"
+  },
+  "rotator": {
+    "ru": "Ротатор",
+    "en": "Rotator",
+    "emoji": "🔄",
+    "cls": "r-rotator"
+  }
+}

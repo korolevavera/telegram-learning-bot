@@ -12,6 +12,8 @@ class Config:
         self.webapp_url: str = os.getenv("WEBAPP_URL", "").strip()
         self.faceit_api_key: str = os.getenv("FACEIT_API_KEY", "").strip()
         self.port: int = int(os.getenv("PORT", "8080"))
+        admin_str = os.getenv("ADMIN_IDS", "").strip()
+        self.admin_ids: list[int] = [int(x) for x in admin_str.split(",") if x.strip().isdigit()] if admin_str else []
 
 
 def load_config() -> Config:

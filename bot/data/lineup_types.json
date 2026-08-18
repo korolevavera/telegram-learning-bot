@@ -1,0 +1,18 @@
+{
+  "smoke": {
+    "label": "Смок",
+    "emoji": "💨"
+  },
+  "flash": {
+    "label": "Флешка",
+    "emoji": "✨"
+  },
+  "molotov": {
+    "label": "Молотов",
+    "emoji": "🔥"
+  },
+  "grenade": {
+    "label": "Граната",
+    "emoji": "💣"
+  }
+}

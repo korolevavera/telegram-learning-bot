@@ -133,11 +133,12 @@ async def get_faceit_ranking(region: str = "EU", limit: int = TOP_FACEIT) -> lis
     return _write_cache(key, result)
 
 
-async def get_faceit_player_info(player_id: str) -> dict | None:
+async def get_faceit_player_info(player_id: str, force: bool = False) -> dict | None:
     key = f"faceit:player:{player_id}"
-    cached = _read_cache(key, CACHE_TTL)
-    if cached is not None:
-        return cached
+    if not force:
+        cached = _read_cache(key, CACHE_TTL)
+        if cached is not None:
+            return cached
     headers = _faceit_headers()
     if headers is None:
         return None

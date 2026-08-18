@@ -3,8 +3,7 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
 from .config_loader import CONFIG
 from .content import CARDS, LESSONS, LINEUP_TYPES, MAPS, QUIZZES, TACTICS, flatten_tactics
 from .lineups_loader import get_lineups
-
-APP_VERSION = "21"
+from .version import APP_VERSION
 
 LINEUPS = get_lineups()
 
