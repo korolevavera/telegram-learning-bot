@@ -6,6 +6,8 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import parse_qsl
 
+import mimetypes
+
 from aiohttp import web
 
 from .config_loader import CONFIG
@@ -73,6 +75,32 @@ from .version import APP_VERSION
 
 STATIC_DIR = Path(__file__).resolve().parent / "webapp"
 
+_TEXT_TYPES = {"text/", "application/javascript", "application/json"}
+
+
+def _charset_for(path: str) -> str | None:
+    ct, _ = mimetypes.guess_type(path)
+    if ct and any(ct.startswith(p) for p in _TEXT_TYPES):
+        return "utf-8"
+    return None
+
+
+async def _static_handler(request: web.Request) -> web.Response:
+    rel = request.match_info["filename"]
+    file_path = STATIC_DIR / rel
+    if not file_path.is_file():
+        raise web.HTTPNotFound()
+    charset = _charset_for(rel)
+    ct, _ = mimetypes.guess_type(rel)
+    if not ct:
+        ct = "application/octet-stream"
+    data = file_path.read_bytes()
+    if charset == "utf-8" and data[:3] == b"\xef\xbb\xbf":
+        data = data[3:]
+    resp = web.Response(body=data, content_type=ct, charset=charset)
+    resp.headers.setdefault("Cache-Control", "no-cache")
+    return resp
+
 AUTH_MAX_AGE = 86400
 RATE_WINDOW = 60
 RATE_MAX_AUTH = 120
@@ -139,7 +167,7 @@ def _unauthorized() -> web.Response:
 async def index_handler(request: web.Request) -> web.Response:
     html = (STATIC_DIR / "index.html").read_text(encoding="utf-8")
     html = html.replace("{{APP_VERSION}}", APP_VERSION)
-    return web.Response(text=html, content_type="text/html")
+    return web.Response(text=html, content_type="text/html", charset="utf-8")
 
 
 async def api_init(request: web.Request) -> web.Response:
@@ -1114,7 +1142,7 @@ def create_app() -> web.Application:
     app.router.add_get("/api/admin/grenades", api_admin_grenades)
     app.router.add_post("/api/admin/content", api_admin_content)
     app.router.add_post("/api/admin/content/delete", api_admin_content_delete)
-    app.router.add_static("/static", STATIC_DIR)
+    app.router.add_get("/static/{filename:.*}", _static_handler)
     return app
 
 
