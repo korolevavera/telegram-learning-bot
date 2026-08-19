@@ -2699,10 +2699,14 @@ const TAB_DEFS = {
     view.appendChild(title);
     const mini = gMiniRadar(item, l);
     if (mini) view.appendChild(mini);
-    if (l.video) {
+    const luVideos = Array.isArray(l.videos) ? l.videos : (l.video ? [l.video] : []);
+    if (luVideos.length) {
       const wrap = el('div', 'spot-video');
-      const m = gMedia(l.video);
-      if (m) wrap.appendChild(m);
+      luVideos.forEach(v => {
+        const url = typeof v === 'string' ? v : (v && v.url);
+        const m = gMedia(url);
+        if (m) wrap.appendChild(m);
+      });
       view.appendChild(wrap);
     }
     view.appendChild(gSteps(l.steps));
@@ -3925,10 +3929,14 @@ const TAB_DEFS = {
       mini.appendChild(mlabel);
       view.appendChild(mini);
     }
-    if (l.video) {
+    const trVideos = Array.isArray(l.videos) ? l.videos : (l.video ? [l.video] : []);
+    if (trVideos.length) {
       const wrap = el('div', 'spot-video');
-      const m = gMedia(l.video);
-      if (m) wrap.appendChild(m);
+      trVideos.forEach(v => {
+        const url = typeof v === 'string' ? v : (v && v.url);
+        const m = gMedia(url);
+        if (m) wrap.appendChild(m);
+      });
       view.appendChild(wrap);
     }
     view.appendChild(gSteps(l.steps));
@@ -4128,10 +4136,14 @@ function renderGrenadeDetail(g, favs) {
   meta.appendChild(el('span', null, (g.side || 'T') + ' · ' + (g.site || '—')));
   meta.appendChild(el('span', null, t('gr_difficulty') + ': ' + difficultyStars(g.difficulty)));
   view.appendChild(meta);
-  if (g.video) {
+  const grVideos = Array.isArray(g.videos) ? g.videos : (g.video ? [g.video] : []);
+  if (grVideos.length) {
     const wrap = el('div', 'spot-video');
-    const m = gMedia(g.video);
-    if (m) wrap.appendChild(m);
+    grVideos.forEach(v => {
+      const url = typeof v === 'string' ? v : (v && v.url);
+      const m = gMedia(url);
+      if (m) wrap.appendChild(m);
+    });
     view.appendChild(wrap);
   }
   const steps = g.steps && g.steps.length ? g.steps : [];
