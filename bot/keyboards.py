@@ -1,7 +1,7 @@
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
 
 from .config_loader import CONFIG
-from .content import CARDS, LESSONS, LINEUP_TYPES, MAPS, QUIZZES, TACTICS, flatten_tactics
+from .content import CARDS, LESSONS, LINEUP_TYPES, MAPS, QUIZZES
 from .lineups_loader import get_lineups
 from .version import APP_VERSION
 
@@ -128,17 +128,6 @@ def guides_keyboard() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=rows)
 
 
-def map_actions_keyboard(map_id: str) -> InlineKeyboardMarkup:
-    rows = [
-        [InlineKeyboardButton(text="🧨 Раскидки", callback_data=f"guide_lineups:{map_id}")]
-    ]
-    if TACTICS.get(map_id):
-        rows.append([InlineKeyboardButton(text="🎯 Тактики", callback_data=f"guide_tactics:{map_id}")])
-    rows.append([InlineKeyboardButton(text="⬅️ К картам", callback_data="guides")])
-    rows.append([InlineKeyboardButton(text="🏠 Меню", callback_data="menu")])
-    return InlineKeyboardMarkup(inline_keyboard=rows)
-
-
 def _lineup_button(map_id: str, lineup: dict) -> InlineKeyboardButton:
     type_info = LINEUP_TYPES.get(lineup.get("type", ""), {})
     emoji = type_info.get("emoji", "🧨")
@@ -150,34 +139,15 @@ def _lineup_button(map_id: str, lineup: dict) -> InlineKeyboardButton:
 
 def guide_lineups_keyboard(map_id: str) -> InlineKeyboardMarkup:
     rows = [[_lineup_button(map_id, lineup)] for lineup in LINEUPS.get(map_id, [])]
-    rows.append([InlineKeyboardButton(text="⬅️ К карте", callback_data=f"guide_map:{map_id}")])
+    rows.append([InlineKeyboardButton(text="⬅️ К картам", callback_data="guides")])
     rows.append([InlineKeyboardButton(text="🏠 Меню", callback_data="menu")])
     return InlineKeyboardMarkup(inline_keyboard=rows)
 
 
-def guide_tactics_keyboard(map_id: str) -> InlineKeyboardMarkup:
-    rows = [
-        [
-            InlineKeyboardButton(
-                text=f"🎯 {tactic['title']}",
-                callback_data=f"guide_tactic:{map_id}:{tactic['id']}",
-            )
-        ]
-        for tactic in flatten_tactics(map_id)
-    ]
-    rows.append([InlineKeyboardButton(text="⬅️ К карте", callback_data=f"guide_map:{map_id}")])
-    rows.append([InlineKeyboardButton(text="🏠 Меню", callback_data="menu")])
-    return InlineKeyboardMarkup(inline_keyboard=rows)
-
-
-def guide_back_keyboard(map_id: str, to_lineups: bool) -> InlineKeyboardMarkup:
-    back_data = f"guide_lineups:{map_id}" if to_lineups else f"guide_tactics:{map_id}"
+def guide_back_keyboard(map_id: str) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
         inline_keyboard=[
-            [InlineKeyboardButton(text="⬅️ Назад", callback_data=back_data)],
+            [InlineKeyboardButton(text="⬅️ Назад", callback_data=f"guide_lineups:{map_id}")],
             [InlineKeyboardButton(text="🏠 Меню", callback_data="menu")],
         ]
     )
-
-
-

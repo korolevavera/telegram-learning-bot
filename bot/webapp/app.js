@@ -2155,9 +2155,8 @@ const TAB_DEFS = {
   }
 
   function openMap(item) {
-    tacticsFilter = { side: 't', round: 'pistol' };
     activeSpotId = null;
-    renderMapHub(item);
+    renderMap(item);
   }
 
   function pickCard(icon, title, subtitle, onClick) {
@@ -2374,7 +2373,7 @@ const TAB_DEFS = {
   function renderMap(item) {
     currentMap = item;
     clear();
-    view.appendChild(gBackBtn(() => renderMapHub(item)));
+    view.appendChild(gBackBtn(() => renderGuides()));
 
     const head = el('div', 'map-head');
     head.appendChild(el('span', 'map-head-name', (item.emoji || '') + ' ' + item.name));

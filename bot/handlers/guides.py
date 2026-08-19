@@ -2,13 +2,11 @@ from aiogram import F, Router
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery
 
-from ..content import DIFFICULTY, LINEUP_TYPES, MAPS, ROLES, flatten_tactics, tactic_steps
+from ..content import LINEUP_TYPES, MAPS, ROLES
 from ..keyboards import (
     guide_back_keyboard,
     guide_lineups_keyboard,
-    guide_tactics_keyboard,
     guides_keyboard,
-    map_actions_keyboard,
 )
 from ..lineups_loader import get_lineups
 from ..video_player import send_lineup_video
@@ -23,10 +21,6 @@ def _get_map(map_id: str) -> dict | None:
 
 def _get_lineup(map_id: str, lineup_id: str) -> dict | None:
     return next((l for l in LINEUPS.get(map_id, []) if l["id"] == lineup_id), None)
-
-
-def _get_tactic(map_id: str, tactic_id: str) -> dict | None:
-    return next((t for t in flatten_tactics(map_id) if t["id"] == tactic_id), None)
 
 
 def _lineup_badge(lineup: dict) -> str:
@@ -62,7 +56,11 @@ def _steps_text(steps: list) -> str:
 @router.callback_query(F.data == "guides")
 async def show_guides(cb: CallbackQuery, state: FSMContext) -> None:
     await state.clear()
-    await cb.message.edit_text("🧭 <b>Гайды</b>\n\nВыбери карту, чтобы посмотреть раскидки:", parse_mode="HTML", reply_markup=guides_keyboard())
+    await cb.message.edit_text(
+        "🧭 <b>Гайды</b>\n\nВыбери карту, чтобы посмотреть раскидки:",
+        parse_mode="HTML",
+        reply_markup=guides_keyboard(),
+    )
     await cb.answer()
 
 
@@ -74,16 +72,16 @@ async def show_map(cb: CallbackQuery) -> None:
         await cb.answer("Карта не найдена", show_alert=True)
         return
 
-    lineups_count = len(LINEUPS.get(map_id, []))
-    tactics_count = len(flatten_tactics(map_id))
+    lineups = LINEUPS.get(map_id, [])
+    if not lineups:
+        await cb.answer("На этой карте пока нет раскидок", show_alert=True)
+        return
 
-    text = (
-        f"🧭 <b>{map_data['emoji']} {map_data['name']}</b>\n\n"
-        f"Раскидок на карте: <b>{lineups_count}</b>\n"
-        f"Тактик: <b>{tactics_count}</b>\n\n"
-        "Выбери категорию:"
+    await cb.message.edit_text(
+        f"🧨 <b>Раскидки · {map_data['name']}</b>\n\nВыбери раскидку:",
+        parse_mode="HTML",
+        reply_markup=guide_lineups_keyboard(map_id),
     )
-    await cb.message.edit_text(text, parse_mode="HTML", reply_markup=map_actions_keyboard(map_id))
     await cb.answer()
 
 
@@ -125,7 +123,7 @@ async def show_lineup(cb: CallbackQuery) -> None:
     await cb.message.edit_text(
         text,
         parse_mode="HTML",
-        reply_markup=guide_back_keyboard(map_id, to_lineups=True),
+        reply_markup=guide_back_keyboard(map_id),
     )
     video_url = lineup.get("video")
     if video_url:
@@ -133,63 +131,4 @@ async def show_lineup(cb: CallbackQuery) -> None:
             await send_lineup_video(cb.bot, cb.message.chat.id, video_url, caption=text)
         except Exception:
             pass
-    await cb.answer()
-
-
-@router.callback_query(F.data.startswith("guide_tactics:"))
-async def show_tactics(cb: CallbackQuery) -> None:
-    map_id = cb.data.split(":", 1)[1]
-    map_data = _get_map(map_id)
-    if map_data is None:
-        await cb.answer("Карта не найдена", show_alert=True)
-        return
-
-    tactics = flatten_tactics(map_id)
-    if not tactics:
-        await cb.answer("На этой карте пока нет тактик", show_alert=True)
-        return
-
-    await cb.message.edit_text(
-        f"🎯 <b>Тактики · {map_data['name']}</b>\n\nВыбери тактику:",
-        parse_mode="HTML",
-        reply_markup=guide_tactics_keyboard(map_id),
-    )
-    await cb.answer()
-
-
-@router.callback_query(F.data.startswith("guide_tactic:"))
-async def show_tactic(cb: CallbackQuery) -> None:
-    _, map_id, tactic_id = cb.data.split(":")
-    map_data = _get_map(map_id)
-    tactic = _get_tactic(map_id, tactic_id)
-    if map_data is None or tactic is None:
-        await cb.answer("Тактика не найдена", show_alert=True)
-        return
-
-    lines = [f"🎯 <b>{tactic['title']}</b>"]
-    if tactic.get("short"):
-        lines.append(f"💡 <i>{tactic['short']}</i>")
-    lines.append(f"🗺️ {map_data['emoji']} {map_data['name']}")
-    diff = tactic.get("difficulty")
-    if diff:
-        d_info = DIFFICULTY.get(diff, {})
-        lines.append(f"📊 <b>Сложность:</b> {'●' * diff}{'○' * (3 - diff)} {d_info.get('ru', '')}")
-    if tactic.get("goal"):
-        lines.append(f"🎯 <b>Цель:</b> {tactic['goal']}")
-    if tactic.get("buy"):
-        lines.append(f"💰 <b>Покупка:</b> {tactic['buy']}")
-    phases = tactic.get("phases")
-    if phases:
-        for phase in phases:
-            lines.append(f"\n<b>{phase['name']}:</b>")
-            lines.append(_steps_text(phase.get("steps", [])))
-    else:
-        lines.append(f"\n<b>Выполнение:</b>")
-        lines.append(_steps_text(tactic_steps(tactic)))
-
-    await cb.message.edit_text(
-        "\n".join(lines),
-        parse_mode="HTML",
-        reply_markup=guide_back_keyboard(map_id, to_lineups=False),
-    )
     await cb.answer()
