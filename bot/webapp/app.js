@@ -4464,6 +4464,8 @@ function startReactionGame(game) {
   let running = false;
   let timer = null;
   let stage = 'wait'; // wait | ready
+  let readyTime = 0;
+  let reactionTimes = [];
   const startTime = Date.now();
 
   const box = el('div', 'react-box');
@@ -4475,8 +4477,15 @@ function startReactionGame(game) {
   function finish() {
     clearTimeout(timer);
     const dur = Date.now() - startTime;
+    const avgMs = reactionTimes.length ? Math.round(reactionTimes.reduce((a, b) => a + b, 0) / reactionTimes.length) : 0;
     const res = el('div', 'quiz-result');
     res.appendChild(el('div', 'quiz-score', t('gm_result').replace('{0}', hit).replace('{1}', attempts)));
+    const avgLine = el('div', 'quiz-score');
+    avgLine.textContent = 'Среднее время реакции: ' + avgMs + ' мс';
+    res.appendChild(avgLine);
+    const detailLine = el('div', 'quiz-score');
+    detailLine.textContent = reactionTimes.map((ms, i) => (i + 1) + ': ' + ms + 'мс').join(' | ');
+    res.appendChild(detailLine);
     box.innerHTML = '';
     box.classList.remove('ready', 'early');
     box.appendChild(res);
@@ -4499,6 +4508,7 @@ function startReactionGame(game) {
     box.textContent = t('gm_react_wait');
     timer = setTimeout(() => {
       stage = 'ready';
+      readyTime = Date.now();
       box.classList.add('ready');
       box.textContent = t('gm_react_go');
     }, 1000 + Math.random() * 2500);
@@ -4514,12 +4524,14 @@ function startReactionGame(game) {
       return;
     }
     // ready
+    const ms = Date.now() - readyTime;
+    reactionTimes.push(ms);
     hit++;
     done++;
     stage = 'wait';
     state.textContent = t('gm_react_attempt').replace('{0}', done + 1).replace('{1}', attempts);
     box.classList.remove('ready');
-    box.textContent = t('gm_react_hit') + ' ' + done + '/' + attempts;
+    box.textContent = ms + ' мс';
     timer = setTimeout(() => {
       if (done >= attempts) { finish(); return; }
       startWait();
