@@ -956,44 +956,46 @@ async def calibrate_handler(request: web.Request) -> web.Response:
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
 body { background:#111; color:#eee; font-family:monospace; padding:20px; }
-h2 { margin-bottom:12px; }
-.radar { position:relative; width:512px; height:512px; border:2px solid #333; margin-bottom:16px; cursor:crosshair; }
-.radar img { width:100%; height:100%; display:block; }
-.dot { position:absolute; width:12px; height:12px; border-radius:50%; background:#f44; border:2px solid #fff; transform:translate(-50%,-50%); pointer-events:none; z-index:10; }
-.dot .tip { position:absolute; top:-18px; left:14px; white-space:nowrap; font-size:11px; background:rgba(0,0,0,.8); padding:2px 6px; border-radius:3px; }
-.output { background:#1a1a1a; border:1px solid #333; padding:12px; border-radius:6px; max-height:400px; overflow-y:auto; }
-.output pre { white-space:pre-wrap; font-size:13px; line-height:1.6; }
-.coord { color:#0f0; }
-.btns { margin-top:12px; display:flex; gap:8px; }
+h2 { margin-bottom:6px; }
+p.hint { color:#888; margin-bottom:12px; font-size:13px; }
+.radar { position:relative; width:512px; height:512px; border:2px solid #333; margin-bottom:16px; user-select:none; }
+.radar img { width:100%; height:100%; display:block; pointer-events:none; }
+.dot { position:absolute; width:16px; height:16px; border-radius:50%; background:#f44; border:2px solid #fff; transform:translate(-50%,-50%); cursor:grab; z-index:10; }
+.dot:active { cursor:grabbing; background:#ff0; }
+.dot .tip { position:absolute; top:-20px; left:14px; white-space:nowrap; font-size:11px; background:rgba(0,0,0,.85); padding:2px 6px; border-radius:3px; pointer-events:none; }
+.output { background:#1a1a1a; border:1px solid #333; padding:12px; border-radius:6px; }
+.output pre { white-space:pre-wrap; font-size:13px; line-height:1.6; color:#0f0; }
+.btns { margin:12px 0; display:flex; gap:8px; }
 button { background:#333; color:#eee; border:1px solid #555; padding:6px 14px; border-radius:4px; cursor:pointer; font-family:monospace; }
 button:hover { background:#555; }
 </style></head><body>
 <h2>Dust2 — Калибровка точек</h2>
-<p style="color:#888;margin-bottom:8px">Кликни по карте чтобы поставить точку. Координаты появятся ниже.</p>
+<p class="hint">Перетаскивай точки по карте. Координаты обновляются в реальном времени.</p>
 <div class="radar" id="radar">
-  <img src="/static/dust2.png" id="map">
+  <img src="/maps/dust2.png" id="map">
 </div>
 <div class="btns">
-  <button onclick="copyAll()">Копировать всё</button>
-  <button onclick="clearAll()">Очистить</button>
+  <button onclick="copyAll()">Копировать JSON</button>
+  <button onclick="clearAll()">Очистить всё</button>
 </div>
 <div class="output"><pre id="out"></pre></div>
 <script>
 const radar = document.getElementById('radar');
 const out = document.getElementById('out');
 let points = [];
+let dragId = null;
 """ + """
 const existing = """ + existing + """;
 existing.forEach(s => {
-  addPoint(s.x, s.y, s.name);
+  addPoint(s.x, s.y, s.name, s.id);
 });
 """ + """
-function addPoint(x, y, name) {
+function addPoint(x, y, name, sid) {
   const id = points.length;
-  points.push({id, x, y, name: name || ''});
+  points.push({id, x, y, name: name || '', sid: sid || ('sp-' + (id+1))});
   const dot = document.createElement('div');
   dot.className = 'dot';
-  dot.id = 'dot-' + id;
+  dot.dataset.idx = id;
   dot.style.left = x + '%';
   dot.style.top = y + '%';
   dot.innerHTML = '<span class="tip">' + (name || '#'+(id+1)) + '</span>';
@@ -1003,24 +1005,47 @@ function addPoint(x, y, name) {
 function render() {
   let s = '[';
   points.forEach((p, i) => {
-    const n = p.name || prompt('Имя точки #' + (i+1)) || ('point-' + (i+1));
-    p.name = n;
-    document.querySelector('#dot-' + p.id + ' .tip').textContent = n;
-    s += (i?',':'') + '\\n  {"id":"sp-' + (i+1) + '","name":"' + n + '","x":' + p.x + ',"y":' + p.y + ',"videos":[]}';
+    if (!p.name) {
+      p.name = 'point-' + (i+1);
+      document.querySelector('[data-idx="'+p.id+'"] .tip').textContent = p.name;
+    }
+    s += (i?',':'') + '\\n  {"id":"' + p.sid + '","name":"' + p.name + '","x":' + p.x + ',"y":' + p.y + ',"videos":[]}';
   });
   s += '\\n]';
   out.textContent = s;
 }
-radar.addEventListener('click', e => {
+radar.addEventListener('mousedown', e => {
+  const dot = e.target.closest('.dot');
+  if (!dot) return;
+  dragId = parseInt(dot.dataset.idx);
+  e.preventDefault();
+});
+document.addEventListener('mousemove', e => {
+  if (dragId === null) return;
+  const r = radar.getBoundingClientRect();
+  const x = Math.round(Math.max(0, Math.min(100, (e.clientX - r.left) / r.width * 100)));
+  const y = Math.round(Math.max(0, Math.min(100, (e.clientY - r.top) / r.height * 100)));
+  const dot = document.querySelector('[data-idx="'+dragId+'"]');
+  dot.style.left = x + '%';
+  dot.style.top = y + '%';
+  points[dragId].x = x;
+  points[dragId].y = y;
+  render();
+});
+document.addEventListener('mouseup', () => { dragId = null; });
+radar.addEventListener('dblclick', e => {
+  if (e.target.closest('.dot')) return;
   const r = radar.getBoundingClientRect();
   const x = Math.round((e.clientX - r.left) / r.width * 100);
   const y = Math.round((e.clientY - r.top) / r.height * 100);
-  addPoint(x, y);
+  const name = prompt('Имя точки:') || ('point-' + (points.length+1));
+  addPoint(x, y, name);
 });
 function copyAll() {
   navigator.clipboard.writeText(out.textContent).then(() => alert('Скопировано!'));
 }
 function clearAll() {
+  if (!confirm('Удалить все точки?')) return;
   points = [];
   radar.querySelectorAll('.dot').forEach(d => d.remove());
   render();
