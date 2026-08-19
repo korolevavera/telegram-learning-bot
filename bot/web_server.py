@@ -950,73 +950,82 @@ async def health_handler(request: web.Request) -> web.Response:
 
 async def calibrate_handler(request: web.Request) -> web.Response:
     spots = MAP_SPOTS.get("dust2", [])
-    rows = "".join(
-        f'<tr><td>{s["id"]}</td><td>{s["name"]}</td>'
-        f'<td><input type="number" id="x-{s["id"]}" value="{s["x"]}" min="0" max="100"></td>'
-        f'<td><input type="number" id="y-{s["id"]}" value="{s["y"]}" min="0" max="100"></td>'
-        f'<td><span id="lbl-{s["id"]}">({s["x"]}, {s["y"]})</span></td></tr>'
-        for s in spots
-    )
-    spots_json = json.dumps(spots)
-    html = f"""<!DOCTYPE html>
+    existing = json.dumps(spots)
+    html = """<!DOCTYPE html>
 <html><head><meta charset="utf-8"><title>Calibrate Dust2</title>
 <style>
-body {{ margin:0; background:#111; color:#eee; font-family:monospace; }}
-.wrap {{ display:flex; gap:20px; padding:20px; }}
-.radar {{ position:relative; width:512px; height:512px; flex-shrink:0; }}
-.radar img {{ width:100%; height:100%; }}
-.dot {{ position:absolute; width:14px; height:14px; border-radius:50%; background:#f44; border:2px solid #fff; transform:translate(-50%,-50%); cursor:grab; z-index:10; }}
-.dot:hover {{ background:#ff0; transform:translate(-50%,-50%) scale(1.4); }}
-.dot .tip {{ position:absolute; top:-20px; left:16px; white-space:nowrap; font-size:11px; background:rgba(0,0,0,.7); padding:2px 5px; border-radius:3px; pointer-events:none; }}
-table {{ border-collapse:collapse; font-size:13px; }}
-th,td {{ padding:4px 10px; border:1px solid #333; text-align:center; }}
-input[type=number] {{ width:60px; background:#222; color:#eee; border:1px solid #555; padding:3px; text-align:center; }}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:#111; color:#eee; font-family:monospace; padding:20px; }
+h2 { margin-bottom:12px; }
+.radar { position:relative; width:512px; height:512px; border:2px solid #333; margin-bottom:16px; cursor:crosshair; }
+.radar img { width:100%; height:100%; display:block; }
+.dot { position:absolute; width:12px; height:12px; border-radius:50%; background:#f44; border:2px solid #fff; transform:translate(-50%,-50%); pointer-events:none; z-index:10; }
+.dot .tip { position:absolute; top:-18px; left:14px; white-space:nowrap; font-size:11px; background:rgba(0,0,0,.8); padding:2px 6px; border-radius:3px; }
+.output { background:#1a1a1a; border:1px solid #333; padding:12px; border-radius:6px; max-height:400px; overflow-y:auto; }
+.output pre { white-space:pre-wrap; font-size:13px; line-height:1.6; }
+.coord { color:#0f0; }
+.btns { margin-top:12px; display:flex; gap:8px; }
+button { background:#333; color:#eee; border:1px solid #555; padding:6px 14px; border-radius:4px; cursor:pointer; font-family:monospace; }
+button:hover { background:#555; }
 </style></head><body>
-<div class="wrap">
+<h2>Dust2 — Калибровка точек</h2>
+<p style="color:#888;margin-bottom:8px">Кликни по карте чтобы поставить точку. Координаты появятся ниже.</p>
 <div class="radar" id="radar">
   <img src="/static/dust2.png" id="map">
-  {"".join(f'<div class="dot" id="dot-{s["id"]}" style="left:{s["x"]}%;top:{s["y"]}%" data-id="{s["id"]}"><span class="tip">{s["name"]}</span></div>' for s in spots)}
 </div>
-<div>
-<h3>Dust2 — Точки (перетаскивай на карте)</h3>
-<table><tr><th>ID</th><th>Имя</th><th>X</th><th>Y</th><th>Preview</th></tr>
-{rows}</table>
-<p style="margin-top:12px;color:#888">Перетащи точки на карте или измени координаты в таблице.</p>
-</div></div>
+<div class="btns">
+  <button onclick="copyAll()">Копировать всё</button>
+  <button onclick="clearAll()">Очистить</button>
+</div>
+<div class="output"><pre id="out"></pre></div>
 <script>
-const spots = {spots_json};
-const dots = document.querySelectorAll('.dot');
 const radar = document.getElementById('radar');
-dots.forEach(d => {{
-  let dragging = false;
-  d.addEventListener('mousedown', () => dragging = true);
-  document.addEventListener('mousemove', e => {{
-    if (!dragging) return;
-    const r = radar.getBoundingClientRect();
-    let x = Math.round(Math.max(0, Math.min(100, (e.clientX - r.left) / r.width * 100)));
-    let y = Math.round(Math.max(0, Math.min(100, (e.clientY - r.top) / r.height * 100)));
-    d.style.left = x + '%';
-    d.style.top = y + '%';
-    const id = d.dataset.id;
-    document.getElementById('x-' + id).value = x;
-    document.getElementById('y-' + id).value = y;
-    document.getElementById('lbl-' + id).textContent = '(' + x + ', ' + y + ')';
-  }});
-  document.addEventListener('mouseup', () => dragging = false);
-}});
-document.querySelectorAll('input[type=number]').forEach(inp => {{
-  inp.addEventListener('change', () => {{
-    const id = inp.id.split('-')[1];
-    const axis = inp.id.split('-')[0];
-    const val = parseInt(inp.value) || 0;
-    const dot = document.getElementById('dot-' + id);
-    if (axis === 'x') dot.style.left = val + '%';
-    else dot.style.top = val + '%';
-    const x = document.getElementById('x-' + id).value;
-    const y = document.getElementById('y-' + id).value;
-    document.getElementById('lbl-' + id).textContent = '(' + x + ', ' + y + ')';
-  }});
-}});
+const out = document.getElementById('out');
+let points = [];
+""" + """
+const existing = """ + existing + """;
+existing.forEach(s => {
+  addPoint(s.x, s.y, s.name);
+});
+""" + """
+function addPoint(x, y, name) {
+  const id = points.length;
+  points.push({id, x, y, name: name || ''});
+  const dot = document.createElement('div');
+  dot.className = 'dot';
+  dot.id = 'dot-' + id;
+  dot.style.left = x + '%';
+  dot.style.top = y + '%';
+  dot.innerHTML = '<span class="tip">' + (name || '#'+(id+1)) + '</span>';
+  radar.appendChild(dot);
+  render();
+}
+function render() {
+  let s = '[';
+  points.forEach((p, i) => {
+    const n = p.name || prompt('Имя точки #' + (i+1)) || ('point-' + (i+1));
+    p.name = n;
+    document.querySelector('#dot-' + p.id + ' .tip').textContent = n;
+    s += (i?',':'') + '\\n  {"id":"sp-' + (i+1) + '","name":"' + n + '","x":' + p.x + ',"y":' + p.y + ',"videos":[]}';
+  });
+  s += '\\n]';
+  out.textContent = s;
+}
+radar.addEventListener('click', e => {
+  const r = radar.getBoundingClientRect();
+  const x = Math.round((e.clientX - r.left) / r.width * 100);
+  const y = Math.round((e.clientY - r.top) / r.height * 100);
+  addPoint(x, y);
+});
+function copyAll() {
+  navigator.clipboard.writeText(out.textContent).then(() => alert('Скопировано!'));
+}
+function clearAll() {
+  points = [];
+  radar.querySelectorAll('.dot').forEach(d => d.remove());
+  render();
+}
+render();
 </script></body></html>"""
     return web.Response(text=html, content_type="text/html")
 
