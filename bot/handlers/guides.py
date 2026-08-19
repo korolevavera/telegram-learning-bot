@@ -57,7 +57,7 @@ def _steps_text(steps: list) -> str:
 async def show_guides(cb: CallbackQuery, state: FSMContext) -> None:
     await state.clear()
     await cb.message.edit_text(
-        "🧭 <b>Гайды</b>\n\nВыбери карту, чтобы посмотреть раскидки:",
+        "💣 <b>Гранаты</b>\n\nВыбери карту, чтобы посмотреть раскидки:",
         parse_mode="HTML",
         reply_markup=guides_keyboard(),
     )

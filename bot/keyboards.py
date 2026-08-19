@@ -21,7 +21,7 @@ def main_menu_keyboard() -> InlineKeyboardMarkup:
         [InlineKeyboardButton(text="🌸 Уроки", callback_data="lessons")],
         [InlineKeyboardButton(text="🩷 Карточки", callback_data="cards")],
         [InlineKeyboardButton(text="💖 Тесты", callback_data="quizzes")],
-        [InlineKeyboardButton(text="🧭 Гайды", callback_data="guides")],
+        [InlineKeyboardButton(text="💣 Гранаты", callback_data="guides")],
         [InlineKeyboardButton(text="📊 Прогресс", callback_data="progress")],
     ]
     if CONFIG.webapp_url:
