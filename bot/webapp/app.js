@@ -2379,7 +2379,16 @@ const TAB_DEFS = {
     head.appendChild(el('p', 'map-head-hint', t('g_spot_hint')));
     view.appendChild(head);
 
-    const spots = (guidesData.spots || {})[item.id] || [];
+    const mapSpots = (guidesData.spots || {})[item.id] || [];
+    const mapLineups = (guidesData.lineups || {})[item.id] || [];
+    const lineupSpots = mapLineups.filter(l => Array.isArray(l.pos) && l.pos.length >= 2 && (l.video || (Array.isArray(l.videos) && l.videos.length))).map(l => ({
+      id: 'lu-' + l.id,
+      name: l.title || l.id,
+      x: l.pos[0],
+      y: l.pos[1],
+      videos: Array.isArray(l.videos) ? l.videos : (l.video ? [l.video] : []),
+    }));
+    const spots = mapSpots.concat(lineupSpots);
     const spotBtns = [];
     const legendBtns = [];
     const spotBox = spots.length ? el('div', 'spot-video') : null;
@@ -2600,6 +2609,31 @@ const TAB_DEFS = {
     window.open(url, '_blank');
   }
 
+  function gYTId(url) {
+    return String(url || '').match(/(?:youtube\.com\/(?:shorts\/|watch\?v=|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{6,})/)?.[1] || null;
+  }
+
+  function gMedia(url) {
+    if (!url) return null;
+    const id = gYTId(url);
+    if (id) {
+      const frame = document.createElement('iframe');
+      frame.className = 'spot-frame';
+      frame.src = 'https://www.youtube-nocookie.com/embed/' + id;
+      frame.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share');
+      frame.setAttribute('allowfullscreen', '');
+      frame.setAttribute('loading', 'lazy');
+      frame.setAttribute('frameborder', '0');
+      return frame;
+    }
+    const video = document.createElement('video');
+    video.className = 'spot-video-player';
+    video.controls = true;
+    video.preload = 'metadata';
+    video.src = url;
+    return video;
+  }
+
   function gSteps(steps) {
     const wrap = el('div', 'g-steps-wrap');
     wrap.appendChild(el('div', 'g-steps-title', t('g_steps')));
@@ -2634,6 +2668,12 @@ const TAB_DEFS = {
     view.appendChild(title);
     const mini = gMiniRadar(item, l);
     if (mini) view.appendChild(mini);
+    if (l.video) {
+      const wrap = el('div', 'spot-video');
+      const m = gMedia(l.video);
+      if (m) wrap.appendChild(m);
+      view.appendChild(wrap);
+    }
     view.appendChild(gSteps(l.steps));
   }
 
@@ -3854,6 +3894,12 @@ const TAB_DEFS = {
       mini.appendChild(mlabel);
       view.appendChild(mini);
     }
+    if (l.video) {
+      const wrap = el('div', 'spot-video');
+      const m = gMedia(l.video);
+      if (m) wrap.appendChild(m);
+      view.appendChild(wrap);
+    }
     view.appendChild(gSteps(l.steps));
 
     const attempts = pr[l.id] || 0;
@@ -4051,6 +4097,12 @@ function renderGrenadeDetail(g, favs) {
   meta.appendChild(el('span', null, (g.side || 'T') + ' · ' + (g.site || '—')));
   meta.appendChild(el('span', null, t('gr_difficulty') + ': ' + difficultyStars(g.difficulty)));
   view.appendChild(meta);
+  if (g.video) {
+    const wrap = el('div', 'spot-video');
+    const m = gMedia(g.video);
+    if (m) wrap.appendChild(m);
+    view.appendChild(wrap);
+  }
   const steps = g.steps && g.steps.length ? g.steps : [];
   if (steps.length) view.appendChild(gSteps(steps));
 
