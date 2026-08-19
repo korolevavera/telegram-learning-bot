@@ -948,6 +948,79 @@ async def health_handler(request: web.Request) -> web.Response:
     return web.json_response({"ok": True, "status": "up", "service": "cs2-coach"})
 
 
+async def calibrate_handler(request: web.Request) -> web.Response:
+    spots = MAP_SPOTS.get("dust2", [])
+    rows = "".join(
+        f'<tr><td>{s["id"]}</td><td>{s["name"]}</td>'
+        f'<td><input type="number" id="x-{s["id"]}" value="{s["x"]}" min="0" max="100"></td>'
+        f'<td><input type="number" id="y-{s["id"]}" value="{s["y"]}" min="0" max="100"></td>'
+        f'<td><span id="lbl-{s["id"]}">({s["x"]}, {s["y"]})</span></td></tr>'
+        for s in spots
+    )
+    spots_json = json.dumps(spots)
+    html = f"""<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Calibrate Dust2</title>
+<style>
+body {{ margin:0; background:#111; color:#eee; font-family:monospace; }}
+.wrap {{ display:flex; gap:20px; padding:20px; }}
+.radar {{ position:relative; width:512px; height:512px; flex-shrink:0; }}
+.radar img {{ width:100%; height:100%; }}
+.dot {{ position:absolute; width:14px; height:14px; border-radius:50%; background:#f44; border:2px solid #fff; transform:translate(-50%,-50%); cursor:grab; z-index:10; }}
+.dot:hover {{ background:#ff0; transform:translate(-50%,-50%) scale(1.4); }}
+.dot .tip {{ position:absolute; top:-20px; left:16px; white-space:nowrap; font-size:11px; background:rgba(0,0,0,.7); padding:2px 5px; border-radius:3px; pointer-events:none; }}
+table {{ border-collapse:collapse; font-size:13px; }}
+th,td {{ padding:4px 10px; border:1px solid #333; text-align:center; }}
+input[type=number] {{ width:60px; background:#222; color:#eee; border:1px solid #555; padding:3px; text-align:center; }}
+</style></head><body>
+<div class="wrap">
+<div class="radar" id="radar">
+  <img src="/static/dust2.png" id="map">
+  {"".join(f'<div class="dot" id="dot-{s["id"]}" style="left:{s["x"]}%;top:{s["y"]}%" data-id="{s["id"]}"><span class="tip">{s["name"]}</span></div>' for s in spots)}
+</div>
+<div>
+<h3>Dust2 — Точки (перетаскивай на карте)</h3>
+<table><tr><th>ID</th><th>Имя</th><th>X</th><th>Y</th><th>Preview</th></tr>
+{rows}</table>
+<p style="margin-top:12px;color:#888">Перетащи точки на карте или измени координаты в таблице.</p>
+</div></div>
+<script>
+const spots = {spots_json};
+const dots = document.querySelectorAll('.dot');
+const radar = document.getElementById('radar');
+dots.forEach(d => {{
+  let dragging = false;
+  d.addEventListener('mousedown', () => dragging = true);
+  document.addEventListener('mousemove', e => {{
+    if (!dragging) return;
+    const r = radar.getBoundingClientRect();
+    let x = Math.round(Math.max(0, Math.min(100, (e.clientX - r.left) / r.width * 100)));
+    let y = Math.round(Math.max(0, Math.min(100, (e.clientY - r.top) / r.height * 100)));
+    d.style.left = x + '%';
+    d.style.top = y + '%';
+    const id = d.dataset.id;
+    document.getElementById('x-' + id).value = x;
+    document.getElementById('y-' + id).value = y;
+    document.getElementById('lbl-' + id).textContent = '(' + x + ', ' + y + ')';
+  }});
+  document.addEventListener('mouseup', () => dragging = false);
+}});
+document.querySelectorAll('input[type=number]').forEach(inp => {{
+  inp.addEventListener('change', () => {{
+    const id = inp.id.split('-')[1];
+    const axis = inp.id.split('-')[0];
+    const val = parseInt(inp.value) || 0;
+    const dot = document.getElementById('dot-' + id);
+    if (axis === 'x') dot.style.left = val + '%';
+    else dot.style.top = val + '%';
+    const x = document.getElementById('x-' + id).value;
+    const y = document.getElementById('y-' + id).value;
+    document.getElementById('lbl-' + id).textContent = '(' + x + ', ' + y + ')';
+  }});
+}});
+</script></body></html>"""
+    return web.Response(text=html, content_type="text/html")
+
+
 def _is_admin(user_id: int) -> bool:
     return user_id in CONFIG.admin_ids
 
@@ -1095,6 +1168,7 @@ def create_app() -> web.Application:
     app.on_shutdown.append(_on_shutdown)
     app.router.add_get("/", index_handler)
     app.router.add_get("/healthz", health_handler)
+    app.router.add_get("/calibrate/dust2", calibrate_handler)
     app.router.add_get("/api/init", api_init)
     app.router.add_get("/api/content", api_content)
     app.router.add_get("/api/guides", api_guides)
