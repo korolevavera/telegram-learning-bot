@@ -2128,7 +2128,6 @@ const TAB_DEFS = {
     try {
       const g = await loadGuides();
       loadbar.remove();
-      box.appendChild(pickCard('grenade', t('gr_title'), t('gr_sub'), () => renderGrenades()));
       renderMapsList(box, g.maps);
     } catch (err) {
       loadbar.remove();
