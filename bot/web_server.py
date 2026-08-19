@@ -972,7 +972,7 @@ button:hover { background:#555; }
 <h2>Dust2 — Калибровка точек</h2>
 <p class="hint">Перетаскивай точки по карте. Координаты обновляются в реальном времени.</p>
 <div class="radar" id="radar">
-  <img src="/maps/dust2.png" id="map">
+  <img src="/static/maps/dust2.png" id="map">
 </div>
 <div class="btns">
   <button onclick="copyAll()">Копировать JSON</button>
