@@ -2414,31 +2414,16 @@ const TAB_DEFS = {
       const url = vUrl(v);
       const id = ytId(url);
       if (id) {
-        const wrap = document.createElement('div');
-        wrap.className = 'spot-frame';
-        wrap.style.position = 'relative';
-        wrap.style.cursor = 'pointer';
-        wrap.style.overflow = 'hidden';
-        wrap.style.borderRadius = '10px';
-        wrap.style.background = '#000';
-        const img = document.createElement('img');
-        img.src = 'https://img.youtube.com/vi/' + id + '/hqdefault.jpg';
-        img.loading = 'lazy';
-        img.alt = vTitle(v) || 'YouTube';
-        img.style.width = '100%';
-        img.style.display = 'block';
-        wrap.appendChild(img);
-        const badge = document.createElement('div');
-        badge.style.cssText = 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:56px;height:56px;border-radius:50%;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff;pointer-events:none;box-shadow:0 0 18px rgba(0,0,0,.5);';
-        badge.textContent = '\u25B6';
-        wrap.appendChild(badge);
-        const openUrl = url;
-        wrap.addEventListener('click', () => {
-          const tgApp = window.Telegram && window.Telegram.WebApp;
-          if (tgApp && tgApp.openLink) tgApp.openLink(openUrl, { try_instant_view: false });
-          else window.open(openUrl, '_blank');
-        });
-        return wrap;
+        const iframe = document.createElement('iframe');
+        iframe.className = 'spot-video-player';
+        iframe.src = 'https://www.youtube.com/embed/' + id + '?rel=0&modestbranding=1';
+        iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+        iframe.allowFullscreen = true;
+        iframe.style.width = '100%';
+        iframe.style.aspectRatio = '9/16';
+        iframe.style.border = 'none';
+        iframe.style.borderRadius = '10px';
+        return iframe;
       }
       const video = document.createElement('video');
       video.className = 'spot-video-player';
@@ -2633,29 +2618,16 @@ const TAB_DEFS = {
     if (!url) return null;
     const id = gYTId(url);
     if (id) {
-      const wrap = document.createElement('div');
-      wrap.className = 'spot-frame';
-      wrap.style.position = 'relative';
-      wrap.style.cursor = 'pointer';
-      wrap.style.overflow = 'hidden';
-      wrap.style.borderRadius = '10px';
-      wrap.style.background = '#000';
-      const img = document.createElement('img');
-      img.src = 'https://img.youtube.com/vi/' + id + '/hqdefault.jpg';
-      img.loading = 'lazy';
-      img.style.width = '100%';
-      img.style.display = 'block';
-      wrap.appendChild(img);
-      const badge = document.createElement('div');
-      badge.style.cssText = 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:56px;height:56px;border-radius:50%;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff;pointer-events:none;box-shadow:0 0 18px rgba(0,0,0,.5);';
-      badge.textContent = '\u25B6';
-      wrap.appendChild(badge);
-      wrap.addEventListener('click', () => {
-        const tgApp = window.Telegram && window.Telegram.WebApp;
-        if (tgApp && tgApp.openLink) tgApp.openLink(url, { try_instant_view: false });
-        else window.open(url, '_blank');
-      });
-      return wrap;
+      const iframe = document.createElement('iframe');
+      iframe.className = 'spot-video-player';
+      iframe.src = 'https://www.youtube.com/embed/' + id + '?rel=0&modestbranding=1';
+      iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+      iframe.allowFullscreen = true;
+      iframe.style.width = '100%';
+      iframe.style.aspectRatio = '9/16';
+      iframe.style.border = 'none';
+      iframe.style.borderRadius = '10px';
+      return iframe;
     }
     const video = document.createElement('video');
     video.className = 'spot-video-player';
