@@ -167,63 +167,96 @@
    "name": "Спавн Т",
    "x": 41,
    "y": 90,
-   "videos": []
+   "videos": [
+    "https://youtube.com/shorts/4CWsruQrJFg",
+    "https://youtube.com/shorts/qumc5dGKeQo",
+    "https://youtube.com/shorts/jWquAPAO9n4",
+    "https://youtube.com/shorts/71fLb_lDXVk",
+    "https://youtube.com/shorts/X1m_9JLf4Nk"
+   ]
   },
   {
    "id": "sp-2",
    "name": "Подход в темку",
    "x": 24,
    "y": 62,
-   "videos": []
+   "videos": [
+    "https://youtube.com/shorts/cJWQfZuHeIo"
+   ]
   },
   {
    "id": "sp-3",
    "name": "Верхняя темка",
    "x": 13,
    "y": 46,
-   "videos": []
+   "videos": [
+    "https://youtube.com/shorts/t7ekdhBZsUU",
+    "https://youtube.com/shorts/2vG3uLUlGdU"
+   ]
   },
   {
    "id": "sp-4",
    "name": "Нижняя темка",
    "x": 39,
    "y": 40,
-   "videos": []
+   "videos": [
+    "https://youtube.com/shorts/QL4q_Ldw_EE",
+    "https://youtube.com/shorts/RC1JVy8wcfY",
+    "https://youtube.com/shorts/nkZannCzvos"
+   ]
   },
   {
    "id": "sp-5",
    "name": "Шорт",
    "x": 51,
    "y": 46,
-   "videos": []
+   "videos": [
+    "https://youtube.com/shorts/V5rc4ibrmu0",
+    "https://youtube.com/shorts/dhqahQOsolM"
+   ]
   },
   {
    "id": "sp-6",
    "name": "Выход из бокса",
    "x": 70,
    "y": 53,
-   "videos": []
+   "videos": [
+    "https://youtube.com/shorts/ILUIpkK5O6g",
+    "https://youtube.com/shorts/EnxD8MEawMw",
+    "https://youtube.com/shorts/-8gP8p8LnOo"
+   ]
   },
   {
    "id": "sp-7",
    "name": "Лонг",
    "x": 88,
    "y": 38,
-   "videos": []
+   "videos": [
+    "https://youtube.com/shorts/aXhU-qdGxns"
+   ]
   },
   {
    "id": "sp-8",
    "name": "Глубокий шорт",
    "x": 64,
    "y": 38,
-   "videos": []
+   "videos": [
+    "https://youtube.com/shorts/UevfTciDc7M",
+    "https://youtube.com/shorts/WY4nBlypv6o",
+    "https://youtube.com/shorts/ZnR3plFZ3w8",
+    "https://youtube.com/shorts/MeTTitF46_A",
+    "https://youtube.com/shorts/KnNgkrmYGJs"
+   ]
   },
   {
    "id": "sp-9",
    "name": "КТ",
    "x": 69,
    "y": 23,
-   "videos": []
+   "videos": [
+    "https://youtube.com/shorts/KDuO8miXR3o",
+    "https://youtube.com/shorts/xsqud77HJlI"
+   ]
   }
  ],
  "inferno": [
