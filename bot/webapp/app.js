@@ -4479,8 +4479,8 @@ function startReactionGame(game) {
   const scene = el('div', 'react-scene');
   const cv = document.createElement('canvas');
   cv.className = 'react-canvas';
-  const W = 960;
-  const H = 600;
+  const W = 384;
+  const H = 240;
   cv.width = W;
   cv.height = H;
   const flash = el('div', 'react-flash');
@@ -4496,16 +4496,49 @@ function startReactionGame(game) {
     try { if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred(style); } catch (e) {}
   }
 
-  function rr(c, x, y, w, h, r) {
-    const rad = Math.min(r, w / 2, h / 2);
-    c.beginPath();
-    c.moveTo(x + rad, y);
-    c.arcTo(x + w, y, x + w, y + h, rad);
-    c.arcTo(x + w, y + h, x, y + h, rad);
-    c.arcTo(x, y + h, x, y, rad);
-    c.arcTo(x, y, x + w, y, rad);
-    c.closePath();
-    c.fill();
+  // ── Pixel-art helpers: everything snaps to the integer grid ─────
+  function P(c, col, x, y, w, h) {
+    c.fillStyle = col;
+    c.fillRect(x | 0, y | 0, w || 1, h || 1);
+  }
+
+  function pdith(c, colA, colB, x, y, w, h) {
+    for (let yy = 0; yy < h; yy++) {
+      for (let xx = 0; xx < w; xx++) {
+        c.fillStyle = ((xx + yy) & 1) ? colA : colB;
+        c.fillRect(x + xx, y + yy, 1, 1);
+      }
+    }
+  }
+
+  function pcirc(c, col, cx, cy, r) {
+    c.fillStyle = col;
+    for (let dy = -r; dy <= r; dy++) {
+      const dx = Math.floor(Math.sqrt(r * r - dy * dy));
+      c.fillRect(cx - dx, cy + dy, dx * 2 + 1, 1);
+    }
+  }
+
+  function pring(c, col, cx, cy, r) {
+    c.fillStyle = col;
+    for (let dy = -r; dy <= r; dy++) {
+      const dx = Math.round(Math.sqrt(r * r - dy * dy));
+      c.fillRect(cx - dx, cy + dy, 1, 1);
+      c.fillRect(cx + dx, cy + dy, 1, 1);
+    }
+  }
+
+  function pline(c, col, x0, y0, x1, y1, t) {
+    const dx = Math.abs(x1 - x0), dy = Math.abs(y1 - y0);
+    const sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1;
+    let err = dx - dy;
+    while (true) {
+      P(c, col, x0, y0, t, t);
+      if (x0 === x1 && y0 === y1) break;
+      const e2 = 2 * err;
+      if (e2 > -dy) { err -= dy; x0 += sx; }
+      if (e2 < dx) { err += dx; y0 += sy; }
+    }
   }
 
   function seeded(seed) {
@@ -4521,165 +4554,231 @@ function startReactionGame(game) {
     return off;
   }
 
-  const groundY = Math.round(H * 0.78);
+  const groundY = 190;
 
-  // ── Backdrop: dusk skyline, smooth vector style ─────────────────
+  // ── Backdrop: Mirage-style dusk — banded sky, sun, minaret ──────
   const bg = makeLayer((c) => {
-    let g = c.createLinearGradient(0, 0, 0, groundY);
-    g.addColorStop(0, '#12182e');
-    g.addColorStop(.5, '#2c3159');
-    g.addColorStop(.8, '#6f4763');
-    g.addColorStop(1, '#c87a52');
-    c.fillStyle = g;
-    c.fillRect(0, 0, W, groundY);
-    const rnd = seeded(20260821);
-    c.fillStyle = '#dfe8ff';
-    for (let i = 0; i < 90; i++) {
-      c.globalAlpha = .18 + rnd() * .55;
-      c.beginPath();
-      c.arc(rnd() * W, rnd() * groundY * .55, .4 + rnd() * 1.5, 0, Math.PI * 2);
-      c.fill();
+    const stops = [[0, '#0b1024'], [.32, '#20204a'], [.56, '#45295e'], [.74, '#74405f'], [.87, '#b06a4e'], [1, '#e0955c']];
+    let bandTop = 0;
+    for (let i = 0; i < stops.length; i++) {
+      const yEnd = i === stops.length - 1 ? groundY : Math.round(stops[i + 1][0] * groundY);
+      P(c, stops[i][1], 0, bandTop, W, yEnd - bandTop);
+      if (i > 0 && yEnd - bandTop > 4) pdith(c, stops[i][1], stops[i - 1][1], 0, bandTop, W, 2);
+      bandTop = yEnd;
     }
-    c.globalAlpha = 1;
-    const sx = W * .66, sy = groundY - 74;
-    g = c.createRadialGradient(sx, sy, 0, sx, sy, 320);
-    g.addColorStop(0, 'rgba(255,205,130,.85)');
-    g.addColorStop(.25, 'rgba(255,160,96,.32)');
-    g.addColorStop(1, 'rgba(255,160,96,0)');
-    c.fillStyle = g;
-    c.fillRect(sx - 340, sy - 340, 680, 680);
-    g = c.createRadialGradient(sx, sy, 8, sx, sy, 46);
-    g.addColorStop(0, '#ffe9c2');
-    g.addColorStop(1, 'rgba(255,190,120,0)');
-    c.fillStyle = g;
-    c.beginPath(); c.arc(sx, sy, 46, 0, Math.PI * 2); c.fill();
-    const rnd2 = seeded(777);
-    c.fillStyle = 'rgba(38,42,74,.85)';
-    let bx = -20;
-    while (bx < W + 40) {
-      const bw = 60 + rnd2() * 110, bh = 60 + rnd2() * 130;
-      rr(c, bx, groundY - bh, bw, bh, 6);
-      bx += bw + 14 + rnd2() * 30;
+    const rnd = seeded(42);
+    for (let i = 0; i < 110; i++) {
+      const x = Math.floor(rnd() * W), y = Math.floor(rnd() * groundY * .55), b = rnd();
+      if (b > .93) {
+        P(c, '#ffffff', x, y);
+        P(c, '#cdd6ff', x - 1, y); P(c, '#cdd6ff', x + 1, y);
+        P(c, '#cdd6ff', x, y - 1); P(c, '#cdd6ff', x, y + 1);
+      } else P(c, b > .6 ? '#cdd6ff' : '#7d8cc4', x, y);
     }
-    c.fillStyle = 'rgba(19,23,42,.95)';
-    bx = -30;
-    while (bx < W + 60) {
-      const bw = 90 + rnd2() * 150, bh = 36 + rnd2() * 84;
-      rr(c, bx, groundY - bh, bw, bh, 5);
-      bx += bw + 22 + rnd2() * 46;
+    const sx = 253, sy = 116;
+    pring(c, '#5e3a55', sx, sy, 26);
+    pring(c, '#7a4a55', sx, sy, 22);
+    pdith(c, '#ffbf80', '#74405f', sx - 70, sy - 1, 141, 1);
+    pdith(c, '#ffbf80', '#45295e', sx - 52, sy - 2, 105, 1);
+    pcirc(c, '#c87a52', sx, sy, 17);
+    pcirc(c, '#ffb066', sx, sy, 13);
+    pcirc(c, '#ffd98e', sx, sy, 9);
+    pcirc(c, '#fff3d0', sx, sy, 4);
+    const F = '#2c2450';
+    const rnd2 = seeded(1337);
+    let bx = -8;
+    while (bx < W + 20) {
+      const bw = Math.floor(28 + rnd2() * 44), bh = Math.floor(28 + rnd2() * 58), ty = groundY - bh;
+      P(c, F, bx, ty, bw, bh);
+      const kind = rnd2();
+      if (kind < .18) {
+        pcirc(c, F, bx + (bw >> 1), ty, Math.max(4, bw / 3 | 0));
+        P(c, F, bx + (bw >> 1), ty - Math.max(4, bw / 3 | 0) - 3, 1, 3);
+      } else if (kind < .34) {
+        const tx = bx + Math.floor(rnd2() * (bw - 10)) + 3;
+        pcirc(c, F, tx, ty - 3, 4);
+        P(c, F, tx - 2, ty + 1, 1, 3); P(c, F, tx + 2, ty + 1, 1, 3);
+      } else if (kind < .46) {
+        P(c, F, bx + (bw >> 1), ty - 10, 1, 10);
+        P(c, F, bx + (bw >> 1) - 1, ty - 8, 3, 1);
+      }
+      bx += bw + 4 + Math.floor(rnd2() * 10);
     }
-    g = c.createLinearGradient(0, groundY, 0, H);
-    g.addColorStop(0, '#232a3f');
-    g.addColorStop(1, '#0b0e18');
-    c.fillStyle = g;
-    c.fillRect(0, groundY, W, H - groundY);
-    g = c.createLinearGradient(0, groundY - 3, 0, groundY + 26);
-    g.addColorStop(0, 'rgba(255,170,105,.45)');
-    g.addColorStop(1, 'rgba(255,170,105,0)');
-    c.fillStyle = g;
-    c.fillRect(0, groundY - 3, W, 29);
+    const mx = 322;
+    P(c, F, mx, groundY - 84, 8, 84);
+    P(c, F, mx - 2, groundY - 62, 12, 3);
+    P(c, F, mx - 2, groundY - 40, 12, 3);
+    pcirc(c, F, mx + 4, groundY - 88, 5);
+    P(c, F, mx + 4, groundY - 97, 1, 5);
+    const N = '#181430';
+    let nx = -12;
+    while (nx < W + 24) {
+      const bw = Math.floor(44 + rnd2() * 50), bh = Math.floor(16 + rnd2() * 30), ty = groundY - bh;
+      P(c, N, nx, ty, bw, bh);
+      P(c, '#241d40', nx, ty, bw, 2);
+      for (let wy = ty + 4; wy < groundY - 4; wy += 6) {
+        for (let wx = nx + 4; wx < nx + bw - 4; wx += 6) {
+          P(c, rnd2() < .3 ? '#ffb066' : '#0d0a1c', wx, wy, 2, 3);
+        }
+      }
+      nx += bw + 6 + Math.floor(rnd2() * 14);
+    }
+    P(c, '#2a2438', 0, groundY, W, 16);
+    P(c, '#1c1828', 0, groundY + 16, W, 18);
+    P(c, '#12101c', 0, groundY + 34, W, H - groundY - 34);
+    pdith(c, '#2a2438', '#1c1828', 0, groundY + 14, W, 2);
+    pdith(c, '#1c1828', '#12101c', 0, groundY + 32, W, 2);
+    pdith(c, '#ff9a58', '#2a2438', 0, groundY, W, 2);
+    const rnd3 = seeded(99);
+    for (let i = 0; i < 40; i++) {
+      P(c, '#332c44', Math.floor(rnd3() * W), groundY + 6 + Math.floor(rnd3() * (H - groundY - 8)));
+    }
   });
 
-  const PEEK_SPOTS = [[210, 396], [470, 380], [720, 402]];
+  const PEEK_SPOTS = [[74, 148], [192, 138], [300, 152]];
 
-  // ── Foreground: crates that hide the peeking enemy + vignette ───
+  // ── Foreground: CS crates, sandbags, barrels + vignette ─────────
+  function barrel(c, bx, gy) {
+    const bw = 20, bh = 30, x0 = bx - 10, y0 = gy - bh;
+    for (let i = 0; i < bw; i++) {
+      P(c, i < 3 ? '#4a5468' : i > 16 ? '#333a48' : '#3f4757', x0 + i, y0, 1, bh);
+    }
+    P(c, '#5a6578', x0, y0, bw, 2);
+    P(c, '#5a6578', x0, y0 + 13, bw, 2);
+    P(c, '#2a303e', x0, gy - 2, bw, 2);
+    P(c, '#8a4a2a', x0 + 4, y0 + 6, 2, 2);
+    P(c, '#8a4a2a', x0 + 13, y0 + 20, 2, 1);
+  }
+
+  function sandbags(c, x, gy) {
+    for (let row = 0; row < 2; row++) {
+      const n = row ? 2 : 3, off = row ? 7 : 0;
+      for (let b = 0; b < n; b++) {
+        const sbx = x + off + b * 15, sby = gy - 6 * (row + 1);
+        P(c, row ? '#6a5c40' : '#7a6a4a', sbx, sby, 14, 6);
+        P(c, '#96865f', sbx, sby, 14, 1);
+        P(c, '#4a3f2c', sbx, sby + 5, 14, 1);
+        P(c, '#55482f', sbx + 4, sby + 2, 1, 3);
+        P(c, '#55482f', sbx + 9, sby + 2, 1, 3);
+      }
+    }
+  }
+
   const fg = makeLayer((c) => {
     PEEK_SPOTS.forEach(([px, py], i) => {
-      const cw = 118, chh = groundY - py + 8;
-      let g = c.createLinearGradient(px - cw / 2, 0, px + cw / 2, 0);
-      g.addColorStop(0, '#2a2135'); g.addColorStop(.5, '#3a2f47'); g.addColorStop(1, '#241d2e');
-      c.fillStyle = g;
-      rr(c, px - cw / 2, py, cw, chh, 10);
-      g = c.createLinearGradient(0, py - 12, 0, py + 10);
-      g.addColorStop(0, '#57456b'); g.addColorStop(1, '#3a2f47');
-      c.fillStyle = g;
-      rr(c, px - cw / 2 - 5, py - 12, cw + 10, 22, 8);
-      c.fillStyle = 'rgba(255,190,120,.13)';
-      c.fillRect(px - 7, py + 4, 14, chh - 8);
-      const bcx = px + (i % 2 ? 96 : -96);
-      c.fillStyle = '#20263a';
-      rr(c, bcx - 24, py + 26, 48, groundY - py - 26, 12);
-      c.fillStyle = 'rgba(255,190,120,.11)';
-      rr(c, bcx - 24, py + 26, 10, groundY - py - 26, 6);
-      c.fillStyle = '#2b334d';
-      rr(c, bcx - 27, py + 18, 54, 16, 8);
+      const cw = 76, chh = groundY - py + 6, x0 = px - cw / 2;
+      for (let k = 0; k < 6; k++) P(c, '#b07a45', x0 - 6 + k, py - 7 + k, cw, 1);
+      P(c, '#caa05e', x0 - 1, py - 2, cw + 1, 1);
+      P(c, '#4a2f1a', x0, py, cw, chh);
+      for (let p = 0; p < 6; p++) {
+        P(c, p % 2 ? '#8a5c34' : '#75492a', x0 + 2 + p * 12, py + 5, 11, chh - 10);
+        P(c, 'rgba(255,220,160,.18)', x0 + 2 + p * 12, py + 5, 11, 1);
+      }
+      P(c, '#96683a', x0, py, cw, 4);
+      P(c, '#a97a44', x0, py, cw, 1);
+      P(c, '#96683a', x0, py + chh - 4, cw, 4);
+      pline(c, '#5d3a20', x0 + 5, py + 7, x0 + cw - 5, py + chh - 8, 2);
+      pline(c, '#5d3a20', x0 + cw - 5, py + 7, x0 + 5, py + chh - 8, 2);
+      [[x0, py], [x0 + cw - 5, py], [x0, py + chh - 5], [x0 + cw - 5, py + chh - 5]].forEach(([qx, qy]) => {
+        P(c, '#8f97a6', qx, qy, 5, 5);
+        P(c, '#aab2c0', qx, qy, 5, 1);
+        P(c, '#3a3f4a', qx + 2, qy + 2, 1, 1);
+      });
+      if (i === 1) sandbags(c, px - 80, groundY);
+      else barrel(c, px + (i % 2 ? 64 : -64), groundY);
     });
-    let g = c.createRadialGradient(W / 2, H / 2, H * .32, W / 2, H / 2, H * .8);
-    g.addColorStop(0, 'rgba(5,8,15,0)');
-    g.addColorStop(1, 'rgba(5,8,15,.62)');
-    c.fillStyle = g;
-    c.fillRect(0, 0, W, H);
+    [['rgba(5,8,15,.12)', 14], ['rgba(5,8,15,.09)', 9], ['rgba(5,8,15,.07)', 5], ['rgba(5,8,15,.05)', 2]].forEach(([col, bw]) => {
+      c.fillStyle = col;
+      c.fillRect(0, 0, W, bw);
+      c.fillRect(0, H - bw, W, bw);
+      c.fillRect(0, bw, bw, H - bw * 2);
+      c.fillRect(W - bw, bw, bw, H - bw * 2);
+    });
   });
 
-  const motes = Array.from({ length: 16 }, () => ({
-    x: Math.random(), y: Math.random(), r: 1.4 + Math.random() * 2.6,
-    spd: .008 + Math.random() * .02, a: .1 + Math.random() * .2, ph: Math.random() * Math.PI * 2,
+  const motes = Array.from({ length: 14 }, () => ({
+    fx: Math.random() * W, fy: Math.random() * groundY,
+    spd: .08 + Math.random() * .22, ph: Math.random() * 6.28,
+    col: Math.random() < .7 ? '#ffd9a0' : '#cdd6ff',
   }));
 
-  function drawEnemy(c, x, footY, p) {
-    const ease = 1 - Math.pow(1 - p, 3);
-    c.save();
-    c.translate(x, footY - (1 - ease) * 70);
-    c.globalAlpha = .1 + ease * .9;
-    const ink = '#151a26';
-    c.shadowColor = 'rgba(255,176,102,.85)';
-    c.shadowBlur = 26;
-    c.fillStyle = ink;
-    c.beginPath(); c.ellipse(0, -78, 27, 47, 0, 0, Math.PI * 2); c.fill();
-    c.beginPath(); c.arc(0, -136, 19, 0, Math.PI * 2); c.fill();
-    rr(c, -21, -144, 42, 13, 6);
-    c.strokeStyle = ink;
-    c.lineCap = 'round';
-    c.lineWidth = 13;
-    c.beginPath(); c.moveTo(-4, -104); c.lineTo(46, -76); c.stroke();
-    c.lineWidth = 11;
-    c.beginPath(); c.moveTo(30, -84); c.lineTo(88, -60); c.stroke();
-    c.shadowBlur = 0;
-    c.fillStyle = 'rgba(255,206,140,.9)';
-    c.beginPath(); c.arc(90, -59, 3.4, 0, Math.PI * 2); c.fill();
-    c.shadowColor = 'rgba(255,92,80,.95)';
-    c.shadowBlur = 10;
-    c.fillStyle = '#ff6a5a';
-    c.beginPath(); c.arc(-7, -137, 2.6, 0, Math.PI * 2); c.fill();
-    c.beginPath(); c.arc(5, -137, 2.6, 0, Math.PI * 2); c.fill();
-    c.restore();
+  // ── Enemy: shaded T-side peeker with AK, rises in chunky steps ──
+  const PAL = {
+    mask: '#241f2b', maskL: '#39304a', maskD: '#161220',
+    skin: '#d29a6a', skinD: '#a06c49', pup: '#1a1420',
+    jak: '#96703f', jakL: '#bd9257', jakD: '#6b4e2c',
+    vest: '#2e2a33', vestL: '#474052', pouch: '#3d3729', pouchL: '#4f4836',
+    gun: '#262a34', gunL: '#454e60', metal: '#7d8798', metalL: '#9aa3b5',
+    wood: '#6b4226', woodL: '#8a5832', glove: '#b56237', gloveL: '#d07943', belt: '#1e1922',
+  };
+
+  function drawEnemy(c, x, fy, step) {
+    const oy = (3 - step) * 10;
+    const cx = x, hy = fy - 46 - oy;
+    pcirc(c, PAL.maskD, cx + 1, hy + 1, 8);
+    pcirc(c, PAL.mask, cx, hy, 8);
+    for (let a = -80; a <= 20; a += 12) {
+      const rad = a * Math.PI / 180;
+      P(c, PAL.maskL, cx + Math.round(Math.cos(rad) * 7), hy + Math.round(Math.sin(rad) * 7));
+    }
+    P(c, PAL.skin, cx - 5, hy - 1, 11, 3);
+    P(c, PAL.pup, cx - 1, hy, 2, 1);
+    P(c, PAL.pup, cx + 3, hy, 2, 1);
+    P(c, PAL.skinD, cx - 5, hy + 2, 11, 1);
+    P(c, PAL.jakD, cx - 3, hy + 7, 7, 3);
+    P(c, PAL.jak, cx - 11, hy + 10, 23, 5);
+    P(c, PAL.jakL, cx - 11, hy + 10, 23, 1);
+    P(c, PAL.vest, cx - 7, hy + 13, 15, 17);
+    P(c, PAL.vestL, cx + 6, hy + 13, 1, 17);
+    P(c, PAL.vest, cx - 11, hy + 13, 4, 4);
+    P(c, PAL.vest, cx + 8, hy + 13, 4, 4);
+    P(c, PAL.pouch, cx - 6, hy + 22, 6, 7);
+    P(c, PAL.pouchL, cx - 6, hy + 22, 6, 1);
+    P(c, PAL.pouch, cx + 1, hy + 22, 6, 7);
+    P(c, PAL.pouchL, cx + 1, hy + 22, 6, 1);
+    P(c, PAL.belt, cx - 10, hy + 30, 21, 3);
+    P(c, PAL.gunL, cx - 1, hy + 31, 3, 1);
+    P(c, PAL.jakD, cx - 13, hy + 14, 4, 11);
+    P(c, PAL.glove, cx - 13, hy + 25, 4, 3);
+    pline(c, PAL.jak, cx + 9, hy + 16, cx + 16, hy + 22, 3);
+    pline(c, PAL.jak, cx + 16, hy + 22, cx + 21, hy + 24, 3);
+    P(c, PAL.glove, cx + 20, hy + 22, 4, 4);
+    P(c, PAL.gloveL, cx + 20, hy + 22, 4, 1);
+    P(c, PAL.wood, cx + 1, hy + 20, 8, 4);
+    P(c, PAL.woodL, cx + 1, hy + 20, 8, 1);
+    P(c, PAL.gun, cx + 8, hy + 19, 14, 4);
+    P(c, PAL.gunL, cx + 8, hy + 19, 14, 1);
+    P(c, PAL.gun, cx + 13, hy + 23, 4, 2);
+    P(c, PAL.gun, cx + 12, hy + 25, 4, 2);
+    P(c, PAL.gun, cx + 11, hy + 27, 3, 2);
+    P(c, PAL.metal, cx + 22, hy + 20, 9, 2);
+    P(c, PAL.metalL, cx + 31, hy + 20, 1, 2);
+    P(c, PAL.metal, cx + 28, hy + 18, 1, 2);
   }
 
   function drawFrame(now) {
     ctx.drawImage(bg, 0, 0);
     motes.forEach((m) => {
-      m.y -= m.spd / 60;
-      if (m.y < -.02) { m.y = 1.02; m.x = Math.random(); }
-      ctx.globalAlpha = m.a * (.65 + .35 * Math.sin(now / 700 + m.ph));
-      ctx.fillStyle = '#ffd9a0';
-      ctx.beginPath();
-      ctx.arc(m.x * W, m.y * groundY, m.r, 0, Math.PI * 2);
-      ctx.fill();
+      m.fy -= m.spd;
+      if (m.fy < 2) { m.fy = groundY - 4; m.fx = Math.random() * W; }
+      if (Math.sin(now / 450 + m.ph) > -.3) P(ctx, m.col, m.fx | 0, m.fy | 0);
     });
-    ctx.globalAlpha = 1;
-    if (spot && stage === 'ready') drawEnemy(ctx, spot[0], spot[1] + 6, Math.min(1, (now - appearAt) / 170));
+    if (spot && stage === 'ready') {
+      const step = Math.min(3, 1 + Math.floor((now - appearAt) / 60));
+      drawEnemy(ctx, spot[0], spot[1] + 6, step);
+    }
     ctx.drawImage(fg, 0, 0);
     if (stage === 'ready' && spot) {
       const k = ((now - appearAt) % 1150) / 1150;
-      ctx.globalAlpha = (1 - k) * .5;
-      ctx.strokeStyle = '#ffcf7d';
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.arc(spot[0], spot[1] - 78, 34 + k * 92, 0, Math.PI * 2);
-      ctx.stroke();
-      ctx.globalAlpha = 1;
+      pring(ctx, Math.floor(now / 180) % 2 ? '#ffcf7d' : '#c9793c', spot[0], spot[1] - 30, 8 + Math.round(k * 28));
     }
-    ctx.strokeStyle = 'rgba(230,240,255,.28)';
-    ctx.lineWidth = 4;
-    ctx.lineCap = 'round';
-    const m = 22, L = 30;
-    [[m, m, 1, 1], [W - m, m, -1, 1], [m, H - m, 1, -1], [W - m, H - m, -1, -1]].forEach(([cx2, cy2, dx, dy]) => {
-      ctx.beginPath();
-      ctx.moveTo(cx2 + dx * L, cy2);
-      ctx.lineTo(cx2, cy2);
-      ctx.lineTo(cx2, cy2 + dy * L);
-      ctx.stroke();
+    ctx.globalAlpha = .32;
+    const cm = 14, cl = 24, ct = 2;
+    [[cm, cm, 1, 1], [W - cm, cm, -1, 1], [cm, H - cm, 1, -1], [W - cm, H - cm, -1, -1]].forEach(([qx, qy, dx, dy]) => {
+      P(ctx, '#ebf0ff', dx > 0 ? qx : qx - cl, qy, cl, ct);
+      P(ctx, '#ebf0ff', dx > 0 ? qx : qx - ct, dy > 0 ? qy : qy - cl, ct, cl);
     });
+    ctx.globalAlpha = 1;
     rafId = requestAnimationFrame(drawFrame);
   }
 

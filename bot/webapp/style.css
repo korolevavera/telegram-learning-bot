@@ -1883,7 +1883,10 @@ html[data-theme="gurren"] .tab.active .tab-ico { filter: drop-shadow(0 0 8px rgb
   background: #10131d;
   box-shadow: 0 12px 32px rgba(0, 0, 0, .45), inset 0 0 0 1px rgba(255, 255, 255, .07);
 }
-.react-canvas { display: block; width: 100%; height: auto; }
+.react-canvas {
+  display: block; width: 100%; height: auto;
+  image-rendering: pixelated; image-rendering: crisp-edges;
+}
 .react-flash {
   position: absolute; inset: 0; opacity: 0; pointer-events: none;
   transition: opacity .15s;
