@@ -265,56 +265,142 @@
    "name": "Спавн Т",
    "x": 20.3,
    "y": 68.4,
-   "videos": []
+   "videos": [
+    {
+     "url": "https://youtube.com/shorts/-H87ndqbLXc"
+    },
+    {
+     "url": "https://youtube.com/shorts/ZzQsaYjTWsc"
+    },
+    {
+     "url": "https://youtube.com/shorts/hfjAE65iu_4"
+    },
+    {
+     "url": "https://youtube.com/shorts/jkwYziCiCb0"
+    }
+   ]
   },
   {
    "id": "ct-spawn",
    "name": "Спавн CT",
    "x": 89.6,
    "y": 34.1,
-   "videos": []
+   "videos": [
+    {
+     "url": "https://youtube.com/shorts/pyVYdArV_rs"
+    },
+    {
+     "url": "https://youtube.com/shorts/Wjuep_RSI8o"
+    }
+   ]
   },
   {
    "id": "second-mid",
    "name": "Секонд мид",
    "x": 51.1,
    "y": 80.1,
-   "videos": []
+   "videos": [
+    {
+     "url": "https://youtube.com/shorts/JtpAWuPt6Fo"
+    },
+    {
+     "url": "https://youtube.com/shorts/xDOr29MAGAU"
+    },
+    {
+     "url": "https://youtube.com/shorts/eGzeh2-lThQ"
+    },
+    {
+     "url": "https://youtube.com/shorts/XXoFhzxhzzo"
+    },
+    {
+     "url": "https://youtube.com/shorts/GCVjA3UQfhU"
+    },
+    {
+     "url": "https://youtube.com/shorts/knM6H8BprEM"
+    },
+    {
+     "url": "https://youtube.com/shorts/dbc9hDhQD60"
+    },
+    {
+     "url": "https://youtube.com/shorts/s1sE1w6egh0"
+    }
+   ]
   },
   {
    "id": "apartments",
    "name": "Апарты",
    "x": 67.3,
    "y": 83.2,
-   "videos": []
+   "videos": [
+    {
+     "url": "https://youtube.com/shorts/kUPaYwwlEgU"
+    },
+    {
+     "url": "https://youtube.com/shorts/fj80_FCaMD0"
+    }
+   ]
   },
   {
    "id": "banana",
    "name": "Банан",
    "x": 48.4,
    "y": 41.8,
-   "videos": []
+   "videos": [
+    {
+     "url": "https://youtube.com/shorts/m4ukBNEOBxw"
+    },
+    {
+     "url": "https://youtube.com/shorts/dru2bX_hy84"
+    },
+    {
+     "url": "https://youtube.com/shorts/r85bfK63Vt4"
+    },
+    {
+     "url": "https://youtube.com/shorts/eZlm3ivo6LY"
+    },
+    {
+     "url": "https://youtube.com/shorts/4YvLI6q5x1k"
+    }
+   ]
   },
   {
    "id": "a-site",
    "name": "A сайт",
    "x": 87.2,
    "y": 64.6,
-   "videos": []
+   "videos": [
+    {
+     "url": "https://youtube.com/shorts/rZWvDpYgEro"
+    }
+   ]
   },
   {
    "id": "mid",
    "name": "Мид",
    "x": 54.3,
    "y": 66.4,
-   "videos": []
+   "videos": [
+    {
+     "url": "https://youtube.com/shorts/mtGu9iu52zE"
+    }
+   ]
   },
   {
    "id": "balcony",
    "name": "Под балконом",
    "x": 58.8,
    "y": 73.1,
-   "videos": []
+   "videos": [
+    {
+     "url": "https://youtube.com/shorts/OFWjyT9wzwo"
+    },
+    {
+     "url": "https://youtube.com/shorts/_azatgMvA6s"
+    },
+    {
+     "url": "https://youtube.com/shorts/2p1dgPBiCjU"
+    }
+   ]
   }
  ],
  "nuke": [
