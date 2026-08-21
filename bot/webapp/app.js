@@ -4465,7 +4465,10 @@ function startReactionGame(game) {
   let hit = 0;
   let stage = 'wait'; // wait | ready | cooldown | finished
   let timer = null;
+  let rafId = 0;
   let readyTime = 0;
+  let appearAt = 0;
+  let spot = null;
   let reactionTimes = [];
   const startTime = Date.now();
 
@@ -4476,8 +4479,10 @@ function startReactionGame(game) {
   const scene = el('div', 'react-scene');
   const cv = document.createElement('canvas');
   cv.className = 'react-canvas';
-  cv.width = 128;
-  cv.height = 96;
+  const W = 960;
+  const H = 600;
+  cv.width = W;
+  cv.height = H;
   const flash = el('div', 'react-flash');
   const hint = el('div', 'react-hint');
   scene.appendChild(cv);
@@ -4487,96 +4492,195 @@ function startReactionGame(game) {
 
   const ctx = cv.getContext('2d');
 
-  function rect(c, color, x, y, w, h) { c.fillStyle = color; c.fillRect(x, y, w, h); }
-
   function haptic(style) {
     try { if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred(style); } catch (e) {}
   }
 
-  // ── Pixel backdrop: Mirage Top Mid as seen from Window ──────────
-  function buildBackdrop() {
+  function rr(c, x, y, w, h, r) {
+    const rad = Math.min(r, w / 2, h / 2);
+    c.beginPath();
+    c.moveTo(x + rad, y);
+    c.arcTo(x + w, y, x + w, y + h, rad);
+    c.arcTo(x + w, y + h, x, y + h, rad);
+    c.arcTo(x, y + h, x, y, rad);
+    c.arcTo(x, y, x + w, y, rad);
+    c.closePath();
+    c.fill();
+  }
+
+  function seeded(seed) {
+    let s = seed % 2147483647;
+    if (s <= 0) s += 2147483646;
+    return () => { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; };
+  }
+
+  function makeLayer(drawFn) {
     const off = document.createElement('canvas');
-    off.width = cv.width; off.height = cv.height;
-    const c = off.getContext('2d');
-    rect(c, '#7fc4ea', 0, 0, 128, 32);
-    rect(c, '#a5dbf5', 0, 8, 128, 14);
-    rect(c, '#efe0b6', 0, 26, 128, 6);
-    rect(c, '#f7ecc9', 88, 6, 10, 5);
-    const roofs = [[0,9],[11,5],[18,13],[33,7],[42,12],[56,6],[64,14],[80,8],[90,13],[105,7],[114,12]];
-    roofs.forEach(([bx, bh], i) => {
-      const bw = i === roofs.length - 1 ? 128 - bx : roofs[i + 1][0] - bx - 2;
-      rect(c, '#d9b47c', bx, 40 - bh, bw, bh);
-      rect(c, '#ecd09b', bx, 40 - bh, bw, 1);
-      for (let wx = bx + 1; wx < bx + bw - 1; wx += 3) rect(c, '#9c7a49', wx, 40 - bh + 3, 1, 2);
-    });
-    rect(c, '#b78c4e', 0, 40, 128, 2);
-    rect(c, '#c69c5d', 0, 42, 128, 54);
-    [[10,50],[34,58],[46,72],[70,48],[92,60],[112,52],[24,78],[58,84],[100,76],[16,66],[84,68],[120,82]].forEach(([tx, ty]) => {
-      rect(c, '#bb9052', tx, ty, 3, 1);
-      rect(c, '#bb9052', tx + 1, ty + 2, 1, 1);
-    });
-    rect(c, '#6b4c2a', 18, 28, 16, 26);
-    rect(c, '#33241a', 20, 30, 12, 24);
-    rect(c, '#241a12', 22, 32, 8, 22);
-    rect(c, '#a9742f', 50, 44, 22, 24);
-    rect(c, '#7d5420', 50, 44, 22, 1);
-    rect(c, '#7d5420', 50, 67, 22, 1);
-    rect(c, '#7d5420', 50, 44, 1, 24);
-    rect(c, '#7d5420', 71, 44, 1, 24);
-    rect(c, '#96682a', 51, 52, 20, 1);
-    rect(c, '#96682a', 51, 60, 20, 1);
-    rect(c, '#b98a3f', 52, 34, 12, 10);
-    rect(c, '#8a6126', 52, 34, 12, 1);
-    rect(c, '#8a6126', 52, 43, 12, 1);
-    rect(c, '#a9742f', 72, 52, 8, 16);
-    rect(c, '#7d5420', 79, 52, 1, 16);
-    for (let sy = 0; sy < 5; sy++) {
-      rect(c, sy % 2 ? '#d3aa6b' : '#c29a58', 92 + sy * 7, 62 - sy * 6, 128 - (92 + sy * 7), 6);
-    }
-    rect(c, '#dcb87e', 118, 18, 10, 38);
-    rect(c, '#caa668', 118, 18, 2, 38);
+    off.width = W; off.height = H;
+    drawFn(off.getContext('2d'));
     return off;
   }
-  const bg = buildBackdrop();
 
-  function drawWindowFrame(c) {
-    rect(c, '#3a2718', 0, 0, 128, 7);
-    rect(c, '#57381f', 0, 7, 128, 1);
-    rect(c, '#3a2718', 0, 89, 128, 7);
-    rect(c, '#6b4526', 0, 86, 128, 3);
-    rect(c, '#82592f', 0, 86, 128, 1);
-    rect(c, '#3a2718', 0, 0, 6, 96);
-    rect(c, '#57381f', 6, 0, 1, 96);
-    rect(c, '#3a2718', 122, 0, 6, 96);
-    rect(c, '#57381f', 121, 0, 1, 96);
-  }
+  const groundY = Math.round(H * 0.78);
 
-  const T_PALETTE = { h: '#2e2620', s: '#c98a52', t: '#a8823f', d: '#5f4423', m: '#3b3b40' };
-  const T_SPRITE = [
-    '...hhhhhh...',
-    '..hhhhhhhh..',
-    '..hsssssh...',
-    '...ssss.....',
-    '..ttttttt...',
-    '.ttttttttomm',
-    'sstttttts.mm',
-    '.ttdddddt...',
-  ];
-  const PEEK_SPOTS = [[21, 36], [61, 37], [93, 39]];
+  // ── Backdrop: dusk skyline, smooth vector style ─────────────────
+  const bg = makeLayer((c) => {
+    let g = c.createLinearGradient(0, 0, 0, groundY);
+    g.addColorStop(0, '#12182e');
+    g.addColorStop(.5, '#2c3159');
+    g.addColorStop(.8, '#6f4763');
+    g.addColorStop(1, '#c87a52');
+    c.fillStyle = g;
+    c.fillRect(0, 0, W, groundY);
+    const rnd = seeded(20260821);
+    c.fillStyle = '#dfe8ff';
+    for (let i = 0; i < 90; i++) {
+      c.globalAlpha = .18 + rnd() * .55;
+      c.beginPath();
+      c.arc(rnd() * W, rnd() * groundY * .55, .4 + rnd() * 1.5, 0, Math.PI * 2);
+      c.fill();
+    }
+    c.globalAlpha = 1;
+    const sx = W * .66, sy = groundY - 74;
+    g = c.createRadialGradient(sx, sy, 0, sx, sy, 320);
+    g.addColorStop(0, 'rgba(255,205,130,.85)');
+    g.addColorStop(.25, 'rgba(255,160,96,.32)');
+    g.addColorStop(1, 'rgba(255,160,96,0)');
+    c.fillStyle = g;
+    c.fillRect(sx - 340, sy - 340, 680, 680);
+    g = c.createRadialGradient(sx, sy, 8, sx, sy, 46);
+    g.addColorStop(0, '#ffe9c2');
+    g.addColorStop(1, 'rgba(255,190,120,0)');
+    c.fillStyle = g;
+    c.beginPath(); c.arc(sx, sy, 46, 0, Math.PI * 2); c.fill();
+    const rnd2 = seeded(777);
+    c.fillStyle = 'rgba(38,42,74,.85)';
+    let bx = -20;
+    while (bx < W + 40) {
+      const bw = 60 + rnd2() * 110, bh = 60 + rnd2() * 130;
+      rr(c, bx, groundY - bh, bw, bh, 6);
+      bx += bw + 14 + rnd2() * 30;
+    }
+    c.fillStyle = 'rgba(19,23,42,.95)';
+    bx = -30;
+    while (bx < W + 60) {
+      const bw = 90 + rnd2() * 150, bh = 36 + rnd2() * 84;
+      rr(c, bx, groundY - bh, bw, bh, 5);
+      bx += bw + 22 + rnd2() * 46;
+    }
+    g = c.createLinearGradient(0, groundY, 0, H);
+    g.addColorStop(0, '#232a3f');
+    g.addColorStop(1, '#0b0e18');
+    c.fillStyle = g;
+    c.fillRect(0, groundY, W, H - groundY);
+    g = c.createLinearGradient(0, groundY - 3, 0, groundY + 26);
+    g.addColorStop(0, 'rgba(255,170,105,.45)');
+    g.addColorStop(1, 'rgba(255,170,105,0)');
+    c.fillStyle = g;
+    c.fillRect(0, groundY - 3, W, 29);
+  });
 
-  function drawTerrorist(c, ox, oy) {
-    T_SPRITE.forEach((row, y) => {
-      for (let x = 0; x < row.length; x++) {
-        const ch = row[x];
-        if (T_PALETTE[ch]) rect(c, T_PALETTE[ch], ox + x, oy + y, 1, 1);
-      }
+  const PEEK_SPOTS = [[210, 396], [470, 380], [720, 402]];
+
+  // ── Foreground: crates that hide the peeking enemy + vignette ───
+  const fg = makeLayer((c) => {
+    PEEK_SPOTS.forEach(([px, py], i) => {
+      const cw = 118, chh = groundY - py + 8;
+      let g = c.createLinearGradient(px - cw / 2, 0, px + cw / 2, 0);
+      g.addColorStop(0, '#2a2135'); g.addColorStop(.5, '#3a2f47'); g.addColorStop(1, '#241d2e');
+      c.fillStyle = g;
+      rr(c, px - cw / 2, py, cw, chh, 10);
+      g = c.createLinearGradient(0, py - 12, 0, py + 10);
+      g.addColorStop(0, '#57456b'); g.addColorStop(1, '#3a2f47');
+      c.fillStyle = g;
+      rr(c, px - cw / 2 - 5, py - 12, cw + 10, 22, 8);
+      c.fillStyle = 'rgba(255,190,120,.13)';
+      c.fillRect(px - 7, py + 4, 14, chh - 8);
+      const bcx = px + (i % 2 ? 96 : -96);
+      c.fillStyle = '#20263a';
+      rr(c, bcx - 24, py + 26, 48, groundY - py - 26, 12);
+      c.fillStyle = 'rgba(255,190,120,.11)';
+      rr(c, bcx - 24, py + 26, 10, groundY - py - 26, 6);
+      c.fillStyle = '#2b334d';
+      rr(c, bcx - 27, py + 18, 54, 16, 8);
     });
+    let g = c.createRadialGradient(W / 2, H / 2, H * .32, W / 2, H / 2, H * .8);
+    g.addColorStop(0, 'rgba(5,8,15,0)');
+    g.addColorStop(1, 'rgba(5,8,15,.62)');
+    c.fillStyle = g;
+    c.fillRect(0, 0, W, H);
+  });
+
+  const motes = Array.from({ length: 16 }, () => ({
+    x: Math.random(), y: Math.random(), r: 1.4 + Math.random() * 2.6,
+    spd: .008 + Math.random() * .02, a: .1 + Math.random() * .2, ph: Math.random() * Math.PI * 2,
+  }));
+
+  function drawEnemy(c, x, footY, p) {
+    const ease = 1 - Math.pow(1 - p, 3);
+    c.save();
+    c.translate(x, footY - (1 - ease) * 70);
+    c.globalAlpha = .1 + ease * .9;
+    const ink = '#151a26';
+    c.shadowColor = 'rgba(255,176,102,.85)';
+    c.shadowBlur = 26;
+    c.fillStyle = ink;
+    c.beginPath(); c.ellipse(0, -78, 27, 47, 0, 0, Math.PI * 2); c.fill();
+    c.beginPath(); c.arc(0, -136, 19, 0, Math.PI * 2); c.fill();
+    rr(c, -21, -144, 42, 13, 6);
+    c.strokeStyle = ink;
+    c.lineCap = 'round';
+    c.lineWidth = 13;
+    c.beginPath(); c.moveTo(-4, -104); c.lineTo(46, -76); c.stroke();
+    c.lineWidth = 11;
+    c.beginPath(); c.moveTo(30, -84); c.lineTo(88, -60); c.stroke();
+    c.shadowBlur = 0;
+    c.fillStyle = 'rgba(255,206,140,.9)';
+    c.beginPath(); c.arc(90, -59, 3.4, 0, Math.PI * 2); c.fill();
+    c.shadowColor = 'rgba(255,92,80,.95)';
+    c.shadowBlur = 10;
+    c.fillStyle = '#ff6a5a';
+    c.beginPath(); c.arc(-7, -137, 2.6, 0, Math.PI * 2); c.fill();
+    c.beginPath(); c.arc(5, -137, 2.6, 0, Math.PI * 2); c.fill();
+    c.restore();
   }
 
-  function drawScene(spot) {
+  function drawFrame(now) {
     ctx.drawImage(bg, 0, 0);
-    if (spot) drawTerrorist(ctx, spot[0], spot[1]);
-    drawWindowFrame(ctx);
+    motes.forEach((m) => {
+      m.y -= m.spd / 60;
+      if (m.y < -.02) { m.y = 1.02; m.x = Math.random(); }
+      ctx.globalAlpha = m.a * (.65 + .35 * Math.sin(now / 700 + m.ph));
+      ctx.fillStyle = '#ffd9a0';
+      ctx.beginPath();
+      ctx.arc(m.x * W, m.y * groundY, m.r, 0, Math.PI * 2);
+      ctx.fill();
+    });
+    ctx.globalAlpha = 1;
+    if (spot && stage === 'ready') drawEnemy(ctx, spot[0], spot[1] + 6, Math.min(1, (now - appearAt) / 170));
+    ctx.drawImage(fg, 0, 0);
+    if (stage === 'ready' && spot) {
+      const k = ((now - appearAt) % 1150) / 1150;
+      ctx.globalAlpha = (1 - k) * .5;
+      ctx.strokeStyle = '#ffcf7d';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(spot[0], spot[1] - 78, 34 + k * 92, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+    }
+    ctx.strokeStyle = 'rgba(230,240,255,.28)';
+    ctx.lineWidth = 4;
+    ctx.lineCap = 'round';
+    const m = 22, L = 30;
+    [[m, m, 1, 1], [W - m, m, -1, 1], [m, H - m, 1, -1], [W - m, H - m, -1, -1]].forEach(([cx2, cy2, dx, dy]) => {
+      ctx.beginPath();
+      ctx.moveTo(cx2 + dx * L, cy2);
+      ctx.lineTo(cx2, cy2);
+      ctx.lineTo(cx2, cy2 + dy * L);
+      ctx.stroke();
+    });
+    rafId = requestAnimationFrame(drawFrame);
   }
 
   function setHint(text, mode) {
@@ -4586,11 +4690,12 @@ function startReactionGame(game) {
 
   function finish() {
     clearTimeout(timer);
+    cancelAnimationFrame(rafId);
+    spot = null;
     stage = 'finished';
     const dur = Date.now() - startTime;
     const avgMs = reactionTimes.length ? Math.round(reactionTimes.reduce((a, b) => a + b, 0) / reactionTimes.length) : 0;
     const bestMs = reactionTimes.length ? Math.min.apply(null, reactionTimes) : 0;
-    drawScene(null);
     setHint('');
     const res = el('div', 'quiz-result');
     res.appendChild(el('div', 'quiz-score', t('gm_result').replace('{0}', hit).replace('{1}', attempts)));
@@ -4631,19 +4736,20 @@ function startReactionGame(game) {
     if (stage !== 'ready') return;
     done++;
     stage = 'cooldown';
+    spot = null;
     setHint(t('gm_react_miss'), 'early');
     nextAttempt(900);
   }
 
   function startWait() {
     stage = 'wait';
-    drawScene(null);
+    spot = null;
     setHint(t('gm_react_wait'));
     timer = setTimeout(() => {
       stage = 'ready';
       readyTime = Date.now();
-      const spot = PEEK_SPOTS[Math.floor(Math.random() * PEEK_SPOTS.length)];
-      drawScene(spot);
+      appearAt = performance.now();
+      spot = PEEK_SPOTS[Math.floor(Math.random() * PEEK_SPOTS.length)];
       setHint(t('gm_react_go'), 'ready');
       haptic('rigid');
       timer = setTimeout(missPeek, 1300);
@@ -4666,13 +4772,14 @@ function startReactionGame(game) {
       hit++;
       done++;
       stage = 'cooldown';
+      spot = null;
       setHint(ms + ' мс', 'hit');
       haptic('medium');
       nextAttempt(650);
     }
   });
 
-  drawScene(null);
+  rafId = requestAnimationFrame(drawFrame);
   setHint(t('gm_react_wait'));
   currentPage = () => startGame(game);
 }

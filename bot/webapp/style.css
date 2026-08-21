@@ -1878,28 +1878,30 @@ html[data-theme="gurren"] .tab.active .tab-ico { filter: drop-shadow(0 0 8px rgb
 .daily-card.done { border-color: #3ecf5e; opacity: .85; }
 .daily-icon { font-size: 22px; }
 .react-scene {
-  position: relative; margin: 14px 0; border-radius: 12px; overflow: hidden;
+  position: relative; margin: 14px 0; border-radius: 18px; overflow: hidden;
   cursor: pointer; user-select: none; touch-action: manipulation;
-  background: #181f2d; box-shadow: inset 0 0 24px rgba(0, 0, 0, .45);
+  background: #10131d;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, .45), inset 0 0 0 1px rgba(255, 255, 255, .07);
 }
-.react-canvas {
-  display: block; width: 100%; height: auto;
-  image-rendering: pixelated; image-rendering: crisp-edges;
-}
+.react-canvas { display: block; width: 100%; height: auto; }
 .react-flash {
-  position: absolute; inset: 0; background: rgba(220, 40, 40, .38);
-  opacity: 0; pointer-events: none; transition: opacity .12s;
+  position: absolute; inset: 0; opacity: 0; pointer-events: none;
+  transition: opacity .15s;
+  background: radial-gradient(circle at 50% 45%, rgba(255, 120, 90, .18), rgba(224, 49, 49, .42));
 }
 .react-scene.early .react-flash { opacity: 1; }
 .react-hint {
-  position: absolute; left: 0; right: 0; bottom: 14px; text-align: center;
-  font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 17px;
-  color: #fff; text-shadow: 0 2px 0 rgba(0, 0, 0, .65); pointer-events: none;
-  letter-spacing: 1px;
+  position: absolute; left: 50%; bottom: 18px; transform: translateX(-50%);
+  padding: 9px 22px; border-radius: 999px; white-space: nowrap;
+  background: rgba(9, 13, 22, .62); border: 1px solid rgba(255, 255, 255, .14);
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 15px;
+  color: #eef2ff; letter-spacing: 1.5px; pointer-events: none;
+  transition: color .15s, border-color .15s, font-size .15s;
 }
-.react-scene.ready .react-hint { color: #ffe066; font-size: 21px; }
-.react-scene.hit .react-hint { color: #7dff8a; }
-.react-scene.early .react-hint { color: #ff6b6b; font-size: 15px; }
+.react-scene.ready .react-hint { color: #ffd166; border-color: rgba(255, 209, 102, .55); font-size: 17px; }
+.react-scene.hit .react-hint { color: #7dff8a; border-color: rgba(125, 255, 138, .5); }
+.react-scene.early .react-hint { color: #ff6b6b; border-color: rgba(255, 107, 107, .5); font-size: 13px; }
 .react-scene.finished {
   min-height: 260px; display: flex; flex-direction: column;
   align-items: center; justify-content: center; gap: 10px; padding: 16px;
