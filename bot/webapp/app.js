@@ -216,7 +216,8 @@ const TAB_DEFS = {
       tp_goal_game_sense: 'Лучше гейм-сенс', tp_goal_movement: 'Лучше движение',
       tp_goal_faceit10: 'До FACEIT 10',
       tp_saved: '✓ Сохранено', tp_skill_level: 'Навыки',
-      gm_react_wait: 'Жди…', gm_react_go: 'ЖМИ!', gm_react_too_soon: 'Слишком рано!',
+      gm_react_wait: 'Жди пика…', gm_react_go: 'ПИК! ЖМИ!', gm_react_too_soon: 'Рано! Тебя запикали',
+      gm_react_miss: 'Прозевал пик!', gm_react_best: 'Лучшая реакция: {0} мс',
       gm_react_attempt: 'Попытка {0} из {1}', gm_react_hit: '✓ Попал!',
       gm_aim_hit: 'Целей: {0}', gm_aim_miss: 'Мимо!',
       gm_daily: 'Задание дня', gm_daily_done: '✓ Выполнено',
@@ -392,7 +393,8 @@ const TAB_DEFS = {
       tp_goal_game_sense: 'Better game sense', tp_goal_movement: 'Better movement',
       tp_goal_faceit10: 'Reach FACEIT 10',
       tp_saved: '✓ Saved', tp_skill_level: 'Skills',
-      gm_react_wait: 'Wait…', gm_react_go: 'TAP!', gm_react_too_soon: 'Too early!',
+      gm_react_wait: 'Wait for the peek…', gm_react_go: 'PEEK! TAP!', gm_react_too_soon: 'Too early! You got peeked',
+      gm_react_miss: 'Missed the peek!', gm_react_best: 'Best reaction: {0} ms',
       gm_react_attempt: 'Attempt {0} of {1}', gm_react_hit: '✓ Hit!',
       gm_aim_hit: 'Targets: {0}', gm_aim_miss: 'Miss!',
       gm_daily: 'Daily Challenge', gm_daily_done: '✓ Done',
@@ -4461,84 +4463,217 @@ function startReactionGame(game) {
   const attempts = 5;
   let done = 0;
   let hit = 0;
-  let running = false;
+  let stage = 'wait'; // wait | ready | cooldown | finished
   let timer = null;
-  let stage = 'wait'; // wait | ready
   let readyTime = 0;
   let reactionTimes = [];
   const startTime = Date.now();
 
-  const box = el('div', 'react-box');
   const state = el('div', 'quiz-state');
-  state.textContent = t('gm_react_attempt').replace('{0}', 1).replace('{1}', attempts);
+  state.textContent = fmt(t('gm_react_attempt'), 1, attempts);
   view.appendChild(state);
-  view.appendChild(box);
+
+  const scene = el('div', 'react-scene');
+  const cv = document.createElement('canvas');
+  cv.className = 'react-canvas';
+  cv.width = 128;
+  cv.height = 96;
+  const flash = el('div', 'react-flash');
+  const hint = el('div', 'react-hint');
+  scene.appendChild(cv);
+  scene.appendChild(flash);
+  scene.appendChild(hint);
+  view.appendChild(scene);
+
+  const ctx = cv.getContext('2d');
+
+  function rect(c, color, x, y, w, h) { c.fillStyle = color; c.fillRect(x, y, w, h); }
+
+  function haptic(style) {
+    try { if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred(style); } catch (e) {}
+  }
+
+  // ── Pixel backdrop: Mirage Top Mid as seen from Window ──────────
+  function buildBackdrop() {
+    const off = document.createElement('canvas');
+    off.width = cv.width; off.height = cv.height;
+    const c = off.getContext('2d');
+    rect(c, '#7fc4ea', 0, 0, 128, 32);
+    rect(c, '#a5dbf5', 0, 8, 128, 14);
+    rect(c, '#efe0b6', 0, 26, 128, 6);
+    rect(c, '#f7ecc9', 88, 6, 10, 5);
+    const roofs = [[0,9],[11,5],[18,13],[33,7],[42,12],[56,6],[64,14],[80,8],[90,13],[105,7],[114,12]];
+    roofs.forEach(([bx, bh], i) => {
+      const bw = i === roofs.length - 1 ? 128 - bx : roofs[i + 1][0] - bx - 2;
+      rect(c, '#d9b47c', bx, 40 - bh, bw, bh);
+      rect(c, '#ecd09b', bx, 40 - bh, bw, 1);
+      for (let wx = bx + 1; wx < bx + bw - 1; wx += 3) rect(c, '#9c7a49', wx, 40 - bh + 3, 1, 2);
+    });
+    rect(c, '#b78c4e', 0, 40, 128, 2);
+    rect(c, '#c69c5d', 0, 42, 128, 54);
+    [[10,50],[34,58],[46,72],[70,48],[92,60],[112,52],[24,78],[58,84],[100,76],[16,66],[84,68],[120,82]].forEach(([tx, ty]) => {
+      rect(c, '#bb9052', tx, ty, 3, 1);
+      rect(c, '#bb9052', tx + 1, ty + 2, 1, 1);
+    });
+    rect(c, '#6b4c2a', 18, 28, 16, 26);
+    rect(c, '#33241a', 20, 30, 12, 24);
+    rect(c, '#241a12', 22, 32, 8, 22);
+    rect(c, '#a9742f', 50, 44, 22, 24);
+    rect(c, '#7d5420', 50, 44, 22, 1);
+    rect(c, '#7d5420', 50, 67, 22, 1);
+    rect(c, '#7d5420', 50, 44, 1, 24);
+    rect(c, '#7d5420', 71, 44, 1, 24);
+    rect(c, '#96682a', 51, 52, 20, 1);
+    rect(c, '#96682a', 51, 60, 20, 1);
+    rect(c, '#b98a3f', 52, 34, 12, 10);
+    rect(c, '#8a6126', 52, 34, 12, 1);
+    rect(c, '#8a6126', 52, 43, 12, 1);
+    rect(c, '#a9742f', 72, 52, 8, 16);
+    rect(c, '#7d5420', 79, 52, 1, 16);
+    for (let sy = 0; sy < 5; sy++) {
+      rect(c, sy % 2 ? '#d3aa6b' : '#c29a58', 92 + sy * 7, 62 - sy * 6, 128 - (92 + sy * 7), 6);
+    }
+    rect(c, '#dcb87e', 118, 18, 10, 38);
+    rect(c, '#caa668', 118, 18, 2, 38);
+    return off;
+  }
+  const bg = buildBackdrop();
+
+  function drawWindowFrame(c) {
+    rect(c, '#3a2718', 0, 0, 128, 7);
+    rect(c, '#57381f', 0, 7, 128, 1);
+    rect(c, '#3a2718', 0, 89, 128, 7);
+    rect(c, '#6b4526', 0, 86, 128, 3);
+    rect(c, '#82592f', 0, 86, 128, 1);
+    rect(c, '#3a2718', 0, 0, 6, 96);
+    rect(c, '#57381f', 6, 0, 1, 96);
+    rect(c, '#3a2718', 122, 0, 6, 96);
+    rect(c, '#57381f', 121, 0, 1, 96);
+  }
+
+  const T_PALETTE = { h: '#2e2620', s: '#c98a52', t: '#a8823f', d: '#5f4423', m: '#3b3b40' };
+  const T_SPRITE = [
+    '...hhhhhh...',
+    '..hhhhhhhh..',
+    '..hsssssh...',
+    '...ssss.....',
+    '..ttttttt...',
+    '.ttttttttomm',
+    'sstttttts.mm',
+    '.ttdddddt...',
+  ];
+  const PEEK_SPOTS = [[21, 36], [61, 37], [93, 39]];
+
+  function drawTerrorist(c, ox, oy) {
+    T_SPRITE.forEach((row, y) => {
+      for (let x = 0; x < row.length; x++) {
+        const ch = row[x];
+        if (T_PALETTE[ch]) rect(c, T_PALETTE[ch], ox + x, oy + y, 1, 1);
+      }
+    });
+  }
+
+  function drawScene(spot) {
+    ctx.drawImage(bg, 0, 0);
+    if (spot) drawTerrorist(ctx, spot[0], spot[1]);
+    drawWindowFrame(ctx);
+  }
+
+  function setHint(text, mode) {
+    hint.textContent = text;
+    scene.className = 'react-scene' + (mode ? ' ' + mode : '');
+  }
 
   function finish() {
     clearTimeout(timer);
+    stage = 'finished';
     const dur = Date.now() - startTime;
     const avgMs = reactionTimes.length ? Math.round(reactionTimes.reduce((a, b) => a + b, 0) / reactionTimes.length) : 0;
+    const bestMs = reactionTimes.length ? Math.min.apply(null, reactionTimes) : 0;
+    drawScene(null);
+    setHint('');
     const res = el('div', 'quiz-result');
     res.appendChild(el('div', 'quiz-score', t('gm_result').replace('{0}', hit).replace('{1}', attempts)));
     const avgLine = el('div', 'quiz-score');
     avgLine.textContent = 'Среднее время реакции: ' + avgMs + ' мс';
     res.appendChild(avgLine);
+    const bestLine = el('div', 'quiz-score');
+    bestLine.textContent = fmt(t('gm_react_best'), bestMs);
+    res.appendChild(bestLine);
     const detailLine = el('div', 'quiz-score');
     detailLine.textContent = reactionTimes.map((ms, i) => (i + 1) + ': ' + ms + 'мс').join(' | ');
     res.appendChild(detailLine);
-    box.innerHTML = '';
-    box.classList.remove('ready', 'early');
-    box.appendChild(res);
+    scene.innerHTML = '';
+    scene.className = 'react-scene finished';
+    scene.appendChild(res);
     const again = el('button', 'link-btn');
     again.appendChild(iconEl('refresh'));
     again.appendChild(document.createTextNode(t('gm_play_again')));
     again.addEventListener('click', () => startGame(game));
-    box.appendChild(again);
+    scene.appendChild(again);
     const back = el('button', 'link-btn');
     back.appendChild(iconEl('back'));
     back.appendChild(document.createTextNode(t('gm_back')));
     back.addEventListener('click', () => { gamesCache = null; renderGames(); });
-    box.appendChild(back);
+    scene.appendChild(back);
     submitGameResult(game, hit, attempts, dur);
+  }
+
+  function nextAttempt(delay) {
+    timer = setTimeout(() => {
+      if (done >= attempts) { finish(); return; }
+      state.textContent = fmt(t('gm_react_attempt'), done + 1, attempts);
+      startWait();
+    }, delay);
+  }
+
+  function missPeek() {
+    if (stage !== 'ready') return;
+    done++;
+    stage = 'cooldown';
+    setHint(t('gm_react_miss'), 'early');
+    nextAttempt(900);
   }
 
   function startWait() {
     stage = 'wait';
-    box.classList.remove('ready', 'early');
-    box.textContent = t('gm_react_wait');
+    drawScene(null);
+    setHint(t('gm_react_wait'));
     timer = setTimeout(() => {
       stage = 'ready';
       readyTime = Date.now();
-      box.classList.add('ready');
-      box.textContent = t('gm_react_go');
+      const spot = PEEK_SPOTS[Math.floor(Math.random() * PEEK_SPOTS.length)];
+      drawScene(spot);
+      setHint(t('gm_react_go'), 'ready');
+      haptic('rigid');
+      timer = setTimeout(missPeek, 1300);
     }, 1000 + Math.random() * 2500);
   }
 
-  box.addEventListener('click', () => {
-    if (done >= attempts) return;
+  scene.addEventListener('pointerdown', (ev) => {
+    ev.preventDefault();
     if (stage === 'wait') {
       clearTimeout(timer);
-      box.classList.add('early');
-      box.textContent = t('gm_react_too_soon');
-      timer = setTimeout(startWait, 700);
+      stage = 'cooldown';
+      setHint(t('gm_react_too_soon'), 'early');
+      timer = setTimeout(nextAttempt.bind(null, 0), 800);
       return;
     }
-    // ready
-    const ms = Date.now() - readyTime;
-    reactionTimes.push(ms);
-    hit++;
-    done++;
-    stage = 'wait';
-    state.textContent = t('gm_react_attempt').replace('{0}', done + 1).replace('{1}', attempts);
-    box.classList.remove('ready');
-    box.textContent = ms + ' мс';
-    timer = setTimeout(() => {
-      if (done >= attempts) { finish(); return; }
-      startWait();
-    }, 500);
+    if (stage === 'ready') {
+      clearTimeout(timer);
+      const ms = Date.now() - readyTime;
+      reactionTimes.push(ms);
+      hit++;
+      done++;
+      stage = 'cooldown';
+      setHint(ms + ' мс', 'hit');
+      haptic('medium');
+      nextAttempt(650);
+    }
   });
 
-  startWait();
+  drawScene(null);
+  setHint(t('gm_react_wait'));
   currentPage = () => startGame(game);
 }
 
