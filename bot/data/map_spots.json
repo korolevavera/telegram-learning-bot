@@ -261,45 +261,45 @@
  ],
  "inferno": [
   {
-   "id": "sp-1",
-   "name": "Смок · Дым на Banana",
-   "x": 50,
-   "y": 64,
+   "id": "t-spawn",
+   "name": "Спавн Т",
+   "x": 18,
+   "y": 69.1,
    "videos": []
   },
   {
-   "id": "sp-2",
-   "name": "Смок · Дым на CT (A take)",
-   "x": 28,
-   "y": 46,
+   "id": "ct-spawn",
+   "name": "Спавн CT",
+   "x": 88.7,
+   "y": 31.2,
    "videos": []
   },
   {
-   "id": "sp-3",
-   "name": "Молотов · Молотов на Coffins",
-   "x": 46,
-   "y": 68,
+   "id": "second-mid",
+   "name": "Секонд мид",
+   "x": 52,
+   "y": 79.6,
    "videos": []
   },
   {
-   "id": "sp-4",
-   "name": "Смок · Дым на Top Mid",
-   "x": 36,
-   "y": 34,
+   "id": "apartments",
+   "name": "Апарты",
+   "x": 68,
+   "y": 81.7,
    "videos": []
   },
   {
-   "id": "sp-5",
-   "name": "Смок · One-way на Banana",
-   "x": 44,
-   "y": 60,
+   "id": "banana",
+   "name": "Банан",
+   "x": 48.6,
+   "y": 38.9,
    "videos": []
   },
   {
-   "id": "sp-6",
-   "name": "Молотов · Молотов на Library (B)",
-   "x": 58,
-   "y": 50,
+   "id": "a-site",
+   "name": "A сайт",
+   "x": 87.4,
+   "y": 64.1,
    "videos": []
   }
  ],
