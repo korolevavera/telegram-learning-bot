@@ -4497,7 +4497,8 @@ function startReactionGame(game) {
   const cv = document.createElement('canvas');
   cv.className = 'react-canvas';
   const W = 512;
-  const H = 288;
+  const H = 384;
+  const SCENE_DY = 96;
   cv.width = W;
   cv.height = H;
   const flash = el('div', 'react-flash');
@@ -4523,6 +4524,7 @@ function startReactionGame(game) {
     if (stage !== 'idle') return;
     ensureAudio();
     haptic('rigid');
+    startOverlay.remove();
     stage = 'wait';
     setHint(t('gm_react_wait'));
     nextAttempt(200);
@@ -4534,7 +4536,7 @@ function startReactionGame(game) {
 
   function canvasXY(ev) {
     const r = cv.getBoundingClientRect();
-    return [Math.round((ev.clientX - r.left) * W / r.width), Math.round((ev.clientY - r.top) * H / r.height)];
+    return [Math.round((ev.clientX - r.left) * W / r.width), Math.round((ev.clientY - r.top) * H / r.height) - SCENE_DY];
   }
 
   function burst(x, y) {
@@ -4667,7 +4669,7 @@ function startReactionGame(game) {
     const stops = [[0, '#6faede'], [.28, '#9cc6e4'], [.5, '#c9d6d4'], [.68, '#e6d3a6'], [.84, '#f0ca8a'], [1, '#f6bd70']];
     let bandTop = 0;
     for (let i = 0; i < stops.length; i++) {
-      const hor = 118;
+      const hor = 118 + SCENE_DY;
       const yEnd = i === stops.length - 1 ? hor : Math.round(stops[i + 1][0] * hor);
       P(c, stops[i][1], 0, bandTop, W, yEnd - bandTop);
       if (i > 0 && yEnd - bandTop > 4) pdith(c, stops[i][1], stops[i - 1][1], 0, bandTop, W, 2);
@@ -4690,6 +4692,8 @@ function startReactionGame(game) {
     pcirc(c, '#fff8d8', sx, sy, 8);
     pcirc(c, '#fffdf0', sx, sy, 4);
     pdith(c, '#fff8d8', '#c9d6d4', sx - 46, sy - 1, 93, 1);
+    c.save();
+    c.translate(0, SCENE_DY);
     const F = '#bd9260', FL = '#d4ab77';
     const sk = seeded(1337);
     let bx = -6;
@@ -4913,6 +4917,7 @@ function startReactionGame(game) {
     // sunlight pool spilling from the arch
     pdith(c, '#9c7844', '#6a4e30', bigAx - 4, groundY + 2, 62, 12);
     pdith(c, '#b58c52', '#84683f', bigAx + 4, groundY + 4, 48, 6);
+    c.restore();
   });
 
   const PEEK_SPOTS = [
@@ -4977,6 +4982,8 @@ function startReactionGame(game) {
   }
 
   const fg = makeLayer((c) => {
+    c.save();
+    c.translate(0, SCENE_DY);
     shadow(c, 50, 116);
     crate(c, 56, 194, 72, 40);
     // teal tarp draped over the crate stack (Mirage A-site boxes)
@@ -5056,6 +5063,7 @@ function startReactionGame(game) {
     c.moveTo(250, 0); c.lineTo(330, 0); c.lineTo(430, groundY); c.lineTo(360, groundY);
     c.closePath(); c.fill();
     c.globalAlpha = 1;
+    c.restore();
 
     [['rgba(5,8,15,.12)', 14], ['rgba(5,8,15,.09)', 9], ['rgba(5,8,15,.07)', 5], ['rgba(5,8,15,.05)', 2]].forEach(([col, bw]) => {
       c.fillStyle = col;
@@ -5223,6 +5231,8 @@ function startReactionGame(game) {
       P(ctx, '#2b2038', b.x | 0, wy);
       P(ctx, '#2b2038', (b.x | 0) + (up ? -2 : 2), wy - (up ? 1 : 0));
     });
+    ctx.save();
+    ctx.translate(0, SCENE_DY);
     motes.forEach((m) => {
       m.fy -= m.spd;
       if (m.fy < 2) { m.fy = groundY - 4; m.fx = Math.random() * W; }
@@ -5277,7 +5287,7 @@ function startReactionGame(game) {
       pcirc(ctx, '#ff9a58', efGun[0], efGun[1], 10);
       pline(ctx, '#ff8a5a', efGun[0], efGun[1], W * .55, H + 24, 1);
       pline(ctx, '#ffb066', efGun[0], efGun[1] + 2, W * .48, H + 28, 1);
-      P(ctx, 'rgba(255,46,36,' + (.3 * (1 - k)).toFixed(3) + ')', 0, 0, W, H);
+      P(ctx, 'rgba(255,46,36,' + (.3 * (1 - k)).toFixed(3) + ')', 0, -SCENE_DY, W, H);
       ctx.globalAlpha = 1;
     }
     if (stage === 'ready' && spot && !fallAt) {
@@ -5289,10 +5299,13 @@ function startReactionGame(game) {
         P(ctx, '#ffd166', gx - 1, gy - 6, 2, 12);
         P(ctx, '#fff6da', gx - 2, gy, 5, 1);
         ctx.globalAlpha = .45;
-        pline(ctx, '#ffcf8e', gx, gy, W / 2 + 40, H + 30, 1);
-        pline(ctx, '#ff9a58', gx - 3, gy + 2, W / 2 + 20, H + 34, 1);
+        pline(ctx, '#ffcf8e', gx, gy, W / 2 + 40, groundY + SCENE_DY + 40, 1);
+        pline(ctx, '#ff9a58', gx - 3, gy + 2, W / 2 + 20, groundY + SCENE_DY + 44, 1);
         ctx.globalAlpha = 1;
       }
+    }
+    ctx.restore();
+    if (stage === 'ready' && spot && !fallAt) {
       const rem = Math.max(0, 1 - (now - appearAt) / curDL);
       const bw = W - 120, bx2 = 60;
       P(ctx, 'rgba(9,13,22,.65)', bx2 - 2, 12, bw + 4, 9);
@@ -5322,7 +5335,7 @@ function startReactionGame(game) {
     for (let i = particles.length - 1; i >= 0; i--) {
       const p = particles[i];
       p.x += p.vx; p.y += p.vy; p.vy += p.g; p.life--;
-      if (p.bounce && p.y > H - 10) { p.y = H - 10; p.vy *= -.45; p.vx *= .7; }
+      if (p.bounce && p.y > groundY + SCENE_DY + 6) { p.y = groundY + SCENE_DY + 6; p.vy *= -.45; p.vx *= .7; }
       if (p.life <= 0) { particles.splice(i, 1); continue; }
       ctx.globalAlpha = Math.min(1, p.life / 14);
       P(ctx, p.col, p.x | 0, p.y | 0, p.sz, p.sz);

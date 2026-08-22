@@ -1987,7 +1987,7 @@ html[data-theme="gurren"] .tab.active .tab-ico { filter: drop-shadow(0 0 8px rgb
 
 /* ---------- Reaction game: mobile ---------- */
 @media (max-width: 480px) {
-  .react-scene { margin: 10px 0; border-radius: 14px; }
+  .react-scene { margin: 10px -12px; width: calc(100% + 24px); border-radius: 13px; }
   .react-hint {
     font-size: 12.5px !important; padding: 8px 18px;
     bottom: 10px; letter-spacing: 1px;
