@@ -220,6 +220,7 @@ const TAB_DEFS = {
       gm_react_miss: 'Прозевал пик!', gm_react_best: 'Лучшая реакция: {0} мс',
       gm_react_attempt: 'Попытка {0} из {1}', gm_react_hit: '✓ Попал!',
       gm_aim_hit: 'Целей: {0}', gm_aim_miss: 'Мимо!',
+      gm_react_start: 'НАЧАТЬ РАУНД',
       gm_daily: 'Задание дня', gm_daily_done: '✓ Выполнено',
       gm_daily_bonus: '+20 XP за задание дня', gm_daily_play: 'Играть',
       ch_title: 'Челленджи недели', ch_sub: 'Новые задания каждый понедельник. Выполняй — забирай награду!',
@@ -397,6 +398,7 @@ const TAB_DEFS = {
       gm_react_miss: 'Missed the peek!', gm_react_best: 'Best reaction: {0} ms',
       gm_react_attempt: 'Attempt {0} of {1}', gm_react_hit: '✓ Hit!',
       gm_aim_hit: 'Targets: {0}', gm_aim_miss: 'Miss!',
+      gm_react_start: 'START ROUND',
       gm_daily: 'Daily Challenge', gm_daily_done: '✓ Done',
       gm_daily_bonus: '+20 XP for the daily challenge', gm_daily_play: 'Play',
       ch_title: 'Weekly Challenges', ch_sub: 'New challenges every Monday. Complete them and claim your reward!',
@@ -4465,7 +4467,7 @@ function startReactionGame(game) {
   let curDL = DEADLINE;
   let done = 0;
   let hit = 0;
-  let stage = 'wait'; // wait | ready | cooldown | finished
+  let stage = 'idle'; // idle | wait | ready | cooldown | finished
   let timer = null;
   let rafId = 0;
   let readyTime = 0;
@@ -4476,10 +4478,8 @@ function startReactionGame(game) {
   let reactionTimes = [];
   let flashT = 0;
   let tracer = null;
-  let mx = 0, my = 0, hasMouse = false;
   let curDir = 1, curDy = 0, mirror = false, runMode = false, enemyX = 0;
   let missT = 0, efT = 0, efGun = null;
-  let kick = 0;
   let streak = 0, hsCount = 0;
   const feeds = [];
   const pbKey = 'cs2_react_best_ms';
@@ -4506,6 +4506,25 @@ function startReactionGame(game) {
   scene.appendChild(flash);
   scene.appendChild(hint);
   view.appendChild(scene);
+
+  const startOverlay = el('div', 'react-start');
+  const startBtn = el('button', 'react-start-btn');
+  startBtn.textContent = t('gm_react_start');
+  const startTip = el('div', 'react-start-tip');
+  startTip.textContent = lang === 'ru'
+    ? 'Жди пика террориста — жми как можно быстрее'
+    : 'Wait for the peek — tap as fast as you can';
+  startOverlay.appendChild(startBtn);
+  startOverlay.appendChild(startTip);
+  scene.appendChild(startOverlay);
+  startBtn.addEventListener('click', () => {
+    if (stage !== 'idle') return;
+    ensureAudio();
+    haptic('rigid');
+    stage = 'wait';
+    setHint(t('gm_react_wait'));
+    nextAttempt(200);
+  });
 
   const ctx = cv.getContext('2d');
 
@@ -5336,26 +5355,12 @@ function startReactionGame(game) {
     ctx.globalAlpha = 1;
     ctx.restore();
     ctx.drawImage(scan, 0, 0);
-    if (hasMouse) {
-      kick *= .84;
-      if (kick < .3) kick = 0;
-      const gx = (mx | 0), gy = (my | 0) - Math.round(kick);
-      const jx = kick > 3 ? Math.round((Math.random() - .5) * kick * .4) : 0;
-      const chCol = stage === 'wait' || stage === 'cooldown' ? '#e8ecf5' : '#3dff64';
-      function bar(x, y, w, h) {
-        P(ctx, '#05070c', x - 1, y - 1, w + 2, h + 2);
-        P(ctx, chCol, x, y, w, h);
-      }
-      bar(gx - 10 + jx, gy, 6, 1);
-      bar(gx + 4 + jx, gy, 6, 1);
-      bar(gx + jx, gy - 10, 1, 6);
-      bar(gx + jx, gy + 4, 1, 6);
-    }
     rafId = requestAnimationFrame(drawFrame);
   }
 
   function setHint(text, mode) {
     hint.textContent = text;
+    hint.style.display = text ? '' : 'none';
     scene.className = 'react-scene' + (mode ? ' ' + mode : '');
   }
 
@@ -5494,7 +5499,6 @@ function startReactionGame(game) {
       done++;
       stage = 'cooldown';
       shake = 6;
-      kick = 9;
       streak++;
       fallAt = nowT;
       flashT = nowT;
@@ -5535,16 +5539,8 @@ function startReactionGame(game) {
     }
   });
 
-  scene.addEventListener('pointermove', (ev) => {
-    if (ev.pointerType && ev.pointerType !== 'mouse') { hasMouse = false; return; }
-    const [px2, py2] = canvasXY(ev);
-    mx = px2; my = py2; hasMouse = true;
-  });
-
-  scene.addEventListener('pointerleave', () => { hasMouse = false; });
-
   rafId = requestAnimationFrame(drawFrame);
-  setHint(t('gm_react_wait'));
+  setHint('');
   currentPage = () => startGame(game);
 }
 
