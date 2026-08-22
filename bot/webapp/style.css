@@ -1879,12 +1879,13 @@ html[data-theme="gurren"] .tab.active .tab-ico { filter: drop-shadow(0 0 8px rgb
 .daily-icon { font-size: 22px; }
 .react-scene {
   position: relative; margin: 14px 0; border-radius: 18px; overflow: hidden;
-  cursor: pointer; user-select: none; touch-action: manipulation;
+  cursor: crosshair; user-select: none; touch-action: manipulation;
   background: #10131d;
   box-shadow: 0 12px 32px rgba(0, 0, 0, .45), inset 0 0 0 1px rgba(255, 255, 255, .07);
 }
 .react-canvas {
   display: block; width: 100%; height: auto;
+  cursor: none;
   image-rendering: pixelated; image-rendering: crisp-edges;
 }
 .react-flash {
@@ -1893,6 +1894,10 @@ html[data-theme="gurren"] .tab.active .tab-ico { filter: drop-shadow(0 0 8px rgb
   background: radial-gradient(circle at 50% 45%, rgba(255, 120, 90, .18), rgba(224, 49, 49, .42));
 }
 .react-scene.early .react-flash { opacity: 1; }
+.react-scene.hit .react-flash {
+  opacity: .5;
+  background: radial-gradient(circle at 50% 45%, rgba(255, 255, 255, .22), rgba(255, 209, 102, .18));
+}
 .react-hint {
   position: absolute; left: 50%; bottom: 18px; transform: translateX(-50%);
   padding: 9px 22px; border-radius: 999px; white-space: nowrap;
