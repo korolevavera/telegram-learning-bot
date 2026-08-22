@@ -134,6 +134,8 @@ async def api_videos_list(request: web.Request) -> web.Response:
 
 async def video_file_handler(request: web.Request) -> web.StreamResponse:
     vid = request.match_info["vid"]
+    if vid.endswith(".mp4"):
+        vid = vid[: -len(".mp4")]
     if not _VIDEO_ID_RE.match(vid):
         raise web.HTTPNotFound()
     path = _videos_dir() / f"{vid}.mp4"
