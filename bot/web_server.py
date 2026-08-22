@@ -1262,7 +1262,7 @@ async def _on_shutdown(app: web.Application) -> None:
 
 
 def create_app() -> web.Application:
-    app = web.Application(middlewares=[_cache_control, _rate_limit])
+    app = web.Application(middlewares=[_cache_control, _rate_limit], client_max_size=100 * 1024 * 1024)
     app.on_shutdown.append(_on_shutdown)
     app.router.add_get("/", index_handler)
     app.router.add_get("/healthz", health_handler)
