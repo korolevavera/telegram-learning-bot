@@ -4462,6 +4462,7 @@ function submitGameResult(game, score, total, durationMs, onDone) {
 function startReactionGame(game) {
   const attempts = 5;
   const DEADLINE = 1300;
+  let curDL = DEADLINE;
   let done = 0;
   let hit = 0;
   let stage = 'wait'; // wait | ready | cooldown | finished
@@ -4476,6 +4477,13 @@ function startReactionGame(game) {
   let flashT = 0;
   let tracer = null;
   let mx = 0, my = 0, hasMouse = false;
+  let curDir = 1, curDy = 0, mirror = false, runMode = false, enemyX = 0;
+  let missT = 0, efT = 0, efGun = null;
+  let kick = 0;
+  let streak = 0, hsCount = 0;
+  const feeds = [];
+  const pbKey = 'cs2_react_best_ms';
+  const pb = +(localStorage.getItem(pbKey) || 0);
   const particles = [];
   const floats = [];
   const markers = [];
@@ -4633,7 +4641,7 @@ function startReactionGame(game) {
         cc.fillRect(ax + aw / 2 - dx, ay - dy, dx * 2 + 1, 1);
       }
     };
-    const stops = [[0, '#1d2a52'], [.3, '#43386b'], [.52, '#7a4568'], [.68, '#b05a50'], [.82, '#d97e4a'], [1, '#f0aa62']];
+    const stops = [[0, '#6faede'], [.28, '#9cc6e4'], [.5, '#c9d6d4'], [.68, '#e6d3a6'], [.84, '#f0ca8a'], [1, '#f6bd70']];
     let bandTop = 0;
     for (let i = 0; i < stops.length; i++) {
       const hor = 118;
@@ -4643,24 +4651,23 @@ function startReactionGame(game) {
       bandTop = yEnd;
     }
     const st = seeded(21);
-    for (let i = 0; i < 40; i++) {
-      P(c, st() > .75 ? '#cdd6ff' : '#8d97c9', Math.floor(st() * W), Math.floor(st() * 46));
+    for (let i = 0; i < 14; i++) {
+      P(c, 'rgba(255,255,255,.75)', Math.floor(st() * W), Math.floor(st() * 30));
     }
     const cl = seeded(7);
     for (let i = 0; i < 5; i++) {
       const cx2 = Math.floor(cl() * W), cy2 = 14 + Math.floor(cl() * 70), cw2 = 34 + Math.floor(cl() * 60);
-      pdith(c, '#e8b489', '#c98a72', cx2, cy2, cw2, 2);
-      pdith(c, '#f3cf9e', '#e8b489', cx2 + 6, cy2 - 2, cw2 - 16, 1);
+      pdith(c, '#f2ead6', '#ddd0b8', cx2, cy2, cw2, 2);
+      pdith(c, '#faf6ea', '#f2ead6', cx2 + 6, cy2 - 2, cw2 - 16, 1);
     }
-    const sx = 386, sy = 66;
-    pring(c, '#e8945c', sx, sy, 24);
-    pring(c, '#f4b071', sx, sy, 19);
-    pcirc(c, '#ffcf8e', sx, sy, 14);
-    pcirc(c, '#ffe6ae', sx, sy, 10);
-    pcirc(c, '#fff6da', sx, sy, 5);
-    pdith(c, '#ffcf8e', '#7a4568', sx - 60, sy - 1, 121, 1);
-    pdith(c, '#f4b071', '#43386b', sx - 44, sy - 3, 89, 1);
-    const F = '#41305e', FL = '#574377';
+    const sx = 396, sy = 44;
+    pring(c, 'rgba(255,240,200,.5)', sx, sy, 21);
+    pring(c, 'rgba(255,244,214,.65)', sx, sy, 16);
+    pcirc(c, '#ffeeb0', sx, sy, 11);
+    pcirc(c, '#fff8d8', sx, sy, 8);
+    pcirc(c, '#fffdf0', sx, sy, 4);
+    pdith(c, '#fff8d8', '#c9d6d4', sx - 46, sy - 1, 93, 1);
+    const F = '#bd9260', FL = '#d4ab77';
     const sk = seeded(1337);
     let bx = -6;
     while (bx < W + 20) {
@@ -4675,14 +4682,14 @@ function startReactionGame(game) {
         P(c, F, bx + (bw >> 1) - 2, ty - 16, 5, bh + 16);
         pcirc(c, F, bx + (bw >> 1), ty - 18, 3);
         P(c, FL, bx + (bw >> 1) - 1, ty - 15, 1, 12);
-        P(c, '#ffcf8e', bx + (bw >> 1) - 1, ty - 17, 1, 1);
+        P(c, '#8a6a44', bx + (bw >> 1) - 1, ty - 17, 1, 1);
       } else if (kind < .52) {
         P(c, F, bx + (bw >> 1), ty - 8, 2, 8);
         P(c, FL, bx + (bw >> 1) + 2, ty - 5, 2, 2);
       }
       bx += bw + 3 + Math.floor(sk() * 8);
     }
-    const M = '#5d3a52', ML = '#7a4a58';
+    const M = '#c99457', ML = '#ddb077';
     const md = seeded(555);
     let mx2 = -10;
     while (mx2 < W + 24) {
@@ -4693,8 +4700,8 @@ function startReactionGame(game) {
       P(c, M, mx2 + bw - 10, ty - 3, 7, 3);
       for (let wy = ty + 4; wy < 114; wy += 7) {
         for (let wx = mx2 + 4; wx < mx2 + bw - 5; wx += 8) {
-          if (md() < .34) { P(c, '#ffb066', wx, wy, 2, 3); P(c, '#ffd9a0', wx, wy, 1, 1); }
-          else P(c, '#3a2745', wx, wy, 2, 3);
+          if (md() < .16) { P(c, '#fff2cc', wx, wy, 2, 3); P(c, '#fffdf0', wx, wy, 1, 1); }
+          else P(c, '#8a6238', wx, wy, 2, 3);
         }
       }
       mx2 += bw + 5 + Math.floor(md() * 10);
@@ -4714,9 +4721,9 @@ function startReactionGame(game) {
       P(c, ML, nx0 - 1, 85, 14, 1);
       P(c, M, nx0 + 2, 88, 8, 30);
       P(c, ML, nx0 + 2, 88, 1, 30);
-      P(c, '#2c1d3a', nx0 + 5, 76, 2, 4);
-      P(c, '#2c1d3a', nx0 + 5, 96, 2, 4);
-      P(c, '#ffb066', nx0 + 5, 106, 2, 3);
+      P(c, '#8a6238', nx0 + 5, 76, 2, 4);
+      P(c, '#8a6238', nx0 + 5, 96, 2, 4);
+      P(c, '#fff2cc', nx0 + 5, 106, 2, 3);
     }
     // palace dome above medina roofs
     {
@@ -4730,10 +4737,10 @@ function startReactionGame(game) {
       }
       P(c, '#e0b154', dcx, 78, 1, 4);
       P(c, '#e0b154', dcx - 1, 79, 3, 1);
-      P(c, '#ffb066', dcx - 5, 104, 3, 5);
-      P(c, '#ffb066', dcx + 3, 104, 3, 5);
+      P(c, '#fff2cc', dcx - 5, 104, 3, 5);
+      P(c, '#fff2cc', dcx + 3, 104, 3, 5);
     }
-    const WA = '#c08a52', WAL = '#d9a76a', WAD = '#96683c', WSH = '#7a5230';
+    const WA = '#d2a35f', WAL = '#e6bc7a', WAD = '#b07a45', WSH = '#8a5c34';
     P(c, WAD, 0, 118, W, groundY - 118);
     const wd = seeded(2024);
     for (let ry = 122; ry < groundY; ry += 8) {
@@ -4747,10 +4754,47 @@ function startReactionGame(game) {
     }
     P(c, WAL, 0, 117, W, 1);
     P(c, WSH, 0, 118, W, 1);
+    // palace tower with balcony and hanging rug (Mirage A-ramp palace)
+    {
+      P(c, '#dcb277', 0, 58, 98, 60);
+      P(c, '#eeca8c', 0, 58, 98, 2);
+      P(c, '#b07a45', 0, 116, 98, 2);
+      for (let tx = -2; tx < 100; tx += 10) P(c, '#c99457', tx, 50, 6, 8);
+      P(c, '#b07a45', 0, 56, 98, 1);
+      [[14], [58]].forEach(([wxp]) => {
+        P(c, '#3a9188', wxp - 2, 70, 24, 30);
+        P(c, '#4a3020', wxp, 74, 20, 26);
+        archTop(c, '#4a3020', wxp, 75, 20);
+        P(c, '#2e6e68', wxp - 2, 70, 24, 2);
+        P(c, '#e6bc7a', wxp - 3, 99, 26, 3);
+        P(c, 'rgba(255,255,255,.14)', wxp + 4, 76, 3, 22);
+      });
+      P(c, '#e0b154', 46, 64, 1, 5);
+      P(c, '#8a5230', 43, 69, 7, 7);
+      pcirc(c, 'rgba(255,214,140,.35)', 46, 72, 5);
+      pcirc(c, '#ffd98c', 46, 72, 3);
+      pcirc(c, '#fff2cc', 46, 72, 1);
+      P(c, '#8a5c34', 0, 102, 98, 3);
+      P(c, '#b07a45', 0, 100, 98, 2);
+      for (let vx = 3; vx < 96; vx += 6) P(c, '#a06a38', vx, 105, 2, 8);
+      P(c, '#b07a45', 0, 112, 98, 2);
+      // rug draped over balcony rail
+      P(c, '#7d241f', 34, 103, 32, 18);
+      P(c, '#a8352f', 36, 104, 28, 16);
+      P(c, '#e0b154', 36, 107, 28, 2);
+      P(c, '#e0b154', 36, 114, 28, 2);
+      P(c, '#e0b154', 47, 109, 6, 4);
+      for (let sc = 36; sc < 64; sc += 4) if (((sc / 4) | 0) % 2) { P(c, '#a8352f', sc, 120, 4, 2); }
+      P(c, 'rgba(0,0,0,.25)', 60, 104, 4, 15);
+      pcirc(c, '#c9ced8', 82, 44, 5);
+      pcirc(c, '#eef1f6', 81, 43, 3);
+      pline(c, '#5d5f68', 82, 44, 86, 48, 1);
+      P(c, '#5d5f68', 85, 47, 2, 2);
+    }
     [[168], [322]].forEach(([nx]) => {
       const nw = 34, nh = 46, ny = groundY - nh - 6;
-      P(c, '#33203a', nx, ny + 8, nw, nh - 6);
-      archTop(c, '#33203a', nx, ny + 9, nw);
+      P(c, '#5d3a24', nx, ny + 8, nw, nh - 6);
+      archTop(c, '#5d3a24', nx, ny + 9, nw);
       P(c, WSH, nx - 3, ny + 4, 3, nh + 6);
       P(c, WSH, nx + nw, ny + 4, 3, nh + 6);
       P(c, WAL, nx - 3, ny + 4, nw + 6, 2);
@@ -4768,6 +4812,35 @@ function startReactionGame(game) {
         if (si % 2) P(c, acol, 160 + si * 4, 179, 4, 2);
       }
     }
+    // teal arched door
+    {
+      P(c, '#2e6e68', 106, 176, 38, 58);
+      archTop(c, '#2e6e68', 107, 177, 36);
+      P(c, '#3a9188', 109, 179, 32, 55);
+      for (let dp = 112; dp < 141; dp += 7) P(c, '#2e7d74', dp, 181, 1, 51);
+      P(c, '#245550', 109, 205, 32, 2);
+      pcirc(c, '#e0b154', 136, 206, 2);
+      P(c, '#e6bc7a', 103, 232, 44, 2);
+      P(c, 'rgba(255,255,255,.12)', 111, 181, 3, 50);
+    }
+    // shuttered windows
+    [[258], [306]].forEach(([wxp]) => {
+      P(c, '#4a3020', wxp + 5, 150, 14, 26);
+      P(c, '#3a9188', wxp, 149, 5, 28);
+      P(c, '#3a9188', wxp + 19, 149, 5, 28);
+      for (let sl = 152; sl < 176; sl += 4) { P(c, '#2e7d74', wxp, sl, 5, 1); P(c, '#2e7d74', wxp + 19, sl, 5, 1); }
+      P(c, '#e6bc7a', wxp - 1, 146, 26, 3);
+      P(c, '#b07a45', wxp - 1, 177, 26, 2);
+    });
+    // potted plants
+    [[152], [354]].forEach(([pxp]) => {
+      pcirc(c, '#3e7a3a', pxp, groundY - 16, 6);
+      pcirc(c, '#57984a', pxp - 3, groundY - 18, 4);
+      pcirc(c, '#2e5e2e', pxp + 3, groundY - 15, 4);
+      P(c, '#a85a32', pxp - 5, groundY - 12, 10, 8);
+      P(c, '#c06a3c', pxp - 5, groundY - 12, 10, 2);
+      P(c, '#7d3f20', pxp - 5, groundY - 5, 10, 2);
+    });
     const rx2 = 214, ry2 = 132;
     P(c, '#5d3a20', rx2 - 2, ry2 - 3, 34, 3);
     P(c, '#7d241f', rx2, ry2, 30, 52);
@@ -4778,11 +4851,21 @@ function startReactionGame(game) {
     P(c, '#e0b154', rx2 + 12, ry2 + 20, 6, 10);
     for (let tz = 0; tz < 30; tz += 3) P(c, '#7d241f', rx2 + tz, ry2 + 52, 2, 4);
     const bigAx = 372;
-    P(c, '#241528', bigAx, 162, 52, groundY - 162);
-    archTop(c, '#241528', bigAx, 163, 52);
-    P(c, '#3d2033', bigAx + 4, 168, 44, 2);
+    P(c, '#31200e', bigAx, 162, 52, groundY - 162);
+    archTop(c, '#31200e', bigAx, 163, 52);
+    P(c, '#5d3820', bigAx + 4, 168, 44, 2);
     pcirc(c, '#ff9a58', bigAx + 26, 186, 3);
     pcirc(c, '#ffcf8e', bigAx + 26, 186, 1);
+    P(c, '#5d3820', bigAx - 6, groundY - 4, 64, 4);
+    // lantern sconces flanking the arch
+    [[362], [430]].forEach(([lx]) => {
+      P(c, '#4a3020', lx, 178, 8, 2);
+      P(c, '#2e2418', lx + 2, 180, 4, 4);
+      P(c, '#ffd98c', lx + 1, 184, 6, 7);
+      P(c, '#fff2cc', lx + 3, 186, 2, 3);
+      P(c, '#4a3020', lx, 191, 8, 2);
+      pcirc(c, 'rgba(255,214,140,.28)', lx + 4, 187, 7);
+    });
     pdith(c, '#b06a3a', '#6a4e34', bigAx + 4, groundY + 2, 44, 2);
     const gm = seeded(88);
     for (let i = 0; i < 60; i++) P(c, gm() < .5 ? WSH : WAD, Math.floor(gm() * W), 124 + Math.floor(gm() * (groundY - 128)), 2, 1);
@@ -4792,21 +4875,28 @@ function startReactionGame(game) {
       P(c, fc, fx2 + 4, 109, 6, 5);
       P(c, fc, fx2 + 4, 114, 3, 2);
     }
-    P(c, '#2a2018', 0, groundY, W, 16);
-    P(c, '#1e1712', 0, groundY + 16, W, 20);
-    P(c, '#140f0b', 0, groundY + 36, W, H - groundY - 36);
-    pdith(c, '#2a2018', '#1e1712', 0, groundY + 14, W, 2);
-    pdith(c, '#1e1712', '#140f0b', 0, groundY + 34, W, 2);
-    pdith(c, '#e8a05c', '#2a2018', 0, groundY, W, 2);
+    P(c, '#6a4e30', 0, groundY, W, 16);
+    P(c, '#57402a', 0, groundY + 16, W, 20);
+    P(c, '#453222', 0, groundY + 36, W, H - groundY - 36);
+    pdith(c, '#6a4e30', '#57402a', 0, groundY + 14, W, 2);
+    pdith(c, '#57402a', '#453222', 0, groundY + 34, W, 2);
+    pdith(c, '#f2ca8a', '#6a4e30', 0, groundY, W, 2);
     const gd = seeded(99);
     for (let gy2 = groundY + 6; gy2 < H - 4; gy2 += 9) {
-      P(c, '#332720', 0, gy2, W, 1);
-      for (let gx2 = ((gy2 / 9) | 0) % 2 ? 0 : 10; gx2 < W; gx2 += 22) P(c, '#332720', gx2, gy2 - 8, 1, 8);
+      P(c, '#7a5c3a', 0, gy2, W, 1);
+      for (let gx2 = ((gy2 / 9) | 0) % 2 ? 0 : 10; gx2 < W; gx2 += 22) P(c, '#7a5c3a', gx2, gy2 - 8, 1, 8);
     }
-    for (let i = 0; i < 34; i++) P(c, gd() < .5 ? '#3e2f24' : '#241b14', Math.floor(gd() * W), groundY + 4 + Math.floor(gd() * (H - groundY - 8)), 2, 1);
+    for (let i = 0; i < 34; i++) P(c, gd() < .5 ? '#84683f' : '#503a24', Math.floor(gd() * W), groundY + 4 + Math.floor(gd() * (H - groundY - 8)), 2, 1);
+    // sunlight pool spilling from the arch
+    pdith(c, '#9c7844', '#6a4e30', bigAx - 4, groundY + 2, 62, 12);
+    pdith(c, '#b58c52', '#84683f', bigAx + 4, groundY + 4, 48, 6);
   });
 
-  const PEEK_SPOTS = [[92, 200], [252, 192], [398, 204]];
+  const PEEK_SPOTS = [
+    { x: 92, y: 200, dir: 1 },
+    { x: 252, y: 192, dir: -1 },
+    { x: 398, y: 224, dir: -1 },
+  ];
 
   // ── Foreground: A-site crates, sandbag wall, arch sill, light shafts ─
   function crate(c, x0, y0, cw, chh) {
@@ -4866,6 +4956,16 @@ function startReactionGame(game) {
   const fg = makeLayer((c) => {
     shadow(c, 50, 116);
     crate(c, 56, 194, 72, 40);
+    // teal tarp draped over the crate stack (Mirage A-site boxes)
+    P(c, '#1f6478', 50, 188, 84, 10);
+    P(c, '#2e86a0', 52, 190, 80, 5);
+    for (let fold = 58; fold < 130; fold += 12) {
+      P(c, '#17505f', fold, 189, 2, 8);
+      P(c, 'rgba(255,255,255,.16)', fold + 3, 190, 1, 4);
+    }
+    for (let sag = 50; sag < 134; sag += 8) P(c, '#1f6478', sag, 197 + (((sag / 8) | 0) % 2 ? 1 : 0), 6, 2);
+    P(c, '#e0b154', 54, 191, 2, 2);
+    P(c, '#e0b154', 128, 191, 2, 2);
     P(c, '#e0b154', 78, 206, 28, 9);
     P(c, '#4a2f1a', 80, 208, 24, 5);
     barrel(c, 148, groundY);
@@ -4878,6 +4978,17 @@ function startReactionGame(game) {
     shadow(c, 186, 32);
     crate(c, 190, 210, 26, 22);
     pline(c, '#5d3a20', 193, 213, 213, 229, 1);
+    // ammo crate
+    P(c, '#3d4a30', 300, groundY - 13, 34, 13);
+    P(c, '#55663f', 300, groundY - 13, 34, 2);
+    P(c, '#2c3620', 300, groundY - 3, 34, 3);
+    P(c, '#c9ced8', 305, groundY - 9, 14, 2);
+    P(c, '#c9ced8', 305, groundY - 6, 9, 1);
+    P(c, 'rgba(255,255,255,.12)', 301, groundY - 11, 2, 10);
+    // pallet leaning by the barrel
+    pline(c, '#7a5230', 158, 230, 176, 204, 3);
+    pline(c, '#8a6238', 159, 231, 177, 205, 1);
+    pline(c, '#6a4326', 164, 232, 182, 206, 3);
 
     P(c, '#caa05e', 368, 228, 60, 2);
     P(c, '#96683a', 370, 230, 56, 4);
@@ -4911,6 +5022,11 @@ function startReactionGame(game) {
     c.fillStyle = '#ffd9a0';
     c.beginPath();
     c.moveTo(70, 0); c.lineTo(230, 0); c.lineTo(360, groundY); c.lineTo(160, groundY);
+    c.closePath(); c.fill();
+    c.globalAlpha = .07;
+    c.fillStyle = '#ffe2ae';
+    c.beginPath();
+    c.moveTo(378, 168); c.lineTo(420, 166); c.lineTo(456, groundY); c.lineTo(396, groundY);
     c.closePath(); c.fill();
     c.globalAlpha = .04;
     c.beginPath();
@@ -4976,7 +5092,8 @@ function startReactionGame(game) {
     wood: '#7a4a26', woodL: '#96683c', woodD: '#5d3820',
   };
 
-  function drawEnemy(c, x, fy, step) {
+  function drawEnemy(c, x, fy, step, alpha) {
+    if (alpha != null) c.globalAlpha = alpha;
     const oy = (3 - Math.min(step, 3)) * 10;
     const cx = x, hy = fy - 48 - oy;
     pcirc(c, PAL.balD, cx + 1, hy + 1, 8);
@@ -5047,6 +5164,21 @@ function startReactionGame(game) {
     P(c, PAL.sole, cx - 9, hy + 45, 8, 2);
     P(c, PAL.sole, cx + 2, hy + 45, 8, 2);
     P(c, PAL.gold, cx + 8, hy + 15, 2, 2);
+    if (alpha != null) c.globalAlpha = 1;
+  }
+
+  const eTmp = document.createElement('canvas');
+  eTmp.width = 96; eTmp.height = 100;
+  const etc = eTmp.getContext('2d');
+  function blitEnemy(x, fy, step, dir, alpha) {
+    etc.clearRect(0, 0, 96, 100);
+    drawEnemy(etc, 48, 94, step);
+    ctx.save();
+    ctx.imageSmoothingEnabled = false;
+    ctx.translate(Math.round(x), Math.round(fy));
+    if (dir < 0) ctx.scale(-1, 1);
+    ctx.drawImage(eTmp, -48, -94);
+    ctx.restore();
   }
 
   function drawFrame(now) {
@@ -5074,19 +5206,27 @@ function startReactionGame(game) {
       if (Math.sin(now / 450 + m.ph) > -.3) P(ctx, m.col, m.fx | 0, m.fy | 0);
     });
     if (spot && stage === 'ready' && !fallAt) {
-      const step = Math.min(3, 1 + Math.floor((now - appearAt) / 60));
-      const bob = step >= 3 ? Math.round(Math.sin((now - appearAt) / 150)) : 0;
-      drawEnemy(ctx, spot[0], spot[1] + 6 + bob, step);
-      if (now - appearAt < 260) {
-        const ax = spot[0] + 12, ay = spot[1] - 58;
-        P(ctx, '#10131d', ax - 2, ay - 3, 7, 14);
-        P(ctx, '#ffd166', ax - 1, ay - 2, 4, 8);
-        P(ctx, '#ffd166', ax - 1, ay + 7, 4, 3);
+      const el2 = now - appearAt;
+      if (runMode) {
+        enemyX = 36 + Math.min(1, el2 / 700) * 430;
+        blitEnemy(enemyX, 226 + Math.round(Math.abs(Math.sin(el2 / 110)) * -2), ((el2 / 120) | 0) % 2 ? 2 : 3, 1);
+      } else {
+        const step = curDy ? 3 : Math.min(3, 1 + Math.floor(el2 / 60));
+        const slideX = -curDir * Math.max(0, 26 - el2 / 9);
+        const bob = step >= 3 && !curDy ? Math.round(Math.sin(el2 / 150)) : 0;
+        enemyX = spot[0] + slideX;
+        blitEnemy(enemyX, spot[1] + 6 + curDy + bob, step, mirror ? -1 : 1);
+        if (el2 < 260) {
+          const ax = enemyX + curDir * 14, ay = spot[1] - 58;
+          P(ctx, '#10131d', ax - 2, ay - 3, 7, 14);
+          P(ctx, '#ffd166', ax - 1, ay - 2, 4, 8);
+          P(ctx, '#ffd166', ax - 1, ay + 7, 4, 3);
+        }
       }
     }
     if (fallAt && spot) {
-      const f = Math.min(1, (now - fallAt) / 240);
-      drawEnemy(ctx, spot[0], spot[1] + 6 + f * 48, 0);
+      const f = Math.min(1, (now - fallAt) / 260);
+      blitEnemy(enemyX || spot[0], (runMode ? 226 : spot[1] + 6 + curDy) + f * 44, 0, mirror ? -1 : 1, 1 - f * .8);
     }
     ctx.drawImage(fg, 0, 0);
     if (tracer && now - tracer.t0 < 70) {
@@ -5106,6 +5246,17 @@ function startReactionGame(game) {
       P(ctx, '#ffd166', MUZZLE[0] + 3, MUZZLE[1] - 9, 2, 5);
       ctx.globalAlpha = 1;
     }
+    if (efGun && now - efT < 240) {
+      const k = (now - efT) / 240;
+      ctx.globalAlpha = 1 - k;
+      pcirc(ctx, '#fff6da', efGun[0], efGun[1], 4);
+      pcirc(ctx, '#ffd166', efGun[0], efGun[1], 7);
+      pcirc(ctx, '#ff9a58', efGun[0], efGun[1], 10);
+      pline(ctx, '#ff8a5a', efGun[0], efGun[1], W * .55, H + 24, 1);
+      pline(ctx, '#ffb066', efGun[0], efGun[1] + 2, W * .48, H + 28, 1);
+      P(ctx, 'rgba(255,46,36,' + (.3 * (1 - k)).toFixed(3) + ')', 0, 0, W, H);
+      ctx.globalAlpha = 1;
+    }
     if (stage === 'ready' && spot && !fallAt) {
       const cyc = (now - appearAt) % 360;
       if (cyc < 100) {
@@ -5119,7 +5270,7 @@ function startReactionGame(game) {
         pline(ctx, '#ff9a58', gx - 3, gy + 2, W / 2 + 20, H + 34, 1);
         ctx.globalAlpha = 1;
       }
-      const rem = Math.max(0, 1 - (now - appearAt) / DEADLINE);
+      const rem = Math.max(0, 1 - (now - appearAt) / curDL);
       const bw = W - 120, bx2 = 60;
       P(ctx, 'rgba(9,13,22,.65)', bx2 - 2, 12, bw + 4, 9);
       P(ctx, rem > .4 ? '#ffd166' : '#ff5a4d', bx2, 14, Math.round(bw * rem), 5);
@@ -5128,6 +5279,22 @@ function startReactionGame(game) {
       const dx = W - 16 - i * 12;
       pring(ctx, '#ebf0ff', dx, 15, 3);
       if (i < done) { pcirc(ctx, '#10141f', dx, 15, 2); pcirc(ctx, '#ffd166', dx, 15, 2); }
+    }
+    ctx.font = 'bold 8px Consolas,monospace';
+    ctx.textAlign = 'right';
+    for (let i = feeds.length - 1; i >= 0; i--) {
+      const fe = feeds[i];
+      const age = now - fe.t0;
+      if (age > 2600) { feeds.splice(i, 1); continue; }
+      ctx.globalAlpha = age > 2000 ? Math.max(0, 1 - (age - 2000) / 600) : 1;
+      ctx.fillStyle = fe.col;
+      ctx.fillText(fe.text, W - 26, 32 + i * 10);
+    }
+    ctx.globalAlpha = 1;
+    if (pb > 0) {
+      ctx.textAlign = 'left';
+      ctx.fillStyle = 'rgba(235,240,255,.6)';
+      ctx.fillText('PB ' + pb + 'MS', 14, 36);
     }
     for (let i = particles.length - 1; i >= 0; i--) {
       const p = particles[i];
@@ -5170,16 +5337,19 @@ function startReactionGame(game) {
     ctx.restore();
     ctx.drawImage(scan, 0, 0);
     if (hasMouse) {
-      const gx = mx | 0, gy = my | 0;
+      kick *= .84;
+      if (kick < .3) kick = 0;
+      const gx = (mx | 0), gy = (my | 0) - Math.round(kick);
+      const jx = kick > 3 ? Math.round((Math.random() - .5) * kick * .4) : 0;
       const chCol = stage === 'wait' || stage === 'cooldown' ? '#e8ecf5' : '#3dff64';
       function bar(x, y, w, h) {
         P(ctx, '#05070c', x - 1, y - 1, w + 2, h + 2);
         P(ctx, chCol, x, y, w, h);
       }
-      bar(gx - 10, gy, 6, 1);
-      bar(gx + 4, gy, 6, 1);
-      bar(gx, gy - 10, 1, 6);
-      bar(gx, gy + 4, 1, 6);
+      bar(gx - 10 + jx, gy, 6, 1);
+      bar(gx + 4 + jx, gy, 6, 1);
+      bar(gx + jx, gy - 10, 1, 6);
+      bar(gx + jx, gy + 4, 1, 6);
     }
     rafId = requestAnimationFrame(drawFrame);
   }
@@ -5207,6 +5377,24 @@ function startReactionGame(game) {
     const bestLine = el('div', 'quiz-score');
     bestLine.textContent = fmt(t('gm_react_best'), bestMs);
     res.appendChild(bestLine);
+    let newRec = false;
+    if (bestMs > 0 && (!pb || bestMs < pb)) {
+      try { localStorage.setItem(pbKey, String(bestMs)); newRec = true; } catch (e) {}
+    }
+    if (reactionTimes.length) {
+      const hsLine = el('div', 'quiz-score');
+      hsLine.textContent = 'Хедшотов: ' + hsCount + ' из ' + reactionTimes.length;
+      res.appendChild(hsLine);
+    }
+    if (newRec) {
+      const recBadge = el('div', 'rec-badge');
+      recBadge.textContent = '★ НОВЫЙ РЕКОРД!';
+      res.appendChild(recBadge);
+    } else if (pb > 0 && bestMs > 0) {
+      const pbLine = el('div', 'quiz-score');
+      pbLine.textContent = 'Личный рекорд: ' + Math.min(pb, bestMs) + ' мс';
+      res.appendChild(pbLine);
+    }
     const detailLine = el('div', 'quiz-score');
     detailLine.textContent = reactionTimes.map((ms, i) => (i + 1) + ': ' + ms + 'мс').join(' | ');
     res.appendChild(detailLine);
@@ -5236,12 +5424,23 @@ function startReactionGame(game) {
 
   function missPeek() {
     if (stage !== 'ready') return;
+    const nowT = performance.now();
     done++;
     stage = 'cooldown';
-    shake = 4;
+    shake = 7;
+    streak = 0;
+    fallAt = nowT;
+    missT = nowT;
     tone(170, .16, 'sawtooth', .055, 85);
-    if (spot) floats.push({ x: spot[0], y: spot[1] - 44, text: t('gm_react_miss'), col: '#ff6b6b', t0: performance.now() });
-    spot = null;
+    noiseShot(.1);
+    tone(1750, .09, 'sawtooth', .03, 500, .05);
+    if (spot) {
+      floats.push({ x: enemyX || spot[0], y: spot[1] - 44, text: t('gm_react_miss'), col: '#ff6b6b', t0: nowT });
+      efGun = [enemyX + curDir * 34, spot[1] + curDy - 24];
+      efT = nowT + 90;
+      feeds.push({ text: 'PHOENIX ✖ YOU', col: '#ff8a8a', t0: nowT });
+      if (feeds.length > 4) feeds.shift();
+    }
     setHint(t('gm_react_miss'), 'early');
     nextAttempt(900);
   }
@@ -5255,11 +5454,19 @@ function startReactionGame(game) {
       stage = 'ready';
       readyTime = Date.now();
       appearAt = performance.now();
-      spot = PEEK_SPOTS[Math.floor(Math.random() * PEEK_SPOTS.length)];
+      const sp = PEEK_SPOTS[(Math.random() * PEEK_SPOTS.length) | 0];
+      spot = [sp.x, sp.y];
+      curDir = sp.dir;
+      mirror = sp.dir < 0;
+      runMode = done > 0 && Math.random() < .22;
+      curDy = runMode ? 0 : (Math.random() < .38 ? 14 : 0);
+      enemyX = runMode ? 36 : spot[0];
+      missT = 0; efT = 0; efGun = null;
+      curDL = Math.max(800, DEADLINE - done * 90);
       setHint(t('gm_react_go'), 'ready');
       tone(1050, .05, 'square', .045); tone(1320, .05, 'square', .04, null, .07);
       haptic('rigid');
-      timer = setTimeout(missPeek, DEADLINE);
+      timer = setTimeout(missPeek, curDL);
     }, 1000 + Math.random() * 2500);
   }
 
@@ -5270,28 +5477,42 @@ function startReactionGame(game) {
       clearTimeout(timer);
       stage = 'cooldown';
       shake = 3;
+      streak = 0;
       tone(120, .13, 'square', .055);
+      feeds.push({ text: 'TOO EARLY', col: '#ffb08a', t0: performance.now() });
+      if (feeds.length > 4) feeds.shift();
       setHint(t('gm_react_too_soon'), 'early');
       timer = setTimeout(nextAttempt.bind(null, 0), 800);
       return;
     }
     if (stage === 'ready') {
       clearTimeout(timer);
+      const nowT = performance.now();
       const ms = Date.now() - readyTime;
       reactionTimes.push(ms);
       hit++;
       done++;
       stage = 'cooldown';
       shake = 6;
-      fallAt = performance.now();
-      flashT = fallAt;
+      kick = 9;
+      streak++;
+      fallAt = nowT;
+      flashT = nowT;
       const [hx, hy] = canvasXY(ev);
-      tracer = { x1: hx, y1: hy, t0: fallAt };
-      markers.push({ x: hx, y: hy, t0: fallAt });
+      tracer = { x1: hx, y1: hy, t0: nowT };
+      markers.push({ x: hx, y: hy, t0: nowT });
       burst(hx, hy);
-      const stepNow = Math.min(3, 1 + Math.floor((fallAt - appearAt) / 60));
-      const headCy = spot[1] + 6 - 48 - (3 - Math.min(stepNow, 3)) * 10 + 8;
-      const isHead = Math.abs(hx - spot[0]) <= 10 && Math.abs(hy - headCy) <= 11;
+      for (let i = 0; i < 5; i++) {
+        particles.push({
+          x: MUZZLE[0] - 8 - i * 3, y: MUZZLE[1] + 2, vx: .25 + Math.random() * .3, vy: -.35 - Math.random() * .25,
+          g: -.004, life: 34 + Math.random() * 16, col: '#9aa3b0', sz: 2,
+        });
+      }
+      const headFy = runMode ? 226 : spot[1] + 6 + curDy;
+      const oyH = curDy ? 0 : (3 - Math.min(3, 1 + Math.floor((nowT - appearAt) / 60))) * 10;
+      const headCy = headFy - 48 - oyH;
+      const isHead = Math.abs(hx - enemyX) <= 10 && Math.abs(hy - headCy) <= 11;
+      if (isHead) hsCount++;
       for (let i = 0; i < 4; i++) {
         particles.push({
           x: MUZZLE[0] - 4, y: MUZZLE[1] + 5, vx: .9 + Math.random() * 1.3, vy: -1.6 - Math.random(),
@@ -5299,13 +5520,16 @@ function startReactionGame(game) {
         });
       }
       if (isHead) {
-        floats.push({ x: hx, y: hy - 22, text: 'HEADSHOT!', col: '#ffd166', t0: fallAt, big: true });
-        noiseShot(.15); tone(340, .08, 'sawtooth', .05, 130); tone(1568, .05, 'square', .05, null, .03); tone(2093, .08, 'square', .05, null, .09);
+        floats.push({ x: hx, y: hy - 22, text: 'HEADSHOT!', col: '#ffd166', t0: nowT, big: true });
+        noiseShot(.15); tone(340, .08, 'sawtooth', .05, 130); tone(1244, .04, 'square', .06); tone(1864, .07, 'square', .05, null, .03);
       } else {
         noiseShot(.15); tone(340, .08, 'sawtooth', .05, 130);
       }
-      floats.push({ x: hx, y: hy - 8, text: ms + ' мс', col: isHead ? '#ffe9a8' : '#7dff8a', t0: fallAt });
-      setHint(ms + ' мс' + (isHead ? ' • HEADSHOT' : ''), 'hit');
+      floats.push({ x: hx, y: hy - 8, text: ms + ' мс', col: isHead ? '#ffe9a8' : '#7dff8a', t0: nowT });
+      if (streak >= 2) floats.push({ x: W / 2, y: 64, text: 'STREAK x' + streak, col: '#ff9a58', t0: nowT, big: true });
+      feeds.push({ text: 'YOU ✖ PHOENIX' + (isHead ? ' ◎' : ''), col: '#7dff8a', t0: nowT });
+      if (feeds.length > 4) feeds.shift();
+      setHint(ms + ' мс' + (isHead ? ' • HEADSHOT' : '') + (streak >= 2 ? ' • x' + streak : ''), 'hit');
       haptic('medium');
       nextAttempt(650);
     }

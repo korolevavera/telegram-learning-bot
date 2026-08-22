@@ -1914,6 +1914,14 @@ html[data-theme="gurren"] .tab.active .tab-ico { filter: drop-shadow(0 0 8px rgb
   min-height: 260px; display: flex; flex-direction: column;
   align-items: center; justify-content: center; gap: 10px; padding: 16px;
 }
+.rec-badge {
+  font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 13px;
+  color: #ffd166; letter-spacing: 2px; text-transform: uppercase;
+  padding: 7px 20px; border-radius: 999px;
+  background: rgba(255, 209, 102, .08);
+  border: 1px solid rgba(255, 209, 102, .55);
+  box-shadow: 0 0 18px rgba(255, 209, 102, .25);
+}
 .aim-arena {
   position: relative; height: 360px; margin: 12px 0;
   background: #1b2230; border-radius: 12px; overflow: hidden;
