@@ -4517,14 +4517,18 @@ function startReactionGame(game) {
   startOverlay.appendChild(startBtn);
   startOverlay.appendChild(startTip);
   scene.appendChild(startOverlay);
-  startBtn.addEventListener('click', () => {
+  const beginFromBtn = (ev) => {
+    ev.preventDefault();
+    ev.stopPropagation();
     if (stage !== 'idle') return;
     ensureAudio();
     haptic('rigid');
     stage = 'wait';
     setHint(t('gm_react_wait'));
     nextAttempt(200);
-  });
+  };
+  startBtn.addEventListener('pointerdown', beginFromBtn);
+  startBtn.addEventListener('click', beginFromBtn);
 
   const ctx = cv.getContext('2d');
 
