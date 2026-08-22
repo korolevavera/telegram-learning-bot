@@ -2417,18 +2417,7 @@ const TAB_DEFS = {
     function spotMedia(v) {
       const url = vUrl(v);
       const id = ytId(url);
-      if (id) {
-        const iframe = document.createElement('iframe');
-        iframe.className = 'spot-video-player';
-        iframe.src = 'https://www.youtube.com/embed/' + id + '?rel=0&modestbranding=1';
-        iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
-        iframe.allowFullscreen = true;
-        iframe.style.width = '100%';
-        iframe.style.aspectRatio = '9/16';
-        iframe.style.border = 'none';
-        iframe.style.borderRadius = '10px';
-        return iframe;
-      }
+      if (id) return ytOpenCard(id);
       const video = document.createElement('video');
       video.className = 'spot-video-player';
       video.controls = true;
@@ -2621,24 +2610,31 @@ const TAB_DEFS = {
   function gMedia(url) {
     if (!url) return null;
     const id = gYTId(url);
-    if (id) {
-      const iframe = document.createElement('iframe');
-      iframe.className = 'spot-video-player';
-      iframe.src = 'https://www.youtube.com/embed/' + id + '?rel=0&modestbranding=1';
-      iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
-      iframe.allowFullscreen = true;
-      iframe.style.width = '100%';
-      iframe.style.aspectRatio = '9/16';
-      iframe.style.border = 'none';
-      iframe.style.borderRadius = '10px';
-      return iframe;
-    }
+    if (id) return ytOpenCard(id);
     const video = document.createElement('video');
     video.className = 'spot-video-player';
     video.controls = true;
     video.preload = 'metadata';
     video.src = url;
     return video;
+  }
+
+  function ytOpenCard(id) {
+    const box = el('div', 'yt-open-card');
+    const img = document.createElement('img');
+    img.loading = 'lazy';
+    img.alt = 'YouTube';
+    img.src = 'https://img.youtube.com/vi/' + id + '/hqdefault.jpg';
+    const play = el('div', 'yt-open-play');
+    play.appendChild(el('span', null, '▶'));
+    box.appendChild(img);
+    box.appendChild(play);
+    box.appendChild(el('div', 'yt-open-cap', lang === 'ru' ? 'Смотреть на YouTube' : 'Watch on YouTube'));
+    box.addEventListener('click', () => {
+      haptic('light');
+      gOpenUrl('https://www.youtube.com/watch?v=' + id);
+    });
+    return box;
   }
 
   function gSteps(steps) {
