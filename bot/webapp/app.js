@@ -2417,7 +2417,10 @@ const TAB_DEFS = {
     function spotMedia(v) {
       const url = vUrl(v);
       const id = ytId(url);
-      if (id) return ytOpenCard(id);
+      if (id) {
+        if (localVideoIds.has(id)) return nativeVideo(id);
+        return ytOpenCard(id);
+      }
       const video = document.createElement('video');
       video.className = 'spot-video-player';
       video.controls = true;
@@ -2607,10 +2610,30 @@ const TAB_DEFS = {
     return String(url || '').match(/(?:youtube\.com\/(?:shorts\/|watch\?v=|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{6,})/)?.[1] || null;
   }
 
+  const localVideoIds = new Set();
+  fetch('/api/videos/list').then(r => r.json()).then(d => {
+    if (d && d.ok) (d.ids || []).forEach(i => localVideoIds.add(i));
+  }).catch(() => {});
+
+  function nativeVideo(id) {
+    const v = document.createElement('video');
+    v.className = 'spot-video-player';
+    v.controls = true;
+    v.playsInline = true;
+    v.setAttribute('playsinline', '');
+    v.preload = 'metadata';
+    v.poster = 'https://img.youtube.com/vi/' + id + '/hqdefault.jpg';
+    v.src = '/static/videos/' + id + '.mp4';
+    return v;
+  }
+
   function gMedia(url) {
     if (!url) return null;
     const id = gYTId(url);
-    if (id) return ytOpenCard(id);
+    if (id) {
+      if (localVideoIds.has(id)) return nativeVideo(id);
+      return ytOpenCard(id);
+    }
     const video = document.createElement('video');
     video.className = 'spot-video-player';
     video.controls = true;

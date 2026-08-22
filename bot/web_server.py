@@ -1,6 +1,8 @@
 import hashlib
 import hmac
 import json
+import os
+import re
 import time
 from pathlib import Path
 from typing import Any
@@ -105,6 +107,68 @@ AUTH_MAX_AGE = 86400
 RATE_WINDOW = 60
 RATE_MAX_AUTH = 120
 RATE_MAX_ANON = 60
+
+_VIDEO_ID_RE = re.compile(r"^[A-Za-z0-9_-]{6,20}$")
+
+
+def _videos_dir() -> Path:
+    base = os.environ.get("RAILWAY_VOLUME_MOUNT_PATH") or "/data"
+    vdir = Path(base) / "videos"
+    try:
+        vdir.mkdir(parents=True, exist_ok=True)
+        return vdir
+    except OSError:
+        alt = STATIC_DIR / "videos"
+        alt.mkdir(parents=True, exist_ok=True)
+        return alt
+
+
+async def api_videos_list(request: web.Request) -> web.Response:
+    try:
+        d = _videos_dir()
+        ids = sorted(p.stem for p in d.glob("*.mp4") if p.is_file())
+    except OSError:
+        ids = []
+    return web.json_response({"ok": True, "ids": ids})
+
+
+async def video_file_handler(request: web.Request) -> web.StreamResponse:
+    vid = request.match_info["vid"]
+    if not _VIDEO_ID_RE.match(vid):
+        raise web.HTTPNotFound()
+    path = _videos_dir() / f"{vid}.mp4"
+    if not path.is_file():
+        raise web.HTTPNotFound()
+    resp = web.FileResponse(path, chunk_size=256 * 1024)
+    resp.headers["Cache-Control"] = "public, max-age=86400"
+    resp.headers["Accept-Ranges"] = "bytes"
+    return resp
+
+
+async def api_admin_upload_video(request: web.Request) -> web.Response:
+    key = (CONFIG.upload_key or "").strip()
+    provided = request.headers.get("x-upload-key", "")
+    authed = bool(key) and hmac.compare_digest(provided.encode(), key.encode())
+    if not authed and _admin_auth(request) is None:
+        return web.json_response({"ok": False, "error": "forbidden"}, status=403)
+    vid = request.query.get("id", "")
+    if not _VIDEO_ID_RE.match(vid):
+        return web.json_response({"ok": False, "error": "bad id"}, status=400)
+    data = await request.read()
+    if len(data) < 50000 or len(data) > 80 * 1024 * 1024:
+        return web.json_response({"ok": False, "error": "bad size"}, status=400)
+    try:
+        d = _videos_dir()
+        tmp = d / f".{vid}.part"
+        tmp.write_bytes(data)
+        final = d / f"{vid}.mp4"
+        if final.exists():
+            final.unlink()
+        tmp.rename(final)
+    except OSError as e:
+        return web.json_response({"ok": False, "error": str(e)}, status=500)
+    return web.json_response({"ok": True, "id": vid, "size": len(data)})
+
 
 _rate: dict[str, list[float]] = {}
 
@@ -1250,6 +1314,9 @@ def create_app() -> web.Application:
     app.router.add_get("/api/admin/grenades", api_admin_grenades)
     app.router.add_post("/api/admin/content", api_admin_content)
     app.router.add_post("/api/admin/content/delete", api_admin_content_delete)
+    app.router.add_get("/api/videos/list", api_videos_list)
+    app.router.add_post("/api/admin/upload-video", api_admin_upload_video)
+    app.router.add_get("/static/videos/{vid}", video_file_handler)
     app.router.add_get("/static/{filename:.*}", _static_handler)
     return app
 
