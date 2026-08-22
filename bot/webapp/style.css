@@ -1985,15 +1985,20 @@ html[data-theme="gurren"] .tab.active .tab-ico { filter: drop-shadow(0 0 8px rgb
 .sk-line.short { width: 35%; }
 @keyframes sk { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
-/* ---------- YouTube open card ---------- */
+/* ---------- YouTube inline player card ---------- */
+.yt-open-wrap { margin: 8px 0; }
 .yt-open-card {
-  position: relative; border-radius: 12px; overflow: hidden; cursor: pointer;
-  background: #000; touch-action: manipulation;
+  position: relative; width: 100%; overflow: hidden; cursor: pointer;
+  border-radius: 12px; background: #000; touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
   box-shadow: 0 8px 24px rgba(0, 0, 0, .45), inset 0 0 0 1px rgba(255, 255, 255, .07);
 }
-.yt-open-card img {
-  display: block; width: 100%; height: auto; aspect-ratio: 16/9; object-fit: cover;
+.yt-open-card > img {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover;
+}
+.yt-open-card > iframe {
+  position: absolute; inset: 0; width: 100%; height: 100%; border: none;
 }
 .yt-open-play {
   position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
@@ -2012,6 +2017,11 @@ html[data-theme="gurren"] .tab.active .tab-ico { filter: drop-shadow(0 0 8px rgb
   font-size: 13.5px; color: #fff; letter-spacing: .5px;
   background: rgba(9, 13, 22, .72); border: 1px solid rgba(255, 255, 255, .2);
   padding: 5px 14px; border-radius: 999px;
+}
+.yt-open-fallback {
+  display: block; text-align: center; text-decoration: none; cursor: pointer;
+  font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 12.5px;
+  color: #9fb4d8; letter-spacing: .4px; padding: 8px 0 2px;
 }
 
 /* ---------- Reaction game: mobile ---------- */

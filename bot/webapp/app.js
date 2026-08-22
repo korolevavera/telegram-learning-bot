@@ -2620,7 +2620,10 @@ const TAB_DEFS = {
   }
 
   function ytOpenCard(id) {
+    const wrap = el('div', 'yt-open-wrap');
     const box = el('div', 'yt-open-card');
+    box.style.aspectRatio = '16 / 9';
+    box.style.maxHeight = '74vh';
     const img = document.createElement('img');
     img.loading = 'lazy';
     img.alt = 'YouTube';
@@ -2629,12 +2632,31 @@ const TAB_DEFS = {
     play.appendChild(el('span', null, '▶'));
     box.appendChild(img);
     box.appendChild(play);
-    box.appendChild(el('div', 'yt-open-cap', lang === 'ru' ? 'Смотреть на YouTube' : 'Watch on YouTube'));
+    box.appendChild(el('div', 'yt-open-cap', lang === 'ru' ? 'Нажми, чтобы смотреть' : 'Tap to watch'));
+    try {
+      fetch('https://www.youtube.com/oembed?url=' + encodeURIComponent('https://youtu.be/' + id) + '&format=json')
+        .then(r => r.ok ? r.json() : null)
+        .then(d => { if (d && d.width && d.height && !box.dataset.live) box.style.aspectRatio = d.width + ' / ' + d.height; })
+        .catch(() => {});
+    } catch (e) {}
     box.addEventListener('click', () => {
+      if (box.dataset.live) return;
+      box.dataset.live = '1';
       haptic('light');
-      gOpenUrl('https://www.youtube.com/watch?v=' + id);
+      box.innerHTML = '';
+      const iframe = document.createElement('iframe');
+      iframe.src = 'https://www.youtube-nocookie.com/embed/' + id + '?autoplay=1&playsinline=1&rel=0&modestbranding=1';
+      iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+      iframe.allowFullscreen = true;
+      iframe.setAttribute('allowfullscreen', '');
+      box.appendChild(iframe);
+      const foot = el('a', 'yt-open-fallback', lang === 'ru' ? 'Не воспроизводится? Открыть на YouTube ↗' : 'Not playing? Open on YouTube ↗');
+      foot.href = 'https://www.youtube.com/watch?v=' + id;
+      foot.addEventListener('click', (e) => { e.preventDefault(); gOpenUrl(foot.href); });
+      wrap.appendChild(foot);
     });
-    return box;
+    wrap.appendChild(box);
+    return wrap;
   }
 
   function gSteps(steps) {
