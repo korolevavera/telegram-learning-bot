@@ -951,6 +951,8 @@ const TAB_DEFS = {
     if (p.role) meta.appendChild(el('span', null, p.role));
     info.appendChild(meta);
     row.appendChild(info);
+    if (p.rating != null) row.appendChild(el('div', 'm-score', formatNum(p.rating, 2)));
+    if (p.slug) row.appendChild(el('span', 'g-chev', '›'));
     return row;
   }
 

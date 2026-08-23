@@ -661,13 +661,18 @@ async def get_team_info(slug: str) -> dict | None:
     country = data.get("country") or {}
     roster = []
     for p in data.get("players") or []:
+        p_ref = p.get("player") if isinstance(p.get("player"), dict) else {}
         roster.append(
             {
-                "nickname": p.get("nickname"),
-                "country_code": (p.get("country") or {}).get("code"),
-                "image": (p.get("image_versions") or {}).get("webp") or p.get("image_url"),
+                "slug": p.get("slug") or p_ref.get("slug"),
+                "nickname": (p.get("nickname") or p_ref.get("nickname")),
+                "country_code": ((p.get("country") or p_ref.get("country")) or {}).get("code"),
+                "image": (p.get("image_versions") or {}).get("webp")
+                or p.get("image_url")
+                or p_ref.get("image_url"),
                 "is_coach": bool(p.get("is_coach")),
                 "role": p.get("role"),
+                "rating": round(p["six_month_avg_rating"], 2) if p.get("six_month_avg_rating") is not None else None,
             }
         )
     achievements = []
