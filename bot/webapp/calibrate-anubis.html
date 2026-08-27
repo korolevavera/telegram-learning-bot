@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Калибровка точек — Anubis</title>
+<style>
+  body { margin:0; background:#0b0e13; color:#e8ecf1; font-family: 'Segoe UI', Arial, sans-serif; }
+  h1 { font-size:16px; margin:10px 10px 6px; }
+  .hint { font-size:13px; color:#9aa4b2; margin:0 10px 10px; line-height:1.45; }
+  .wrap { position:relative; max-width:620px; margin:0 auto; background:#000; user-select:none; touch-action:none; }
+  .wrap img { display:block; width:100%; }
+  .dot {
+    position:absolute; transform:translate(-50%,-50%);
+    width:28px; height:28px; border-radius:50%;
+    border:2px solid #5ce1e6; background:rgba(92,225,230,.28);
+    cursor:grab; touch-action:none;
+  }
+  .dot.sel { width:38px; height:38px; box-shadow:0 0 14px #5ce1e6; }
+  .dot .lbl {
+    position:absolute; left:50%; top:100%; transform:translateX(-50%);
+    white-space:nowrap; font-size:10px; line-height:1.2;
+    background:rgba(0,0,0,.78); padding:2px 5px; border-radius:3px; margin-top:3px; color:#fff;
+  }
+  .chips { display:flex; flex-wrap:wrap; gap:6px; padding:10px; }
+  .chip {
+    border:1px solid #3a4350; background:#141a22; color:#c7cdd6;
+    border-radius:16px; padding:6px 10px; font-size:12px; cursor:pointer;
+  }
+  .chip.sel { border-color:#5ce1e6; color:#fff; }
+  .btn {
+    display:block; width:calc(100% - 20px); margin:0 10px 10px; padding:11px;
+    border:0; border-radius:8px; background:#5ce1e6; color:#06282b;
+    font-weight:700; font-size:14px; cursor:pointer;
+  }
+  textarea {
+    width:calc(100% - 20px); margin:0 10px 10px; height:150px;
+    background:#0b0e13; color:#8fe3e7; border:1px solid #3a4350;
+    border-radius:6px; font-size:11px; padding:8px; box-sizing:border-box;
+    font-family: Consolas, monospace;
+  }
+</style>
+</head>
+<body>
+<h1>Калибровка точек — Anubis</h1>
+<p class="hint">
+  Потяни кружок пальцем/мышью на нужную позицию. Или выбери название под радаром и тапни по карте — точка встанет туда.
+  Когда расставишь все 8, нажми «Скопировать координаты» и пришли текст из поля в чат боту.
+</p>
+<div class="wrap" id="wrap"><img id="img" src="maps/anubis.png" alt="anubis" draggable="false"></div>
+<div class="chips" id="chips"></div>
+<button class="btn" id="copy">Скопировать координаты</button>
+<textarea id="out" readonly placeholder="Здесь появятся координаты…" style="display:none"></textarea>
+<script>
+  const out = document.getElementById('out');
+  const SPOTS = [
+    { id: 'camera', name: 'Камера', x: 63.5, y: 36.6 },
+    { id: 'devyatka', name: 'Девятка', x: 66.3, y: 25.5 },
+    { id: 'a-approach-main', name: 'Подход А мейн', x: 74.2, y: 50 },
+    { id: 'b-approach-main', name: 'Подход Б мейн', x: 30.6, y: 67.9 },
+    { id: 't-spawn', name: 'Т спавн', x: 45.8, y: 91.2 },
+    { id: 'rukav', name: 'Рукав', x: 79.7, y: 56.2 },
+    { id: 'ladder', name: 'Лестница', x: 68.2, y: 67 },
+    { id: 'nychka', name: 'Нычка', x: 40.6, y: 49.4 }
+  ];
+
+  const wrap = document.getElementById('wrap');
+  const chipsEl = document.getElementById('chips');
+  let sel = 0;
+
+  const dots = SPOTS.map((s, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot';
+    d.style.left = s.x + '%';
+    d.style.top = s.y + '%';
+    const lbl = document.createElement('span');
+    lbl.className = 'lbl';
+    lbl.textContent = s.name;
+    d.appendChild(lbl);
+    wrap.appendChild(d);
+
+    function place(clientX, clientY) {
+      const r = wrap.getBoundingClientRect();
+      s.x = Math.round(((clientX - r.left) / r.width) * 1000) / 10;
+      s.y = Math.round(((clientY - r.top) / r.height) * 1000) / 10;
+      d.style.left = s.x + '%';
+      d.style.top = s.y + '%';
+    }
+
+    d.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      setSel(i);
+      if (d.setPointerCapture) {
+        try { d.setPointerCapture(e.pointerId); } catch (err) {}
+      }
+      const move = (ev) => place(ev.clientX, ev.clientY);
+      const up = (ev) => {
+        if (d.releasePointerCapture) {
+          try { d.releasePointerCapture(ev.pointerId); } catch (err) {}
+        }
+        d.removeEventListener('pointermove', move);
+        d.removeEventListener('pointerup', up);
+        d.removeEventListener('pointercancel', up);
+      };
+      d.addEventListener('pointermove', move);
+      d.addEventListener('pointerup', up);
+      d.addEventListener('pointercancel', up);
+    });
+    d._place = place;
+    return d;
+  });
+
+  wrap.addEventListener('pointerdown', (e) => {
+    if (e.target === wrap || e.target.id === 'img') {
+      e.preventDefault();
+      dots[sel]._place(e.clientX, e.clientY);
+    }
+  });
+
+  function setSel(i) {
+    sel = i;
+    dots.forEach((d, k) => d.classList.toggle('sel', k === i));
+    chipsEl.querySelectorAll('.chip').forEach((c, k) => c.classList.toggle('sel', k === i));
+  }
+
+  SPOTS.forEach((s, i) => {
+    const c = document.createElement('button');
+    c.type = 'button';
+    c.className = 'chip';
+    c.textContent = s.name;
+    c.addEventListener('click', () => setSel(i));
+    chipsEl.appendChild(c);
+  });
+  setSel(0);
+
+  document.getElementById('copy').addEventListener('click', () => {
+    const lines = SPOTS.map(s =>
+      '{"id": "' + s.id + '", "name": "' + s.name + '", "x": ' + s.x + ', "y": ' + s.y + ', "videos": []}'
+    );
+    out.value = '{\n' + lines.join(',\n') + '\n}';
+    out.style.display = 'block';
+    out.scrollIntoView({ block: 'nearest' });
+    out.select();
+    try { document.execCommand('copy'); } catch (err) {}
+  });
+</script>
+</body>
+</html>
