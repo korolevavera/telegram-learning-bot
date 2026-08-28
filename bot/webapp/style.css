@@ -1980,6 +1980,14 @@ html[data-theme="gurren"] .tab.active .tab-ico { filter: drop-shadow(0 0 8px rgb
   color: #ffd700; font-size: 16px; text-shadow: 0 0 8px rgba(255, 215, 0, .6);
 }
 .tap-chip-stat .tap-stat-icon { font-size: 14px; }
+.tap-chip-run { color: #7ee07e; }
+.tap-chip-run span:first-child { color: #9fff9f; }
+.tap-combo {
+  text-align: center; font-family: 'Courier New', monospace; font-weight: 900;
+  font-size: 15px; letter-spacing: 2px; color: #ffd700; height: 22px; line-height: 22px;
+  opacity: 0; transition: opacity .12s; text-shadow: 2px 2px 0 #000;
+}
+.tap-combo.on { color: #ffb000; }
 .tap-val { min-width: 22px; text-align: center; }
 .tap-hpwrap {
   position: relative; height: 26px; background: #12151b; border: 3px solid #3a4252;
@@ -1994,11 +2002,16 @@ html[data-theme="gurren"] .tab.active .tab-ico { filter: drop-shadow(0 0 8px rgb
   font-family: 'Courier New', monospace; font-weight: 700; font-size: 12px; color: #fff;
   text-shadow: 1px 1px 0 #000; letter-spacing: .5px;
 }
+.tap-subline {
+  display: flex; align-items: center; justify-content: space-between;
+  margin: 2px 0 4px;
+}
 .tap-bossname {
-  text-align: center; font-family: 'Courier New', monospace; font-weight: 900;
-  font-size: 15px; letter-spacing: 2px; color: #ffd700; margin: 2px 0 4px;
+  font-family: 'Courier New', monospace; font-weight: 900;
+  font-size: 15px; letter-spacing: 2px; color: #ffd700;
   text-shadow: 2px 2px 0 #000;
 }
+.tap-kills { font-family: 'Courier New', monospace; font-weight: 700; font-size: 12px; color: #9fb4d8; }
 .tap-canvas {
   width: 100%; height: auto; display: block; background: #20242b;
   border: 3px solid #3a4252; border-radius: 0; box-shadow: 4px 4px 0 #000;
@@ -2020,7 +2033,13 @@ html[data-theme="gurren"] .tab.active .tab-ico { filter: drop-shadow(0 0 8px rgb
   text-align: center; font-family: 'Courier New', monospace; font-weight: 700;
   color: #9fb4d8; font-size: 13px; letter-spacing: 1px; margin: 4px 0;
 }
-.tap-donebar { display: flex; justify-content: center; margin: 8px 0 2px; }
+.tap-donebar { display: flex; justify-content: center; margin: 10px 0 2px; }
+.tap-done {
+  background: #ff0033; border: 3px solid #3a4252; border-radius: 0; color: #fff;
+  font-family: 'Courier New', monospace; font-weight: 900; font-size: 14px; letter-spacing: 2px;
+  padding: 10px 26px; box-shadow: 4px 4px 0 #000; cursor: pointer; touch-action: manipulation;
+}
+.tap-done:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 #000; }
 .tap-result { text-align: center; padding: 20px 12px; }
 .tap-result-line {
   font-family: 'Courier New', monospace; font-weight: 900; font-size: 20px;
