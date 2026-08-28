@@ -190,6 +190,7 @@ header h1 .brand .hl {
   font-family: 'Orbitron', sans-serif;
   letter-spacing: 1px;
   text-shadow: 0 0 10px rgba(var(--accent-rgb),.6);
+  cursor: pointer;
 }
 
 .section-text {

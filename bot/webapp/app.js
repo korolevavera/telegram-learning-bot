@@ -5781,7 +5781,7 @@ async function init() {
       tabBar.className = 'tabbar';
       document.body.appendChild(tabBar);
     }
-    ['home', 'learn', 'train', 'games', 'stats', 'guides', 'settings'].forEach(name => {
+    ['home', 'learn', 'train', 'games', 'stats', 'guides'].forEach(name => {
       const td = TAB_DEFS[name];
       const btn = document.createElement('button');
       btn.className = 'tab' + (name === 'home' ? ' active' : '');
@@ -5801,6 +5801,7 @@ async function init() {
       profileCache = initRes.profile || null;
       isAdmin = !!initRes.is_admin;
       document.getElementById('userName').textContent = initRes.user.first_name;
+      document.getElementById('userName').addEventListener('click', () => switchTab('settings'));
       applyTheme();
       await renderHome();
     } catch (err) {
