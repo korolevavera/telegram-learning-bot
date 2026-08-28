@@ -129,18 +129,26 @@ main { position: relative; z-index: 1; padding: 16px 14px 92px; }
   opacity: .85;
 }
 .tab {
-  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;
-  padding: 10px 0 12px;
+  flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 5px;
+  padding: 9px 2px 11px;
   background: none; border: none;
   color: var(--muted);
-  font-family: 'Orbitron', sans-serif;
-  font-size: 10px; letter-spacing: 1.5px;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 11px; font-weight: 600;
+  letter-spacing: .5px;
+  line-height: 1.15;
   text-transform: uppercase;
   cursor: pointer;
   transition: color .2s;
 }
-.tab .tab-ico { width: 20px; height: 20px; display: grid; place-items: center; }
+.tab .tab-ico { width: 20px; height: 20px; display: grid; place-items: center; flex: none; }
 .tab-ico svg { width: 20px; height: 20px; }
+.tab .tab-label {
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .tab.active { color: var(--accent); }
 .tab.active .tab-ico { filter: drop-shadow(0 0 6px rgba(var(--accent-rgb),.7)); }
 

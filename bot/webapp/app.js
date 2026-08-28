@@ -1552,7 +1552,10 @@ const TAB_DEFS = {
       saveSettings();
       document.querySelectorAll('#tabBar .tab').forEach(b => {
         const td = TAB_DEFS[b.dataset.tab];
-        if (td && b.lastChild) b.lastChild.textContent = t(td.labelKey);
+        if (td) {
+          const lbl = b.querySelector('.tab-label');
+          if (lbl) lbl.textContent = t(td.labelKey);
+        }
       });
       renderSettings();
     }));
@@ -5789,7 +5792,10 @@ async function init() {
       const ico = iconEl(td.icon);
       ico.className = 'tab-ico';
       btn.appendChild(ico);
-      btn.appendChild(document.createTextNode(t(td.labelKey)));
+      const label = document.createElement('span');
+      label.className = 'tab-label';
+      label.textContent = t(td.labelKey);
+      btn.appendChild(label);
       btn.addEventListener('click', () => switchTab(name));
       tabBar.appendChild(btn);
     });
