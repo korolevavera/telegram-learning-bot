@@ -6,6 +6,7 @@ from typing import Any
 
 import aiohttp
 
+from .bios import build_bio
 from .config_loader import CONFIG
 
 BO3_BASE = "https://api.bo3.gg/api/v1"
@@ -227,6 +228,7 @@ async def get_faceit_player_info(player_id: str, force: bool = False) -> dict | 
         },
         "maps": maps_list,
     }
+    info["bio_text"] = build_bio("faceit", info)
     logger.info("fetched faceit player info: %s", player_id)
     return _write_cache(key, info)
 
@@ -382,110 +384,7 @@ def _fmt_money(value: Any) -> str:
 
 
 def _build_player_bio(p: dict) -> str:
-    nickname = p.get("nickname") or "игрок"
-    real = " ".join(filter(None, (p.get("first_name"), p.get("last_name"))))
-    country = _RU_COUNTRIES.get(p.get("country_code")) or p.get("country_name")
-    role = p.get("role")
-    team = p.get("team")
-
-    opening = nickname
-    if real:
-        opening += f" (настоящее имя — {real})"
-    opening += " — профессиональный игрок в Counter-Strike 2"
-    details = []
-    if country:
-        details.append(f"родом из {country}")
-    bd = _fmt_date(p.get("birthday"))
-    if bd:
-        text = f"родился {bd}"
-        if p.get("age") is not None:
-            text += f" ({p['age']} {_plural(p['age'], 'год', 'года', 'лет')})"
-        details.append(text)
-    if role:
-        details.append(f"играет на позиции {role}")
-    if team:
-        details.append(f"сейчас выступает за команду {team}")
-    if details:
-        opening += " — " + ", ".join(details) + "."
-    parts = [opening]
-
-    timeline = p.get("teams") or []
-    if timeline:
-        dedup = []
-        for t in timeline:
-            if dedup and dedup[-1].get("team") == t.get("team"):
-                dedup[-1] = t
-            else:
-                dedup.append(t)
-        timeline = dedup
-        steps = []
-        first = timeline[0]
-        if first.get("date"):
-            start = f"Профессиональную карьеру начал в {str(first['date'])[:4]} году"
-        else:
-            start = "Профессиональную карьеру начинал с первых командных составов"
-        if first.get("team"):
-            start += f" в {first['team']}"
-        steps.append(start + ".")
-        final_team = timeline[-1].get("team") if len(timeline) > 1 else None
-        for t in timeline[1:-1]:
-            if not t.get("team"):
-                continue
-            if final_team and t.get("team") == final_team:
-                continue
-            if t.get("date"):
-                steps.append(f"В {str(t['date'])[:4]} году перешёл в {t['team']}.")
-            else:
-                steps.append(f"Затем выступал за {t['team']}.")
-        if len(timeline) > 1 and final_team:
-            joined = _fmt_date(p.get("joined_team_at"))
-            if joined:
-                steps.append(f"С {joined} выступает за {final_team}.")
-            else:
-                steps.append(f"В итоге оказался в {final_team}.")
-        parts.append(" ".join(steps))
-
-    won = [a for a in (p.get("achievements") or []) if (a.get("title") or "").lower() == "winner"]
-    if won:
-        names = ", ".join(
-            a["tournament"] for a in won if a.get("tournament")
-        )
-        if not names:
-            names = None
-        count = len(won)
-        text = (
-            f"История успеха {nickname} насчитывает {count} "
-            f"побед{_plural(count, 'у', 'ы', '')} на профессиональных турнирах"
-        )
-        if names:
-            text += f" — среди них {names}"
-        text += "."
-        parts.append(text)
-
-    prize = _fmt_money(p.get("total_prize"))
-    if prize:
-        parts.append(f"За карьеру суммарные призовые превысили ${prize}.")
-
-    stats = p.get("stats") or {}
-    rating = p.get("rating")
-    if rating is not None:
-        extras = []
-        if stats.get("match_winrate") is not None:
-            extras.append(f"винрейт в матчах — {stats['match_winrate']:.1f}%")
-        if stats.get("kd") is not None:
-            extras.append(f"K/D — {stats['kd']:.2f}")
-        if stats.get("adr") is not None:
-            extras.append(f"средний урон за раунд — {stats['adr']:.1f}")
-        if stats.get("hs") is not None:
-            extras.append(f"точность попаданий в голову — {stats['hs']:.1f}%")
-        period_txt = p.get("period_label") or "за последние шесть месяцев"
-        tail = f"{period_txt.capitalize()} рейтинг {nickname} составил {rating:.2f}"
-        if extras:
-            tail += " (" + ", ".join(extras) + ")"
-        tail += " — это подтверждает его статус одного из самых ярких игроков современной сцены."
-        parts.append(tail)
-
-    return "\n\n".join(p for p in parts if p)
+    return build_bio("player", p)
 
 
 def _fnum(value: Any) -> float | None:
@@ -722,6 +621,7 @@ async def get_team_info(slug: str) -> dict | None:
         "roster": roster,
         "achievements": achievements,
     }
+    info["bio_text"] = build_bio("team", info)
     logger.info("fetched team info: %s", slug)
     return _write_cache(key, info)
 
