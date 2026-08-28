@@ -2660,10 +2660,12 @@ const TAB_DEFS = {
   }
 
   function ytOpenCard(id) {
+    const url = 'https://www.youtube.com/shorts/' + id;
     const wrap = el('div', 'yt-open-wrap');
-    const box = el('div', 'yt-open-card');
+    const box = el('div', 'yt-open-card yt-open-direct');
     box.style.aspectRatio = '16 / 9';
     box.style.maxHeight = '74vh';
+    box.style.cursor = 'pointer';
     const img = document.createElement('img');
     img.loading = 'lazy';
     img.alt = 'YouTube';
@@ -2672,30 +2674,16 @@ const TAB_DEFS = {
     play.appendChild(el('span', null, '▶'));
     box.appendChild(img);
     box.appendChild(play);
-    box.appendChild(el('div', 'yt-open-cap', lang === 'ru' ? 'Нажми, чтобы смотреть' : 'Tap to watch'));
-    try {
-      fetch('https://www.youtube.com/oembed?url=' + encodeURIComponent('https://youtu.be/' + id) + '&format=json')
-        .then(r => r.ok ? r.json() : null)
-        .then(d => { if (d && d.width && d.height && !box.dataset.live) box.style.aspectRatio = d.width + ' / ' + d.height; })
-        .catch(() => {});
-    } catch (e) {}
+    box.appendChild(el('div', 'yt-open-cap', lang === 'ru' ? 'Открыть видео на YouTube' : 'Open on YouTube'));
     box.addEventListener('click', () => {
-      if (box.dataset.live) return;
-      box.dataset.live = '1';
       haptic('light');
-      box.innerHTML = '';
-      const iframe = document.createElement('iframe');
-      iframe.src = 'https://www.youtube-nocookie.com/embed/' + id + '?autoplay=1&playsinline=1&rel=0&modestbranding=1';
-      iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
-      iframe.allowFullscreen = true;
-      iframe.setAttribute('allowfullscreen', '');
-      box.appendChild(iframe);
-      const foot = el('a', 'yt-open-fallback', lang === 'ru' ? 'Не воспроизводится? Открыть на YouTube ↗' : 'Not playing? Open on YouTube ↗');
-      foot.href = 'https://www.youtube.com/watch?v=' + id;
-      foot.addEventListener('click', (e) => { e.preventDefault(); gOpenUrl(foot.href); });
-      wrap.appendChild(foot);
+      gOpenUrl(url);
     });
+    const foot = el('a', 'yt-open-fallback', lang === 'ru' ? 'Открыть на YouTube ↗' : 'Open on YouTube ↗');
+    foot.href = url;
+    foot.addEventListener('click', (e) => { e.preventDefault(); gOpenUrl(url); });
     wrap.appendChild(box);
+    wrap.appendChild(foot);
     return wrap;
   }
 
