@@ -119,6 +119,38 @@ def _push(out, text):
         out.append(text)
 
 
+def _condense(text: str, target: int = 500) -> str:
+    if not text:
+        return text
+    paragraphs = [p for p in text.split(_delim()) if p.strip()]
+    kept = []
+    count = 0
+    stop = False
+    for para in paragraphs:
+        ws = len(para.split())
+        if count + ws <= target:
+            kept.append(para)
+            count += ws
+        else:
+            remaining = target - count
+            if remaining > 0:
+                sentences = [s for s in para.replace("\n", " ").split(".") if s.strip()]
+                cut = []
+                cut_count = 0
+                for sent in sentences:
+                    sw = len(sent.split())
+                    if cut_count + sw <= remaining:
+                        cut.append(sent)
+                        cut_count += sw
+                    else:
+                        break
+                if cut:
+                    kept.append(".".join(cut).strip() + ".")
+            stop = True
+            break
+    return _delim().join(kept).strip()
+
+
 # =========================================================
 #  ИГРОК
 # =========================================================
@@ -1690,4 +1722,4 @@ _SECTIONS = {
 
 def build_bio(entity_type: str, data: dict) -> str:
     fn = _SECTIONS.get(entity_type, _build_player_bio)
-    return fn(data)
+    return _condense(fn(data))
