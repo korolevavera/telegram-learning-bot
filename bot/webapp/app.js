@@ -2390,7 +2390,7 @@ const TAB_DEFS = {
   }
 
 
-  function renderMap(item) {
+  async function renderMap(item) {
     currentMap = item;
     clear();
     view.appendChild(gBackBtn(() => renderGuides()));
@@ -2400,10 +2400,12 @@ const TAB_DEFS = {
     head.appendChild(el('p', 'map-head-hint', t('g_spot_hint')));
     view.appendChild(head);
 
+    const favs = await loadFavsSet();
     const mapSpots = (guidesData.spots || {})[item.id] || [];
     const mapLineups = (guidesData.lineups || {})[item.id] || [];
-    const lineupSpots = mapLineups.filter(l => Array.isArray(l.pos) && l.pos.length >= 2 && (l.video || (Array.isArray(l.videos) && l.videos.length))).map(l => ({
+    const lineupSpots = mapLineups.filter(l => Array.isArray(l.pos) && l.pos.length >= 2).map(l => ({
       id: 'lu-' + l.id,
+      lineage: l,
       name: l.title || l.id,
       x: l.pos[0],
       y: l.pos[1],
@@ -2472,6 +2474,16 @@ const TAB_DEFS = {
       const head = el('div', 'spot-video-head');
       head.appendChild(el('span', 'spot-pip'));
       head.appendChild(el('span', 'spot-name', spot.name));
+      if (spot.lineage) {
+        const key = 'grenade:' + spot.lineage.id;
+        const star = el('span', 'fav-star' + (favs.has(key) ? ' active' : ''), favs.has(key) ? '★' : '☆');
+        star.setAttribute('aria-label', t('gr_fav_add'));
+        star.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          await toggleGrenadeFav(spot.lineage, favs, star);
+        });
+        head.appendChild(star);
+      }
       spotBox.appendChild(head);
 
       if (!videos.length) {
@@ -3949,13 +3961,22 @@ const TAB_DEFS = {
     currentPage = () => renderTrainMap(map, practice);
   }
 
-  function renderTrainLineup(map, l, pr) {
+  async function renderTrainLineup(map, l, pr) {
     pushPage();
     clear();
     view.appendChild(gBackBtn(() => renderTrainMap(map, pr)));
+    const favs = await loadFavsSet();
     const title = el('div', 'l-title');
     title.appendChild(el('span', 'l-badge ' + guideTypeCls(l.type), guideTypeLabel(l.type)));
     title.appendChild(el('span', 'l-name', l.title));
+    const key = 'grenade:' + l.id;
+    const star = el('span', 'fav-star' + (favs.has(key) ? ' active' : ''), favs.has(key) ? '★' : '☆');
+    star.setAttribute('aria-label', t('gr_fav_add'));
+    star.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      await toggleGrenadeFav(l, favs, star);
+    });
+    title.appendChild(star);
     view.appendChild(title);
     const mini = gMiniRadar(map, l);
     if (mini) {
