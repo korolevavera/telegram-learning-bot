@@ -1965,6 +1965,74 @@ html[data-theme="gurren"] .tab.active .tab-ico { filter: drop-shadow(0 0 8px rgb
   cursor: pointer; touch-action: manipulation;
 }
 
+/* ---------- Tap Boss (Тапалка) pixel game ---------- */
+.tap-hud {
+  display: flex; gap: 8px; align-items: center; justify-content: space-between;
+  margin: 10px 0 6px;
+}
+.tap-chip {
+  display: flex; align-items: center; gap: 6px;
+  background: #1a1f27; border: 3px solid #3a4252; border-radius: 0;
+  padding: 6px 12px; font-family: 'Courier New', monospace; font-weight: 700;
+  color: #fff; letter-spacing: 1px; box-shadow: 4px 4px 0 #000;
+}
+.tap-chip-coin .tap-coin {
+  color: #ffd700; font-size: 16px; text-shadow: 0 0 8px rgba(255, 215, 0, .6);
+}
+.tap-chip-stat .tap-stat-icon { font-size: 14px; }
+.tap-val { min-width: 22px; text-align: center; }
+.tap-hpwrap {
+  position: relative; height: 26px; background: #12151b; border: 3px solid #3a4252;
+  border-radius: 0; overflow: hidden; margin: 6px 0 2px; box-shadow: inset 0 0 0 2px #000, 0 3px 0 #000;
+}
+.tap-hp {
+  height: 100%; background: linear-gradient(#ff4133, #c01000); width: 100%;
+  transition: width .12s; box-shadow: inset 0 -4px 0 rgba(0, 0, 0, .25);
+}
+.tap-hptext {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  font-family: 'Courier New', monospace; font-weight: 700; font-size: 12px; color: #fff;
+  text-shadow: 1px 1px 0 #000; letter-spacing: .5px;
+}
+.tap-bossname {
+  text-align: center; font-family: 'Courier New', monospace; font-weight: 900;
+  font-size: 15px; letter-spacing: 2px; color: #ffd700; margin: 2px 0 4px;
+  text-shadow: 2px 2px 0 #000;
+}
+.tap-canvas {
+  width: 100%; height: auto; display: block; background: #20242b;
+  border: 3px solid #3a4252; border-radius: 0; box-shadow: 4px 4px 0 #000;
+  touch-action: manipulation; cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.tap-shop { display: flex; gap: 8px; margin: 10px 0 4px; }
+.tap-upg {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px;
+  background: #1a1f27; border: 3px solid #3a4252; border-radius: 0; color: #fff;
+  padding: 8px 4px; font-family: 'Courier New', monospace; box-shadow: 3px 3px 0 #000;
+  touch-action: manipulation;
+}
+.tap-upg:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 #000; }
+.tap-upg-max { opacity: .5; border-color: #2c3446; }
+.tap-upg-ic { font-size: 18px; }
+.tap-upg-tx { font-size: 11px; text-align: center; line-height: 1.15; letter-spacing: .3px; }
+.tap-upg-pr { font-size: 12px; font-weight: 900; color: #ffd700; }
+.tap-line {
+  text-align: center; font-family: 'Courier New', monospace; font-weight: 700;
+  color: #9fb4d8; font-size: 13px; letter-spacing: 1px; margin: 4px 0;
+}
+.tap-donebar { display: flex; justify-content: center; margin: 8px 0 2px; }
+.tap-result { text-align: center; padding: 20px 12px; }
+.tap-result-line {
+  font-family: 'Courier New', monospace; font-weight: 900; font-size: 20px;
+  color: #ffd700; margin: 8px 0; text-shadow: 2px 2px 0 #000;
+}
+.tap-result-sub { font-family: 'Courier New', monospace; color: #9fb4d8; margin: 4px 0 14px; }
+@media (max-width: 480px) {
+  .tap-hud { margin-top: 6px; }
+  .tap-canvas { border-width: 2px; box-shadow: 3px 3px 0 #000; }
+  .tap-upg-tx { font-size: 10px; }
+}
+
 /* ---------- Weekly challenges ---------- */
 .ch-card {
   background: var(--card, #141821); border: 1px solid #2c3446; border-radius: 12px;

@@ -108,36 +108,6 @@ GUESS_MAP_QUESTIONS = [
 ]
 
 GAMES = {
-    "callouts": {
-        "id": "callouts",
-        "title": "Map Callouts",
-        "title_ru": "Названия точек",
-        "desc": "Name the map callout from 4 options. Test your map knowledge!",
-        "desc_ru": "Назови точку на карте из 4 вариантов. Проверь знание карт!",
-        "icon": "🗺️",
-        "kind": "quiz",
-        "questions": CALLOUT_QUESTIONS,
-    },
-    "utility": {
-        "id": "utility",
-        "title": "Utility Master",
-        "title_ru": "Мастер утилит",
-        "desc": "Identify the right grenade for every situation.",
-        "desc_ru": "Определи нужную утилиту для каждой ситуации.",
-        "icon": "💣",
-        "kind": "quiz",
-        "questions": UTILITY_QUESTIONS,
-    },
-    "economy": {
-        "id": "economy",
-        "title": "Economy Rush",
-        "title_ru": "Экономика",
-        "desc": "Make the right buy/save/force decision in each scenario.",
-        "desc_ru": "Прими правильное решение: покупать/экономить/форсить.",
-        "icon": "💰",
-        "kind": "quiz",
-        "questions": ECONOMY_QUESTIONS,
-    },
     "reaction": {
         "id": "reaction",
         "title": "Reaction",
@@ -148,40 +118,20 @@ GAMES = {
         "kind": "reaction",
         "questions": [],
     },
-    "aim": {
-        "id": "aim",
-        "title": "Aim Trainer",
-        "title_ru": "Тренажёр прицела",
-        "desc": "Tap the targets as fast as possible. 15 targets.",
-        "desc_ru": "Нажимай по целям как можно быстрее. 15 целей.",
-        "icon": "🎯",
-        "kind": "aim",
+    "tapboss": {
+        "id": "tapboss",
+        "title": "Tap Boss",
+        "title_ru": "Тапалка",
+        "desc": "Tap the pixel CS:GO bosses! Kill them, earn coins and upgrade your damage.",
+        "desc_ru": "Тапай пиксельных боссов CS:GO! Убивай их, зарабатывай монеты и прокачивай урон.",
+        "icon": "🧨",
+        "kind": "tap",
         "questions": [],
-    },
-    "whosaid": {
-        "id": "whosaid",
-        "title": "Who Said It?",
-        "title_ru": "Кто это сказал?",
-        "desc": "Guess which pro player said the quote.",
-        "desc_ru": "Угадай, какой про-игрок сказал цитату.",
-        "icon": "🗣️",
-        "kind": "quiz",
-        "questions": QUOTE_QUESTIONS,
-    },
-    "guessmap": {
-        "id": "guessmap",
-        "title": "Guess the Map",
-        "title_ru": "Угадай карту",
-        "desc": "Look at the screenshot and guess the map.",
-        "desc_ru": "Посмотри на скриншот и угадай карту.",
-        "icon": "🖼️",
-        "kind": "quiz",
-        "questions": GUESS_MAP_QUESTIONS,
     },
 }
 
 # Дейли-челлендж: игра дня (по дню года)
-DAILY_GAME_IDS = ["reaction", "callouts", "aim", "whosaid", "utility", "guessmap", "economy"]
+DAILY_GAME_IDS = ["reaction", "tapboss"]
 
 
 def daily_game(day_of_year: int) -> str:

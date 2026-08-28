@@ -221,6 +221,13 @@ const TAB_DEFS = {
       gm_react_attempt: 'Попытка {0} из {1}', gm_react_hit: '✓ Попал!',
       gm_aim_hit: 'Целей: {0}', gm_aim_miss: 'Мимо!',
       gm_react_start: 'НАЧАТЬ РАУНД',
+      gm_tap_coins: 'Монеты: {0}', gm_tap_hp: 'HP',
+      gm_tap_boss: 'Босс {0}', gm_tap_kills: 'Убито: {0}',
+      gm_tap_dmg_lv: 'Урон: {0}', gm_tap_crit_lv: 'Крит: {0}%', gm_tap_auto_lv: 'Автоклик: {0}',
+      gm_tap_buy_dmg: '+1 урон', gm_tap_buy_crit: '+5% крит', gm_tap_buy_auto: '+1 автоклик',
+      gm_tap_headshot: 'HEADSHOT!', gm_tap_crit: 'КРИТ!',
+      gm_tap_level: 'Уровень {0}', gm_tap_notenough: 'Не хватает монет',
+      gm_tap_result: 'Боссы убиты: {0}', gm_tap_coins_earned: 'Монет заработано: {0}',
       gm_daily: 'Задание дня', gm_daily_done: '✓ Выполнено',
       gm_daily_bonus: '+20 XP за задание дня', gm_daily_play: 'Играть',
       ch_title: 'Челленджи недели', ch_sub: 'Новые задания каждый понедельник. Выполняй — забирай награду!',
@@ -399,6 +406,13 @@ const TAB_DEFS = {
       gm_react_attempt: 'Attempt {0} of {1}', gm_react_hit: '✓ Hit!',
       gm_aim_hit: 'Targets: {0}', gm_aim_miss: 'Miss!',
       gm_react_start: 'START ROUND',
+      gm_tap_coins: 'Coins: {0}', gm_tap_hp: 'HP',
+      gm_tap_boss: 'Boss {0}', gm_tap_kills: 'Killed: {0}',
+      gm_tap_dmg_lv: 'Damage: {0}', gm_tap_crit_lv: 'Crit: {0}%', gm_tap_auto_lv: 'Auto: {0}',
+      gm_tap_buy_dmg: '+1 damage', gm_tap_buy_crit: '+5% crit', gm_tap_buy_auto: '+1 auto',
+      gm_tap_headshot: 'HEADSHOT!', gm_tap_crit: 'CRIT!',
+      gm_tap_level: 'Level {0}', gm_tap_notenough: 'Not enough coins',
+      gm_tap_result: 'Bosses killed: {0}', gm_tap_coins_earned: 'Coins earned: {0}',
       gm_daily: 'Daily Challenge', gm_daily_done: '✓ Done',
       gm_daily_bonus: '+20 XP for the daily challenge', gm_daily_play: 'Play',
       ch_title: 'Weekly Challenges', ch_sub: 'New challenges every Monday. Complete them and claim your reward!',
@@ -4437,6 +4451,7 @@ function startGame(game) {
   view.appendChild(sectionTitle(game.icon ? 'quiz' : 'quiz', lang === 'ru' ? game.title_ru : game.title));
   if (game.kind === 'reaction') return startReactionGame(game);
   if (game.kind === 'aim') return startAimGame(game);
+  if (game.kind === 'tap') return startTapGame(game);
   const questions = shuffleArray(game.questions);
   let qi = 0, score = 0;
   const startTime = Date.now();
@@ -5618,6 +5633,452 @@ function startReactionGame(game) {
 
   rafId = requestAnimationFrame(drawFrame);
   setHint('');
+  currentPage = () => startGame(game);
+}
+
+function startTapGame(game) {
+  // ---- Константы игры ------------------------------------------------------
+  const W = 360, H = 420;
+  const BOSS_Y = 150;      // y верхней части босса
+  const BOSS_SIZE = 150;   // размер спрайта босса
+  const SAVE_KEY = 'cs2_tapboss_save';
+  const COIN_MIN = 10, COIN_MAX = 20;
+  const COMBO_MS = 300;    // интервал для комбо
+  const COMBO_HEADSHOT = 5; // серия для HEADSHOT
+  const DMG_COST = 50, CRIT_COST = 100, AUTO_COST = 200;
+  const DMG_MAX = 100, CRIT_MAX = 80, AUTO_MAX = 10;
+  // Спрайты боссов (агенты CS:GO) — цвет пальто, цвет одежды, акцент
+  const BOSS_TYPES = [
+    { name: 's1mple',  coat: '#1a3a6b', accent: '#ffb000', skin: '#f0c49a', hair: '#3a2a1a' }, // синяя куртка + прицел
+    { name: 'donk',    coat: '#2b2b33', accent: '#9fb4d8', skin: '#e8b98a', hair: '#17171c' }, // капюшон, суровый
+    { name: 'Phoenix', coat: '#b4552d', accent: '#ffd27a', skin: '#f0c49a', hair: '#20292e' }, // терракотовый костюм
+    { name: 'FBI SWAT',coat: '#22417a', accent: '#ffffff', skin: '#e8b98a', hair: '#0d0d12' }, // синий + щит
+    { name: 'Elite Crew', coat: '#7a7f3a', accent: '#ffe14d', skin: '#d9a06a', hair: '#14140f' }, // полосатая бандана
+  ];
+  function bossFor(i) { return BOSS_TYPES[i % BOSS_TYPES.length]; }
+
+  // ---- Сохранение (монеты и прокачка) --------------------------------------
+  let save = { coins: 0, dmg: 1, crit: 0, auto: 0 };
+  try { const s = localStorage.getItem(SAVE_KEY); if (s) save = Object.assign(save, JSON.parse(s)); } catch (e) {}
+  function persist() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch (e) {} }
+
+  // ---- Состояние -----------------------------------------------------------
+  let killed = 0;        // убито боссов за сессию
+  let coinsEarned = 0;   // монет заработано за сессию
+  let playing = true;
+  let dieT = 0;          // таймстамп смерти (анимация)
+  let flashT = 0;        // инверсия при уроне
+  let shakeT = 0;
+  let shakeAmp = 0;
+  let lastTapAt = 0;
+  let comboN = 0;
+  let bob = 0;
+  let rafId = 0;
+  let particles = [];
+  let floats = [];
+  let boss = null;
+  let autoTimer = null;
+  const startTime = Date.now();
+
+  function newBoss() {
+    const hp = 50 + killed * 25 + Math.floor(Math.random() * 51);
+    boss = {
+      type: bossFor(killed),
+      hp: hp,
+      maxHp: hp,
+      scale: 1,
+    };
+    flashT = 0; shakeT = 0; shakeAmp = 0;
+  }
+  newBoss();
+
+  // ---- HUD (верхняя панель) ------------------------------------------------
+  const hud = el('div', 'tap-hud');
+  const coinsChip = el('div', 'tap-chip tap-chip-coin');
+  coinsChip.innerHTML = '<span class="tap-coin">$</span><span class="tap-val" id="tap-coins-val">' + save.coins + '</span>';
+  const dmgChip = el('div', 'tap-chip tap-chip-stat');
+  dmgChip.innerHTML = '<span class="tap-stat-icon">🔨</span><span id="tap-dmg-val">' + save.dmg + '</span>';
+  hud.appendChild(coinsChip);
+  hud.appendChild(dmgChip);
+  view.appendChild(hud);
+
+  // ---- Полоса HP -----------------------------------------------------------
+  const hpWrap = el('div', 'tap-hpwrap');
+  const hpFill = el('div', 'tap-hp');
+  const hpText = el('span', 'tap-hptext', '');
+  hpWrap.appendChild(hpFill);
+  hpWrap.appendChild(hpText);
+  view.appendChild(hpWrap);
+
+  const bossName = el('div', 'tap-bossname', boss.type.name);
+  view.appendChild(bossName);
+
+  // ---- Канвас ----------------------------------------------------------------
+  const canvas = document.createElement('canvas');
+  canvas.className = 'tap-canvas';
+  canvas.width = W;
+  canvas.height = H;
+  const ctx = canvas.getContext('2d');
+  view.appendChild(canvas);
+
+  // ---- Магазин (нижняя панель) ----------------------------------------------
+  const shop = el('div', 'tap-shop');
+  const cost = { dmg: DMG_COST, crit: CRIT_COST, auto: AUTO_COST };
+  const labels = [
+    { key: 'dmg',  icon: '🔨', txt: t('gm_tap_buy_dmg'),  max: DMG_MAX, price: DMG_COST },
+    { key: 'crit', icon: '💥', txt: t('gm_tap_buy_crit'), max: CRIT_MAX, price: CRIT_COST },
+    { key: 'auto', icon: '🤖', txt: t('gm_tap_buy_auto'), max: AUTO_MAX, price: AUTO_COST },
+  ];
+  const shopBtns = {};
+  labels.forEach(lb => {
+    const b = el('button', 'tap-upg');
+    b.innerHTML = '<span class="tap-upg-ic">' + lb.icon + '</span><span class="tap-upg-tx">' + lb.txt + '</span><span class="tap-upg-pr" data-key="' + lb.key + '">' + lb.price + ' $</span>';
+    b.addEventListener('click', () => buy(lb));
+    shopBtns[lb.key] = b;
+    shop.appendChild(b);
+  });
+  view.appendChild(shop);
+
+  const killsLine = el('div', 'tap-line', t('gm_tap_kills').replace('{0}', killed));
+  view.appendChild(killsLine);
+
+  function buy(lb) {
+    const cur = save[lb.key];
+    if (cur >= lb.max) {
+      floText(W / 2, 200, 'MAX', '#ffffff'); haptic('heavy'); return;
+    }
+    if (save.coins < lb.price) {
+      floText(W / 2, 200, t('gm_tap_notenough'), '#ff5566'); haptic('error'); return;
+    }
+    save.coins -= lb.price;
+    if (lb.key === 'dmg') { save.dmg += 1; }
+    else if (lb.key === 'crit') { save.crit += 5; }
+    else { save.auto += 1; if (autoTimer) {} }
+    persist();
+    console.log('[RELOAD] ' + lb.key + ' -> ' + save[lb.key]);
+    haptic('light');
+    refreshUpgUI();
+    refreshHUD();
+    floText(W / 2, 200, '+', '#ffd27a');
+    if (lb.key === 'auto') setupAuto();
+  }
+
+  function setupAuto() {
+    if (autoTimer) clearInterval(autoTimer);
+    autoTimer = setInterval(() => {
+      if (!playing || !boss) return;
+      // автокликер: урон без комбо, но с критом
+      const dmgHit = Math.round(save.dmg * (Math.random() * 100 < save.crit ? 2 : 1));
+      hitBoss(dmgHit, false);
+    }, 1000);
+  }
+  setupAuto();
+
+  function refreshUpgUI() {
+    labels.forEach(lb => {
+      const b = shopBtns[lb.key];
+      b.classList.toggle('tap-upg-max', save[lb.key] >= lb.max);
+      const pr = b.querySelector('.tap-upg-pr');
+      pr.textContent = (save[lb.key] >= lb.max ? 'MAX' : cost[lb.key] + ' $');
+    });
+  }
+  refreshUpgUI();
+
+  function refreshHUD() {
+    document.getElementById('tap-coins-val').textContent = save.coins;
+    document.getElementById('tap-dmg-val').textContent = save.dmg;
+  }
+
+  // ---- Ввод (клик/тап по боссу) ---------------------------------------------
+  function tapPos(e) {
+    const r = canvas.getBoundingClientRect();
+    const ex = (e.touches && e.touches[0]) ? e.touches[0].clientX : e.clientX;
+    const ey = (e.touches && e.touches[0]) ? e.touches[0].clientY : e.clientY;
+    const scaleX = W / r.width, scaleY = H / r.height;
+    return { x: (ex - r.left) * scaleX, y: (ey - r.top) * scaleY };
+  }
+  function onTap(e) {
+    if (!playing || !boss) return;
+    e.preventDefault();
+    const p = tapPos(e);
+    // проверка попадания в область босса
+    if (p.x < W / 2 - BOSS_SIZE / 2 || p.x > W / 2 + BOSS_SIZE / 2) return;
+    if (p.y < BOSS_Y - BOSS_SIZE / 2 || p.y > BOSS_Y + BOSS_SIZE / 2) return;
+    // комбо
+    const now = Date.now();
+    if (now - lastTapAt < COMBO_MS) comboN++; else comboN = 1;
+    lastTapAt = now;
+    const headshot = comboN >= COMBO_HEADSHOT;
+    let dmgHit = save.dmg;
+    const isCrit = (Math.random() * 100 < save.crit);
+    if (isCrit) dmgHit *= 2;
+    if (headshot) dmgHit *= 2;
+    console.log('[BANG] dmg=' + dmgHit + (isCrit ? ' CRIT' : '') + (headshot ? ' HEADSHOT' : ''));
+    spawnParticles(p.x, p.y, 8, '#ffd27a');
+    if (headshot) { floText(p.x, p.y - 20, t('gm_tap_headshot'), '#ff0033'); }
+    else if (isCrit) { floText(p.x, p.y - 20, t('gm_tap_crit'), '#ffe14d'); }
+    haptic(headshot ? 'heavy' : 'light');
+    hitBoss(dmgHit, true);
+  }
+  canvas.addEventListener('mousedown', onTap);
+  canvas.addEventListener('touchstart', onTap, { passive: false });
+
+  function hitBoss(dmgHit, fromPlayer) {
+    if (!playing || !boss) { if (fromPlayer) comboN = 0; return; }
+    boss.hp -= dmgHit;
+    flashT = 120; shakeT = 8; shakeAmp = 4;
+    if (boss.hp <= 0) {
+      boss.hp = 0;
+      playing = false;
+      dieT = performance.now();
+      killed++;
+      const gain = COIN_MIN + Math.floor(Math.random() * (COIN_MAX - COIN_MIN + 1));
+      save.coins += gain;
+      coinsEarned += gain;
+      persist(); refreshHUD(); refreshUpgUI();
+      spawnBursts(W / 2, BOSS_Y, 26, boss.type.accent);
+      killsLine.textContent = t('gm_tap_kills').replace('{0}', killed);
+      setTimeout(respawn, 900);
+      // подождать пока анимация смерти отрисуется; затем отправить результат
+      if (killed >= 1) submitCheckpoint();
+    }
+    comboN = fromPlayer ? comboN : comboN;
+  }
+
+  let lastSent = 0;
+  function submitCheckpoint() {
+    // отправляем результат раз в 10 убийств (чтобы не спамить античит)
+    if (killed - lastSent >= 10) {
+      lastSent = killed;
+      api.post('/api/games/submit', {
+        game_id: game.id, score: killed, total: 200,
+        duration_ms: Date.now() - startTime,
+      }).then(syncProfile).catch(() => {});
+    }
+  }
+
+  function respawn() {
+    playing = true;
+    bob = 0;
+    newBoss();
+    bossName.textContent = boss.type.name;
+  }
+
+  // ---- Частицы ---------------------------------------------------------------
+  function spawnParticles(x, y, n, color) {
+    for (let i = 0; i < n; i++) {
+      particles.push({
+        x: x, y: y,
+        vx: (Math.random() - 0.5) * 6,
+        vy: (Math.random() - 0.5) * 6 - 1,
+        s: 2 + Math.random() * 3,
+        life: 20 + Math.random() * 15,
+        color: color,
+      });
+    }
+  }
+  function spawnBursts(x, y, n, color) {
+    for (let i = 0; i < n; i++) {
+      particles.push({
+        x: x, y: y,
+        vx: (Math.random() - 0.5) * 14,
+        vy: -(2 + Math.random() * 12),
+        s: 3 + Math.random() * 4,
+        life: 40 + Math.random() * 25,
+        color: color,
+      });
+    }
+  }
+  function floText(x, y, text, color) {
+    floats.push({ x: x, y: y, text: text, color: color, life: 50, t: 0 });
+  }
+
+  // ---- Отрисовка пиксельного босса --------------------------------------------
+  function pRect(px, py, w, h, color) {
+    ctx.fillStyle = color;
+    ctx.fillRect(px, py, w, h);
+  }
+  function drawBoss(b) {
+    const cx = W / 2;
+    const bx = cx - BOSS_SIZE / 2;
+    const by = BOSS_Y - BOSS_SIZE / 2;
+    const s = BOSS_SIZE / 100; // базовый масштаб пикселя
+    const sc = b.scale;
+    const t = b.type;
+    ctx.save();
+    ctx.translate(cx, BOSS_Y);
+    ctx.scale(sc, sc);
+    ctx.translate(-cx, -BOSS_Y);
+    const bobY = Math.round(Math.sin(bob / 300) * 3) * s;
+    // тень
+    pRect(cx - 46 * s, BOSS_Y + 55 * s + bobY, 92 * s, 8 * s, 'rgba(0,0,0,0.4)');
+    // туловище (пальто в цвет фракции)
+    pRect(cx - 34 * s, BOSS_Y + 8 * s + bobY, 68 * s, 46 * s, t.coat);
+    pRect(cx - 34 * s, BOSS_Y + 8 * s + bobY, 68 * s, 6 * s, shade(t.coat, -30));
+    // голова
+    pRect(cx - 22 * s, by + 14 * s + bobY, 44 * s, 40 * s, t.skin);
+    // волосы
+    pRect(cx - 22 * s, by + 14 * s + bobY, 44 * s, 9 * s, t.hair);
+    if (t.name === 'donk') { // капюшон
+      pRect(cx - 26 * s, by + 8 * s + bobY, 52 * s, 10 * s, t.coat);
+      pRect(cx - 26 * s, by + 8 * s + bobY, 8 * s, 30 * s, t.coat);
+      pRect(cx + 18 * s, by + 8 * s + bobY, 8 * s, 30 * s, t.coat);
+    }
+    if (t.name === 'Elite Crew') { // полосатая бандана
+      pRect(cx - 22 * s, by + 14 * s + bobY, 44 * s, 6 * s, '#ff0033');
+      pRect(cx - 22 * s, by + 17 * s + bobY, 44 * s, 4 * s, '#ffffff');
+    }
+    // глаза (пиксельные)
+    pRect(cx - 16 * s, by + 26 * s + bobY, 8 * s, 8 * s, '#ffffff');
+    pRect(cx + 8 * s, by + 26 * s + bobY, 8 * s, 8 * s, '#ffffff');
+    pRect(cx - 13 * s, by + 28 * s + bobY, 4 * s, 4 * s, '#101014');
+    pRect(cx + 11 * s, by + 28 * s + bobY, 4 * s, 4 * s, '#101014');
+    // рот
+    pRect(cx - 8 * s, by + 42 * s + bobY, 16 * s, 4 * s, '#7a3a2a');
+    // акцент (прицел s1mple / нашивка)
+    pRect(cx + 22 * s, by + 12 * s + bobY, 10 * s, 10 * s, t.accent);
+    // руки
+    pRect(cx - 42 * s, BOSS_Y + 10 * s + bobY, 10 * s, 30 * s, t.coat);
+    pRect(cx + 32 * s, BOSS_Y + 10 * s + bobY, 10 * s, 30 * s, t.coat);
+    // ноги
+    pRect(cx - 12 * s, BOSS_Y + 50 * s + bobY, 10 * s, 10 * s, '#2a2a30');
+    pRect(cx + 2 * s, BOSS_Y + 50 * s + bobY, 10 * s, 10 * s, '#2a2a30');
+    ctx.restore();
+  }
+  function shade(hex, amt) {
+    let n = parseInt(hex.slice(1), 16);
+    let r = Math.max(0, Math.min(255, (n >> 16) + amt));
+    let g = Math.max(0, Math.min(255, ((n >> 8) & 0xff) + amt));
+    let b = Math.max(0, Math.min(255, (n & 0xff) + amt));
+    return 'rgb(' + r + ',' + g + ',' + b + ')';
+  }
+
+  function render() {
+    // фон — тёмный индустриальный бетон с пиксельным шумом
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = '#20242b';
+    ctx.fillRect(0, 0, W, H);
+    const g = ctx.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, '#2a2f38');
+    g.addColorStop(1, '#171a20');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, H);
+    // пиксельный шум
+    ctx.fillStyle = '#30363f';
+    for (let i = 0; i < 90; i++) {
+      const rx = (i * 37) % W, ry = ((i * 53 + 21) % H);
+      ctx.fillRect(rx, ry, 3, 3);
+    }
+    // кирпичная полоса (индустриальный бетон)
+    ctx.fillStyle = '#333940';
+    for (let y = 0; y < H; y += 26) {
+      ctx.fillRect(0, y, W, 2);
+    }
+    // тряска
+    if (shakeT > 0) {
+      const ox = (Math.random() - 0.5) * shakeAmp;
+      const oy = (Math.random() - 0.5) * shakeAmp;
+      ctx.translate(ox, oy);
+    }
+    // босс
+    if (playing && boss) {
+      if (flashT > 0) { ctx.save(); ctx.globalAlpha = 0.6; ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, W, H); ctx.restore(); }
+      drawBoss(boss);
+    } else if (!playing && boss) {
+      // анимация смерти: падение и растворение
+      const dt = (performance.now() - dieT) / 1000;
+      const fall = Math.min(dt * 120, 40);
+      const alpha = Math.max(0, 1 - dt);
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.translate(0, fall);
+      drawBoss(boss);
+      ctx.restore();
+    }
+    // частицы
+    for (let i = particles.length - 1; i >= 0; i--) {
+      const p = particles[i];
+      ctx.fillStyle = p.color;
+      ctx.fillRect(p.x - p.s / 2, p.y - p.s / 2, p.s, p.s);
+      p.x += p.vx; p.y += p.vy; p.vy += 0.3;
+      p.life -= 1;
+      if (p.life <= 0) particles.splice(i, 1);
+    }
+    // всплывающий текст
+    for (let i = floats.length - 1; i >= 0; i--) {
+      const f = floats[i];
+      f.t++; f.y -= 0.6;
+      ctx.fillStyle = f.color;
+      ctx.font = 'bold 14px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(f.text, f.x, f.y);
+      if (f.t >= f.life) floats.splice(i, 1);
+    }
+  }
+
+  // ---- Полоса HP / HUD обновление --------------------------------------------
+  function updateHud() {
+    if (!boss) { hpFill.style.width = '0%'; hpText.textContent = ''; return; }
+    const pct = Math.max(0, Math.min(100, (boss.hp / boss.maxHp) * 100));
+    hpFill.style.width = pct + '%';
+    hpText.textContent = boss.type.name + ' · ' + Math.max(0, Math.ceil(boss.hp)) + '/' + boss.maxHp;
+  }
+
+  let lastFrame = 0;
+  function frame(ts) {
+    if (ts - lastFrame > 16) {
+      lastFrame = ts;
+      bob++;
+      if (flashT > 0) flashT--;
+      if (shakeT > 0) shakeT--;
+      updateHud();
+      render();
+    }
+    if (killed >= 200) { finish(); return; }
+    if (!finished) rafId = requestAnimationFrame(frame);
+  }
+
+  let finished = false;
+  function finish() {
+    if (finished) return;
+    finished = true;
+    if (autoTimer) clearInterval(autoTimer);
+    if (rafId) cancelAnimationFrame(rafId);
+    // финальная отправка результата
+    api.post('/api/games/submit', {
+      game_id: game.id, score: killed, total: 200,
+      duration_ms: Date.now() - startTime,
+    }).then(syncProfile).catch(() => {});
+    view.innerHTML = '';
+    view.appendChild(backBtn(() => renderGames()));
+    view.appendChild(sectionTitle('quiz', lang === 'ru' ? game.title_ru : game.title));
+    const res = el('div', 'tap-result');
+    res.appendChild(el('div', 'tap-result-line', t('gm_tap_result').replace('{0}', killed)));
+    res.appendChild(el('div', 'tap-result-line', t('gm_tap_coins_earned').replace('{0}', coinsEarned)));
+    res.appendChild(el('div', 'tap-result-sub', t('gm_tap_coins').replace('{0}', save.coins)));
+    const again = el('button', 'link-btn');
+    again.appendChild(iconEl('refresh'));
+    again.appendChild(document.createTextNode(t('gm_play_again')));
+    again.addEventListener('click', () => startGame(game));
+    res.appendChild(again);
+    const stopBtn = el('button', 'link-btn');
+    stopBtn.appendChild(iconEl('back'));
+    stopBtn.appendChild(document.createTextNode(t('gm_back')));
+    stopBtn.addEventListener('click', () => { gamesCache = null; renderGames(); });
+    res.appendChild(stopBtn);
+    view.appendChild(res);
+  }
+
+  // кнопка завершить
+  const doneBar = el('div', 'tap-donebar');
+  const doneBtn = el('button', 'link-btn');
+  doneBtn.appendChild(iconEl('check'));
+  doneBtn.appendChild(document.createTextNode(t('gm_finish')));
+  doneBtn.addEventListener('click', finish);
+  doneBar.appendChild(doneBtn);
+  view.appendChild(doneBar);
+
+  rafId = requestAnimationFrame(frame);
   currentPage = () => startGame(game);
 }
 

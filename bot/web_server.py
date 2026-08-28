@@ -554,13 +554,8 @@ async def api_games_progress(request: web.Request) -> web.Response:
 
 # Anti-cheat правила для мини-игр: минимальное время на вопрос, лимит вопросов
 GAME_RULES: dict[str, dict] = {
-    "callouts": {"min_ms_per_question": 800, "max_total": 30},
-    "utility": {"min_ms_per_question": 600, "max_total": 15},
-    "economy": {"min_ms_per_question": 1000, "max_total": 10},
     "reaction": {"min_ms_per_question": 120, "max_total": 5},
-    "aim": {"min_ms_per_question": 250, "max_total": 15},
-    "whosaid": {"min_ms_per_question": 600, "max_total": 12},
-    "guessmap": {"min_ms_per_question": 800, "max_total": 10},
+    "tapboss": {"min_ms_per_question": 250, "max_total": 200},
 }
 DEFAULT_GAME_RULE = {"min_ms_per_question": 500, "max_total": 200}
 MAX_DURATION_MS = 24 * 60 * 60 * 1000
