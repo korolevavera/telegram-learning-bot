@@ -991,9 +991,6 @@ const TAB_DEFS = {
     if (team.slug) hero.appendChild(favBtn({ type: 'team', key: team.slug, name: team.name, image: team.image }));
     td.appendChild(hero);
 
-    const teamStory = storySection(team.bio_text);
-    if (teamStory) td.appendChild(teamStory);
-
     const s = team.stats || {};
     td.appendChild(sectionTitle('stats', t('stats_6m')));
     const grid = el('div', 's-grid');
@@ -1087,17 +1084,6 @@ const TAB_DEFS = {
     row.appendChild(el('div', 'b-lab', label));
     row.appendChild(el('div', 'b-val', value != null && value !== '' ? value : '—'));
     return row;
-  }
-
-  function storySection(text) {
-    if (!text) return null;
-    const story = el('div', 'bio-story');
-    const storyTitle = el('div', 'bio-story-title');
-    storyTitle.appendChild(iconEl('users'));
-    storyTitle.appendChild(document.createTextNode(t('story')));
-    story.appendChild(storyTitle);
-    story.appendChild(el('p', 'bio-story-text', text));
-    return story;
   }
 
   function teamRow(item) {
@@ -1217,8 +1203,13 @@ const TAB_DEFS = {
     if (!photos.children.length) photos.appendChild(el('p', 'muted-note', t('photo_unavail')));
 
     if (p.bio_text) {
-      const story = storySection(p.bio_text);
-      if (story) bioBox.appendChild(story);
+      const story = el('div', 'bio-story');
+      const storyTitle = el('div', 'bio-story-title');
+      storyTitle.appendChild(iconEl('users'));
+      storyTitle.appendChild(document.createTextNode(t('story')));
+      story.appendChild(storyTitle);
+      story.appendChild(el('p', 'bio-story-text', p.bio_text));
+      bioBox.appendChild(story);
     }
     bioBox.appendChild(photos);
 
@@ -1374,9 +1365,6 @@ const TAB_DEFS = {
     hero.appendChild(hinfo);
     if (p.id) hero.appendChild(favBtn({ type: 'faceit', key: p.id, name: p.nickname, image: p.image }));
     td.appendChild(hero);
-
-    const faceitStory = storySection(p.bio_text);
-    if (faceitStory) td.appendChild(faceitStory);
 
     td.appendChild(sectionTitle('users', t('f_bio')));
     const bio = el('div', 'b-list');
