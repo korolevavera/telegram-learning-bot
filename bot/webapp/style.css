@@ -2029,6 +2029,12 @@ html[data-theme="gurren"] .tab.active .tab-ico { filter: drop-shadow(0 0 8px rgb
 .tap-upg-ic { font-size: 18px; }
 .tap-upg-tx { font-size: 11px; text-align: center; line-height: 1.15; letter-spacing: .3px; }
 .tap-upg-pr { font-size: 12px; font-weight: 900; color: #ffd700; }
+.tap-upg-lv {
+  font-size: 10px; font-weight: 700; font-family: 'Courier New', monospace;
+  color: #9fb4d8; letter-spacing: .5px; line-height: 1;
+}
+.tap-shop4 { display: flex; gap: 8px; margin: 10px 0 4px; }
+.tap-shop4 .tap-upg { flex: 1; }
 .tap-line {
   text-align: center; font-family: 'Courier New', monospace; font-weight: 700;
   color: #9fb4d8; font-size: 13px; letter-spacing: 1px; margin: 4px 0;

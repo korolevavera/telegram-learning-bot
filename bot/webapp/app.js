@@ -223,8 +223,8 @@ const TAB_DEFS = {
       gm_react_start: 'НАЧАТЬ РАУНД',
       gm_tap_coins: 'Монеты: {0}', gm_tap_hp: 'HP',
       gm_tap_boss: 'Босс {0}', gm_tap_kills: 'Убито: {0}',
-      gm_tap_dmg_lv: 'Урон: {0}', gm_tap_crit_lv: 'Крит: {0}%', gm_tap_auto_lv: 'Автоклик: {0}',
-      gm_tap_buy_dmg: '+1 урон', gm_tap_buy_crit: '+5% крит', gm_tap_buy_auto: '+1 автоклик',
+      gm_tap_dmg_lv: 'Урон: {0}', gm_tap_crit_lv: 'Крит: {0}%', gm_tap_auto_lv: 'Автоклик: {0}', gm_tap_lv: 'ур. {0}',
+      gm_tap_buy_dmg: '+1 урон', gm_tap_buy_crit: '+5% крит', gm_tap_buy_auto: '+1 автоклик', gm_tap_buy_coin: '+2 монеты за убийство',
       gm_tap_headshot: 'HEADSHOT!', gm_tap_crit: 'КРИТ!',
       gm_tap_level: 'Уровень {0}', gm_tap_notenough: 'Не хватает монет',
       gm_tap_result: 'Боссы убиты: {0}', gm_tap_coins_earned: 'Монет заработано: {0}',
@@ -408,8 +408,8 @@ const TAB_DEFS = {
       gm_react_start: 'START ROUND',
       gm_tap_coins: 'Coins: {0}', gm_tap_hp: 'HP',
       gm_tap_boss: 'Boss {0}', gm_tap_kills: 'Killed: {0}',
-      gm_tap_dmg_lv: 'Damage: {0}', gm_tap_crit_lv: 'Crit: {0}%', gm_tap_auto_lv: 'Auto: {0}',
-      gm_tap_buy_dmg: '+1 damage', gm_tap_buy_crit: '+5% crit', gm_tap_buy_auto: '+1 auto',
+      gm_tap_dmg_lv: 'Damage: {0}', gm_tap_crit_lv: 'Crit: {0}%', gm_tap_auto_lv: 'Auto: {0}', gm_tap_lv: 'lv {0}',
+      gm_tap_buy_dmg: '+1 damage', gm_tap_buy_crit: '+5% crit', gm_tap_buy_auto: '+1 auto', gm_tap_buy_coin: '+2 coins per kill',
       gm_tap_headshot: 'HEADSHOT!', gm_tap_crit: 'CRIT!',
       gm_tap_level: 'Level {0}', gm_tap_notenough: 'Not enough coins',
       gm_tap_result: 'Bosses killed: {0}', gm_tap_coins_earned: 'Coins earned: {0}',
@@ -5637,115 +5637,133 @@ function startReactionGame(game) {
 }
 
 function startTapGame(game) {
-  // ---- Константы ------------------------------------------------------------
-  const W = 360, H = 440;
-  const BOSS_CY = 200;     // центр спрайта босса по Y
-  const SPRITE_W = 150;    // ширина спрайта
-  const SPRITE_H = 180;    // высота спрайта
-  const BOSS_X0 = W / 2 - SPRITE_W / 2; // левая грань спрайта
-  const BOSS_Y0 = BOSS_CY - SPRITE_H / 2; // верхняя грань спрайта
-  const HEAD_MULT = 4;     // множитель урона по голове
-  const COMBO_MS = 400;    // окно комбо между тапами
+  // ---------------------------------------------------------------- Константы
+  const W = 360, H = 460;
+  const SPRITE_W = 156, SPRITE_H = 200;
+  const BOSS_CX = W / 2;
+  const BOSS_Y0 = 138;                 // верх спрайта
+  const BOSS_X0 = BOSS_CX - SPRITE_W / 2;
+  const HEAD_MULT = 4;                 // множитель за попадение в голову
+  const COMBO_MS = 400;
   const SAVE_KEY = 'cs2_tapboss_save';
-  const COIN_MIN = 10, COIN_MAX = 20;
-  const DMG_MAX = 100, CRIT_MAX = 80, AUTO_MAX = 10;
+  const AUTO_MAX = 15, DMG_MAX = 120, CRIT_MAX = 90, BOOST_MAX = 12;
 
-  // Боссы с разными силуэтами (агенты CS:GO). Поля style включают детали.
+  // Стоимость прокачки растёт с уровнем
+  function costOf(key, lvl) {
+    const base = { dmg: 50, crit: 100, auto: 200, boost: 150 };
+    const step = { dmg: 35, crit: 50, auto: 90, boost: 70 };
+    return base[key] + (lvl - 1) * step[key];
+  }
+  function maxOf(key) {
+    return { dmg: DMG_MAX, crit: CRIT_MAX, auto: AUTO_MAX, boost: BOOST_MAX }[key];
+  }
+  // Награда за босса растёт (уровень босса = число убитых)
+  function coinGain() { return 10 + Math.min(killed, 20) + save.boost * 2; }
+
+  // ------------------------------------------------------------- Боссы (12 шт.)
+  // style: набор черт силуэта. Голова/плечи варируются по типу.
   const BOSS_TYPES = [
-    { name: 's1mple',  skin: '#f0c49a', hair: '#3a2a1a', coat: '#1a3a6b', accent: '#ffb000', style: 'headset' },
-    { name: 'donk',    skin: '#e8b98a', hair: '#17171c', coat: '#24252c', accent: '#9fb4d8', style: 'hood' },
-    { name: 'Phoenix', skin: '#f0c49a', hair: '#20292e', coat: '#b4552d', accent: '#ffd27a', style: 'bald' },
-    { name: 'FBI SWAT',skin: '#e8b98a', hair: '#0d0d12', coat: '#22417a', accent: '#ffffff', style: 'helmet' },
-    { name: 'Elite Crew', skin: '#d9a06a', hair: '#14140f', coat: '#4a4f2c', accent: '#ffe14d', style: 'bandana' },
+    { name: 's1mple',  skin: '#f2c69a', coat: '#1a3a6b', hair: '#3a2a1a', accent: '#ffb000', hat: 'headset', face: 0, wide: 0 },
+    { name: 'donk',    skin: '#e9ba8c', coat: '#23252d', hair: '#14151a', accent: '#9fb4d8', hat: 'hood',   face: 1, wide: 1 },
+    { name: 'Phoenix', skin: '#f2c69a', coat: '#b4552d', hair: '#20292e', accent: '#ffd27a', hat: 'bald',   face: 2, wide: 0 },
+    { name: 'FBI SWAT',skin: '#e9ba8c', coat: '#22417a', hair: '#0d0d12', accent: '#ffffff', hat: 'helmet', face: 1, wide: 1 },
+    { name: 'Elite C.',skin: '#d9a06a', coat: '#4a4f2c', hair: '#14140f', accent: '#ffe14d', hat: 'bandana',face: 2, wide: 0 },
+    { name: 'Guerrilla',skin: '#c79a66', coat: '#2e3326', hair: '#0d0d10', accent: '#e64b2e', hat: 'bandito',face: 1, wide: 1 },
+    { name: 'Pro',     skin: '#f2c69a', coat: '#1b1b20', hair: '#3a3a3f', accent: '#e8e6f0', hat: 'suit',   face: 0, wide: 0 },
+    { name: 'Blast',   skin: '#e9ba8c', coat: '#1f4a40', hair: '#0e1512', accent: '#37d6b0', hat: 'mask',   face: 3, wide: 0 },
+    { name: 'Balkan',  skin: '#d9a06a', coat: '#5a5440', hair: '#231b12', accent: '#d8b460', hat: 'cap',    face: 1, wide: 0 },
+    { name: 'Arctic',  skin: '#e3d6c3', coat: '#3b4556', hair: '#232a33', accent: '#cfd6e0', hat: 'mask',   face: 3, wide: 0 },
+    { name: 'Saboteur',skin: '#e2b98a', coat: '#52141b', hair: '#100d0e', accent: '#ff5030', hat: 'hood',   face: 1, wide: 1 },
+    { name: 'SAS',     skin: '#d9a06a', coat: '#20232a', hair: '#0a0a0d', accent: '#70c06a', hat: 'balaclava', face: 3, wide: 1 },
+    { name: 'GSG9',    skin: '#e9ba8c', coat: '#2e5a3a', hair: '#1a2218', accent: '#ffd95a', hat: 'beret',  face: 0, wide: 0 },
+    { name: 'GIGN',    skin: '#e9ba8c', coat: '#223a55', hair: '#1a2027', accent: '#ffffff', hat: 'helmet', face: 2, wide: 1 },
   ];
   function bossFor(i) { return BOSS_TYPES[i % BOSS_TYPES.length]; }
 
-  // ---- Прогрессия: растущие цены на прокачку (чтобы было что покупать) ------
-  function costOf(key, lvl) {
-    // текущий уровень = save[key]
-    if (key === 'dmg') return 50 + (lvl - 1) * 30;
-    if (key === 'crit') return 100 + (lvl - 1) * 45;
-    return 200 + (lvl - 1) * 80; // auto
-  }
-
-  // ---- Сохранение -----------------------------------------------------------
-  let save = { coins: 0, dmg: 1, crit: 0, auto: 0 };
+  // ---------------------------------------------------------------- Сохранение
+  let save = { coins: 0, dmg: 1, crit: 0, auto: 0, boost: 0 };
   try { const s = localStorage.getItem(SAVE_KEY); if (s) save = Object.assign(save, JSON.parse(s)); } catch (e) {}
   function persist() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch (e) {} }
 
-  // ---- Состояние раунда -----------------------------------------------------
+  // ---------------------------------------------------------------- Состояние
   let killed = 0, coinsEarned = 0;
-  let playing = true;
-  let dieT = 0, flashT = 0, shakeT = 0, shakeAmp = 0;
+  let playing = true, paused = false, finished = false;
+  let dieT = 0, flashT = 0, shakeT = 0, shakeAmp = 0, bossScaleT = 0;
   let lastTapAt = 0, combo = 0, comboMult = 1;
-  let bob = 0, rafId = 0, paused = false;
-  let boss = null, autoTimer = null;
-  const particles = [], floats = [];
+  let bob = 0, rafId = 0, respawnT = null, autoTimer = null;
+  let boss = null;
+  const particles = [], floats = [], dust = [];
   const startTime = Date.now();
 
   function newBoss() {
-    const hp = 50 + killed * 25 + Math.floor(Math.random() * 51);
-    boss = { type: bossFor(killed), hp: hp, maxHp: hp };
+    const hp = 45 + killed * 22 + Math.floor(Math.random() * 41);
+    boss = { type: bossFor(killed), idx: killed, hp: hp, maxHp: hp };
     flashT = 0; shakeT = 0; shakeAmp = 0; combo = 0; comboMult = 1;
   }
   newBoss();
 
-  // ---- HUD (верхняя панель) ------------------------------------------------
+  // пиксельная пыль на фоне (амбиент)
+  for (let i = 0; i < 40; i++) {
+    dust.push({ x: Math.random() * W, y: Math.random() * H, v: 0.2 + Math.random() * 0.5, s: 1 + (Math.random() < 0.3 ? 1 : 0) });
+  }
+
+  // ------------------------------------------------------------------- Звук
+  function sndBang() { try { ensureAudio(); noiseShot(0.09); } catch (e) {} }
+  function sndCrit() { try { ensureAudio(); tone(880, .09, 'square', .05, 1400, 0); } catch (e) {} }
+  function sndHead() { try { ensureAudio(); tone(1200, .12, 'square', .07, 1900, 0); } catch (e) {} }
+  function sndReload() { try { ensureAudio(); tone(520, .06, 'square', .05, 340, 0); } catch (e) {} }
+  function sndDie() { try { ensureAudio(); tone(300, .3, 'sawtooth', .1, 55, 0); } catch (e) {} }
+
+  // --------------------------------------------------------------------- HUD
   const hud = el('div', 'tap-hud');
-  const coinsChip = el('div', 'tap-chip tap-chip-coin');
-  coinsChip.innerHTML = '<span class="tap-coin">$</span><span id="tap-coins-val">' + save.coins + '</span>';
-  const runChip = el('div', 'tap-chip tap-chip-run');
-  runChip.innerHTML = '<span>+</span><span id="tap-run-val">0</span>';
-  const dmgChip = el('div', 'tap-chip tap-chip-stat');
-  dmgChip.innerHTML = '<span class="tap-stat-icon">🔨</span><span id="tap-dmg-val">' + save.dmg + '</span>';
-  hud.appendChild(coinsChip);
-  hud.appendChild(runChip);
-  hud.appendChild(dmgChip);
+  const c1 = el('div', 'tap-chip tap-chip-coin');
+  c1.innerHTML = '<span class="tap-coin">$</span><span id="tap-coins-val">' + save.coins + '</span>';
+  const c2 = el('div', 'tap-chip tap-chip-run');
+  c2.innerHTML = '<span>+</span><span id="tap-run-val">0</span>';
+  const c3 = el('div', 'tap-chip tap-chip-stat');
+  c3.innerHTML = '<span class="tap-stat-icon">🔨</span><span id="tap-dmg-val">' + save.dmg + '</span>';
+  hud.appendChild(c1); hud.appendChild(c2); hud.appendChild(c3);
   view.appendChild(hud);
 
   const comboBar = el('div', 'tap-combo');
   view.appendChild(comboBar);
 
-  // ---- Полоса HP ------------------------------------------------------------
   const hpWrap = el('div', 'tap-hpwrap');
   const hpFill = el('div', 'tap-hp');
   const hpText = el('span', 'tap-hptext', '');
-  hpWrap.appendChild(hpFill);
-  hpWrap.appendChild(hpText);
+  hpWrap.appendChild(hpFill); hpWrap.appendChild(hpText);
   view.appendChild(hpWrap);
 
   const subLine = el('div', 'tap-subline');
   const bossName = el('span', 'tap-bossname', boss.type.name);
   const killsSpan = el('span', 'tap-kills', t('gm_tap_kills').replace('{0}', killed));
-  subLine.appendChild(bossName);
-  subLine.appendChild(killsSpan);
+  subLine.appendChild(bossName); subLine.appendChild(killsSpan);
   view.appendChild(subLine);
 
-  // ---- Канвас ----------------------------------------------------------------
   const canvas = document.createElement('canvas');
   canvas.className = 'tap-canvas';
   canvas.width = W; canvas.height = H;
   const ctx = canvas.getContext('2d');
   view.appendChild(canvas);
 
-  // ---- Магазин (снизу) ------------------------------------------------------
-  const shop = el('div', 'tap-shop');
+  // ------------------------------------------------------------------ Магазин
+  const shop = el('div', 'tap-shop tap-shop4');
   const inv = [
-    { key: 'dmg',  icon: '🔨', txt: t('gm_tap_buy_dmg') },
-    { key: 'crit', icon: '💥', txt: t('gm_tap_buy_crit') },
-    { key: 'auto', icon: '🤖', txt: t('gm_tap_buy_auto') },
+    { key: 'dmg',   icon: '🔨', txt: t('gm_tap_buy_dmg') },
+    { key: 'crit',  icon: '💥', txt: t('gm_tap_buy_crit') },
+    { key: 'auto',  icon: '🤖', txt: t('gm_tap_buy_auto') },
+    { key: 'boost', icon: '💰', txt: t('gm_tap_buy_coin') },
   ];
   const shopBtns = {};
   inv.forEach(lb => {
     const b = el('button', 'tap-upg');
-    b.innerHTML = '<span class="tap-upg-ic">' + lb.icon + '</span><span class="tap-upg-tx">' + lb.txt + '</span><span class="tap-upg-pr" id="tap-pr-' + lb.key + '"></span>';
+    b.innerHTML = '<span class="tap-upg-ic">' + lb.icon + '</span><span class="tap-upg-tx">' + lb.txt + '</span><span class="tap-upg-lv" data-k="' + lb.key + '"></span><span class="tap-upg-pr" id="tap-pr-' + lb.key + '"></span>';
     b.addEventListener('click', () => buy(lb.key));
     shopBtns[lb.key] = b;
     shop.appendChild(b);
   });
   view.appendChild(shop);
 
-  // ---- Кнопка «Завершить» (всегда на виду) ----------------------------------
   const doneBar = el('div', 'tap-donebar');
   const doneBtn = el('button', 'tap-done');
   doneBtn.textContent = t('gm_finish');
@@ -5753,37 +5771,39 @@ function startTapGame(game) {
   doneBar.appendChild(doneBtn);
   view.appendChild(doneBar);
 
-  // ---- Звук (переиспользуем tone/noiseShot) ---------------------------------
-  function sndBang() { try { ensureAudio(); noiseShot(0.10); } catch (e) {} }
-  function sndCrit() { try { ensureAudio(); tone(880, .09, 'square', .05, 1400, 0); } catch (e) {} }
-  function sndHead() { try { ensureAudio(); tone(1200, .12, 'square', .07, 1900, 0); } catch (e) {} }
-  function sndReload() { try { ensureAudio(); tone(520, .06, 'square', .05, 340, 0); } catch (e) {} }
-  function sndDie() { try { ensureAudio(); tone(320, .28, 'sawtooth', .09, 60, 0); } catch (e) {} }
-
-  // ---- Магазин: покупка ------------------------------------------------------
+  // ----------------------------------------------------------------- Покупки
   function buy(key) {
-    const max = { dmg: DMG_MAX, crit: CRIT_MAX, auto: AUTO_MAX }[key];
-    if (save[key] >= max) { floText(W / 2, BOSS_Y0 + 30, 'MAX', '#ffffff'); haptic('heavy'); return; }
-    const price = costOf(key, save[key] + 1);
-    if (save.coins < price) { floText(W / 2, BOSS_Y0 + 30, t('gm_tap_notenough'), '#ff5566'); haptic('error'); return; }
+    const cur = save[key];
+    if (cur >= maxOf(key)) { floText(BOSS_CX, BOSS_Y0 + 20, 'MAX', '#ffffff'); haptic('heavy'); return; }
+    const price = costOf(key, cur + 1);
+    if (save.coins < price) { floText(BOSS_CX, BOSS_Y0 + 20, t('gm_tap_notenough'), '#ff5566'); haptic('heavy'); return; }
     save.coins -= price;
     if (key === 'dmg') save.dmg += 1;
     else if (key === 'crit') save.crit += 5;
-    else save.auto += 1;
+    else if (key === 'auto') { save.auto += 1; setupAuto(); }
+    else save.boost += 1;
     persist();
     console.log('[RELOAD] ' + key + ' -> ' + save[key]);
     sndReload(); haptic('light');
     refreshShop(); refreshHud();
-    floText(W / 2, BOSS_Y0 + 22, '+', '#ffd27a');
-    if (key === 'auto') setupAuto();
+    floText(BOSS_CX, BOSS_Y0 + 16, '+', '#ffd27a');
   }
 
+  // Автокликер: работает ТОЛЬКО если save.auto > 0 (фикс «сама тапает»)
   function setupAuto() {
-    if (autoTimer) clearInterval(autoTimer);
+    if (autoTimer) { clearInterval(autoTimer); autoTimer = null; }
+    if (save.auto <= 0) return;
     autoTimer = setInterval(() => {
       if (!playing || !boss || paused) return;
-      const dmg = Math.round(save.dmg * (Math.random() * 100 < save.crit ? 2 : 1));
-      hitBoss(dmg, false, false, W / 2 + (Math.random() * 40 - 20), BOSS_Y0 + 60);
+      let dmg = 0;
+      for (let i = 0; i < save.auto; i++) {
+        const hit = Math.round(save.dmg * (Math.random() * 100 < save.crit ? 2 : 1));
+        dmg += hit;
+      }
+      // попадания автокликера по корпусу, иногда в голову
+      const head = Math.random() < 0.2;
+      if (head) dmg *= HEAD_MULT;
+      hitBoss(dmg, BOSS_CX + (Math.random() * 60 - 30), head ? BOSS_Y0 + 14 : BOSS_Y0 + 70, true);
     }, 1000);
   }
   setupAuto();
@@ -5791,10 +5811,11 @@ function startTapGame(game) {
   function refreshShop() {
     inv.forEach(lb => {
       const b = shopBtns[lb.key];
-      const max = { dmg: DMG_MAX, crit: CRIT_MAX, auto: AUTO_MAX }[lb.key];
-      b.classList.toggle('tap-upg-max', save[lb.key] >= max);
+      b.classList.toggle('tap-upg-max', save[lb.key] >= maxOf(lb.key));
+      const lv = b.querySelector('.tap-upg-lv');
+      lv.textContent = t('gm_tap_lv').replace('{0}', save[lb.key]);
       const pr = b.querySelector('.tap-upg-pr');
-      pr.textContent = save[lb.key] >= max ? 'MAX' : costOf(lb.key, save[lb.key] + 1) + ' $';
+      pr.textContent = save[lb.key] >= maxOf(lb.key) ? 'MAX' : costOf(lb.key, save[lb.key] + 1) + ' $';
     });
   }
   function refreshHud() {
@@ -5803,7 +5824,7 @@ function startTapGame(game) {
     document.getElementById('tap-dmg-val').textContent = save.dmg;
   }
 
-  // ---- Ввод: тап/клик -------------------------------------------------------
+  // ---------------------------------------------------------------------- Ввод
   function tapPos(e) {
     const r = canvas.getBoundingClientRect();
     const ex = (e.touches && e.touches[0]) ? e.touches[0].clientX : e.clientX;
@@ -5814,79 +5835,77 @@ function startTapGame(game) {
     if (!playing || !boss) return;
     e.preventDefault();
     const p = tapPos(e);
-    // за границами спрайта — промах (сбрасывает комбо)
-    if (p.x < BOSS_X0 || p.x > BOSS_X0 + SPRITE_W || p.y < BOSS_Y0 || p.y > BOSS_Y0 + SPRITE_H) {
-      combo = 0; comboMult = 1; updateCombo(); return;
-    }
-    // зона головы: верхняя треть спрайта
-    const head = p.y < BOSS_Y0 + SPRITE_H * 0.34;
-    // комбо
+    const inBox = p.x >= BOSS_X0 && p.x <= BOSS_X0 + SPRITE_W && p.y >= BOSS_Y0 && p.y <= BOSS_Y0 + SPRITE_H;
+    if (!inBox) { combo = 0; comboMult = 1; reduceCombo(); return; }
+    const head = p.y < BOSS_Y0 + SPRITE_H * 0.32;
     const now = Date.now();
-    if (now - lastTapAt < COMBO_MS) combo++; else combo = 1;
+    combo = (now - lastTapAt < COMBO_MS) ? combo + 1 : 1;
     lastTapAt = now;
-    comboMult = Math.min(6, 1 + Math.floor(combo / 4));
+    comboMult = Math.min(7, 1 + Math.floor(combo / 4));
     let dmg = save.dmg;
     if (head) dmg *= HEAD_MULT;
     if (Math.random() * 100 < save.crit) { dmg *= 2; sndCrit(); }
     dmg *= comboMult;
     dmg = Math.round(dmg);
     sndBang();
-    haptic(head || combo >= 8 ? 'heavy' : 'light');
-    // числа урона на КАЖДЫЙ тап
-    const color = head ? '#ff0033' : (comboMult > 2 ? '#ffb000' : '#ffd27a');
-    spawnParticles(p.x, p.y, head ? 12 : 7, color);
-    floats.push({ x: p.x, y: p.y - 4, text: '-' + dmg + (head ? '!' : ''), color: color, big: head, life: 45, t: 0 });
+    haptic(head || combo >= 12 ? 'heavy' : 'light');
+    const color = head ? '#ff3344' : (comboMult > 2 ? '#ffb000' : '#ffd27a');
+    burst(p.x, p.y, head ? 14 : 8, color);
+    floats.push({ x: p.x, y: p.y - 6, text: '-' + dmg + (head ? '!' : ''), color: color, big: head, life: 46, t: 0 });
     if (head) sndHead();
-    unshrinkBoss();
-    hitBoss(dmg, true, head, p.x, p.y);
-    updateCombo();
+    flashT = 120; shakeT = head ? 9 : 5; shakeAmp = head ? 6 : 3; bossScaleT = 5;
+    reduceCombo();
+    hitBoss(dmg, p.x, p.y, false);
   }
   canvas.addEventListener('mousedown', onTap);
   canvas.addEventListener('touchstart', onTap, { passive: false });
 
-  function unshrinkBoss() { bossScaleT = 4; }
-
-  function hitBoss(dmgHit, fromPlayer, head, px, py) {
+  function hitBoss(dmgHit, px, py, autoHit) {
     if (!playing || !boss) return;
     boss.hp -= dmgHit;
-    flashT = 120; shakeT = head ? 10 : 6; shakeAmp = head ? 6 : 3;
+    if (autoHit) { flashesDamage(px, py); }
     if (boss.hp <= 0) {
-      boss.hp = 0;
-      playing = false;
-      dieT = performance.now();
-      killed++;
-      const gain = COIN_MIN + Math.floor(Math.random() * (COIN_MAX - COIN_MIN + 1));
-      save.coins += gain; coinsEarned += gain;
-      persist(); refreshHud(); refreshShop();
-      spawnBursts(W / 2, BOSS_Y0 + SPRITE_H / 2, 30, boss.type.accent);
-      sndDie(); haptic('heavy');
-      killsSpan.textContent = t('gm_tap_kills').replace('{0}', killed);
-      setTimeout(respawn, 850);
+      killBoss();
     }
   }
+  function killBoss() {
+    boss.hp = 0;
+    playing = false;
+    dieT = performance.now();
+    killed++;
+    const gain = coinGain();
+    save.coins += gain; coinsEarned += gain;
+    persist(); refreshHud(); refreshShop();
+    bigBurst(BOSS_CX, BOSS_Y0 + SPRITE_H / 2, boss.type.accent);
+    sndDie(); haptic('heavy');
+    killsSpan.textContent = t('gm_tap_kills').replace('{0}', killed);
+    if (respawnT) clearTimeout(respawnT);
+    respawnT = setTimeout(spawnNext, 880);
+  }
+  function spawnNext() {
+    if (finished) return;
+    playing = true;
+    newBoss();
+    bossName.textContent = boss.type.name;
+    updateHud();
+    respawnT = null;
+  }
 
-  function respawn() { playing = true; newBoss(); bossName.textContent = boss.type.name; }
-
-  // ---- Частицы ---------------------------------------------------------------
-  function spawnParticles(x, y, n, color) {
+  // ---------------------------------------------------------------- Частицы
+  function burst(x, y, n, color) {
     for (let i = 0; i < n; i++) {
-      particles.push({
-        x: x, y: y, vx: (Math.random() - 0.5) * 6, vy: (Math.random() - 0.5) * 6 - 1,
-        s: 2 + Math.random() * 3, life: 20 + Math.random() * 15, color: color,
-      });
+      particles.push({ x, y, vx: (Math.random() - .5) * 6, vy: (Math.random() - .5) * 6 - 1, s: 2 + Math.random() * 3, life: 20 + Math.random() * 15, color });
     }
   }
-  function spawnBursts(x, y, n, color) {
-    for (let i = 0; i < n; i++) {
-      particles.push({
-        x: x, y: y, vx: (Math.random() - 0.5) * 14, vy: -(2 + Math.random() * 12),
-        s: 3 + Math.random() * 4, life: 40 + Math.random() * 25, color: color,
-      });
+  function bigBurst(x, y, color) {
+    for (let i = 0; i < 34; i++) {
+      particles.push({ x, y, vx: (Math.random() - .5) * 15, vy: -(2 + Math.random() * 13), s: 3 + Math.random() * 5, life: 42 + Math.random() * 26, color });
     }
   }
-  function floText(x, y, text, color) { floats.push({ x: x, y: y, text: text, color: color, big: false, life: 45, t: 0 }); }
+  function flashesDamage(x, y) { burst(x, y, 4, '#9fb4d8'); }
+  function floText(x, y, text, color) { floats.push({ x, y, text, color, big: false, life: 46, t: 0 }); }
 
-  // ---- Отрисовка пиксельного босса (у каждого свой силуэт) ---------------------
+  // ---------------------------------------------------- Канвас-хелперы (пиксель)
   function shade(hex, amt) {
     const n = parseInt(hex.slice(1), 16);
     const r = Math.max(0, Math.min(255, (n >> 16) + amt));
@@ -5894,167 +5913,232 @@ function startTapGame(game) {
     const b = Math.max(0, Math.min(255, (n & 0xff) + amt));
     return 'rgb(' + r + ',' + g + ',' + b + ')';
   }
-  function drawBoss(b) {
-    const sx = BOSS_X0, sy = BOSS_Y0; // база спрайта
-    const u = SPRITE_W / 100; // единичный «пиксель»
-    const st = b.type.style;
-    const bobY = 0;
-    // тень
-    ctx.fillStyle = 'rgba(0,0,0,0.4)';
-    ctx.fillRect(sx + 12 * u, BOSS_Y0 + SPRITE_H, 76 * u, 7 * u);
-    // ноги
-    ctx.fillStyle = '#25262c';
-    ctx.fillRect(sx + 30 * u, sy + 150 * u + bobY, 16 * u, 22 * u);
-    ctx.fillRect(sx + 54 * u, sy + 150 * u + bobY, 16 * u, 22 * u);
-    // туловище (пальто)
-    ctx.fillStyle = b.type.coat;
-    ctx.fillRect(sx + 22 * u, sy + 66 * u + bobY, 56 * u, 86 * u);
-    ctx.fillStyle = shade(b.type.coat, -28);
-    ctx.fillRect(sx + 22 * u, sy + 66 * u + bobY, 56 * u, 6 * u);
-    // плечи-вставка
-    ctx.fillStyle = shade(b.type.coat, 24);
-    ctx.fillRect(sx + 34 * u, sy + 66 * u + bobY, 32 * u, 12 * u);
-    // руки
-    ctx.fillStyle = b.type.coat;
-    ctx.fillRect(sx + 14 * u, sy + 70 * u + bobY, 10 * u, 40 * u);
-    ctx.fillRect(sx + 76 * u, sy + 70 * u + bobY, 10 * u, 40 * u);
-    ctx.fillStyle = b.type.skin;
-    ctx.fillRect(sx + 12 * u, sy + 104 * u + bobY, 8 * u, 12 * u);
-    ctx.fillRect(sx + 80 * u, sy + 104 * u + bobY, 8 * u, 12 * u);
-    // голова
-    ctx.fillStyle = b.type.skin;
-    ctx.fillRect(sx + 26 * u, sy + 22 * u + bobY, 48 * u, 46 * u);
-    // детали головы по силуэту
-    if (st === 'hood') { // donk: капюшон
-      ctx.fillStyle = b.type.coat;
-      ctx.fillRect(sx + 20 * u, sy + 12 * u + bobY, 60 * u, 12 * u);
-      ctx.fillRect(sx + 20 * u, sy + 12 * u + bobY, 8 * u, 34 * u);
-      ctx.fillRect(sx + 72 * u, sy + 12 * u + bobY, 8 * u, 34 * u);
-    } else if (st === 'bandana') { // Elite Crew: полосатая бандана
-      ctx.fillStyle = '#ff0033';
-      ctx.fillRect(sx + 24 * u, sy + 20 * u + bobY, 52 * u, 6 * u);
-      ctx.fillStyle = '#fff';
-      ctx.fillRect(sx + 24 * u, sy + 24 * u + bobY, 52 * u, 3 * u);
-      ctx.fillStyle = '#ff0033';
-      ctx.fillRect(sx + 28 * u, sy + 20 * u + bobY, 10 * u, 6 * u);
-      ctx.fillRect(sx + 62 * u, sy + 20 * u + bobY, 10 * u, 6 * u);
-      ctx.fillStyle = b.type.accent;
-      ctx.fillRect(sx + 12 * u, sy + 26 * u + bobY, 6 * u, 6 * u);
-    } else if (st === 'helmet') { // FBI SWAT: шлем + щит
-      ctx.fillStyle = b.type.coat;
-      ctx.fillRect(sx + 20 * u, sy + 14 * u + bobY, 60 * u, 16 * u);
-      ctx.fillRect(sx + 18 * u, sy + 20 * u + bobY, 8 * u, 6 * u);
-      ctx.fillRect(sx + 74 * u, sy + 20 * u + bobY, 8 * u, 6 * u);
-      ctx.fillStyle = '#15181f'; // забрало
-      ctx.fillRect(sx + 26 * u, sy + 30 * u + bobY, 48 * u, 6 * u);
-      // щит
-      ctx.fillStyle = b.type.coat;
-      ctx.fillRect(sx + 78 * u, sy + 78 * u + bobY, 10 * u, 46 * u);
-      ctx.fillStyle = '#fff';
-      ctx.fillRect(sx + 78 * u, sy + 78 * u + bobY, 10 * u, 4 * u);
-    } else if (st === 'headset') { // s1mple: гарнитура + прицел
-      ctx.fillStyle = '#101014';
-      ctx.fillRect(sx + 18 * u, sy + 14 * u + bobY, 10 * u, 20 * u);
-      ctx.fillRect(sx + 72 * u, sy + 14 * u + bobY, 10 * u, 20 * u);
-      ctx.fillStyle = shade(b.type.hair, 0);
-      ctx.fillRect(sx + 26 * u, sy + 18 * u + bobY, 48 * u, 8 * u);
-      ctx.fillStyle = b.type.accent; // прицел
-      ctx.fillRect(sx + 66 * u, sy + 8 * u + bobY, 8 * u, 8 * u);
-      ctx.fillStyle = '#000';
-      ctx.fillRect(sx + 68 * u, sy + 10 * u + bobY, 2 * u, 2 * u);
-      ctx.fillRect(sx + 68 * u, sy + 14 * u + bobY, 2 * u, 2 * u);
-      ctx.fillRect(sx + 70 * u, sy + 12 * u + bobY, 2 * u, 2 * u);
-    } else { // Phoenix: лысый
-      ctx.fillStyle = b.type.skin;
-      ctx.fillRect(sx + 26 * u, sy + 16 * u + bobY, 48 * u, 8 * u);
+  function rect(x, y, w, h, col) { ctx.fillStyle = col; ctx.fillRect(x | 0, y | 0, w | 0, h | 0); }
+
+  // --------------------------------------------------------- Отрисовка фона
+  function drawBg() {
+    // тёмный промышленный цех с перспективным полом
+    const g = ctx.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, '#22262e');
+    g.addColorStop(0.55, '#191c23');
+    g.addColorStop(1, '#101216');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    // стена: кирпичная кладка (дизерингом)
+    for (let y = 0; y < 210; y += 18) {
+      for (let x = 0; x < W; x += 30) {
+        ctx.fillStyle = ((x / 30 + y / 18) & 1) ? '#262b33' : '#23282f';
+        ctx.fillRect(x, y, 30, 18);
+      }
     }
-    // лицо: глаза и рот (у всех)
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(sx + 30 * u, sy + 34 * u + bobY, 8 * u, 9 * u);
-    ctx.fillRect(sx + 62 * u, sy + 34 * u + bobY, 8 * u, 9 * u);
-    ctx.fillStyle = '#101014';
-    ctx.fillRect(sx + 33 * u, sy + 37 * u + bobY, 3 * u, 3 * u);
-    ctx.fillRect(sx + 65 * u, sy + 37 * u + bobY, 3 * u, 3 * u);
-    ctx.fillStyle = '#6b2d1d';
-    ctx.fillRect(sx + 34 * u, sy + 52 * u + bobY, 32 * u, 5 * u);
-    // эмблема фракции на груди
-    ctx.fillStyle = b.type.accent;
-    ctx.fillRect(sx + 44 * u, sy + 84 * u + bobY, 12 * u, 12 * u);
+    // бетонная штукатурка
+    ctx.fillStyle = 'rgba(40,46,55,0.6)';
+    ctx.fillRect(0, 0, W, 210);
+    // тёмная панель по верху с трещиной
+
+    rect(0, 0, W, 30, '#1b1f26');
+    rect(0, 0, W, 4, '#2d333c');
+    ctx.fillStyle = '#12151a';
+    ctx.fillRect(44, 8, 120, 2);
+    ctx.fillRect(90, 10, 2, 14);
+    ctx.fillRect(300, 6, 40, 3);
+    // пол с перспективными линиями
+    ctx.fillStyle = '#14161a';
+    ctx.fillRect(0, 250, W, H - 250);
+    ctx.strokeStyle = 'rgba(60,70,82,0.5)';
+    ctx.lineWidth = 1;
+    const horizon = 250;
+    for (let i = -4; i <= 4; i++) {
+      ctx.beginPath();
+      ctx.moveTo(BOSS_CX + i * 60, 250);
+      ctx.lineTo(BOSS_CX + i * 260, H);
+      ctx.stroke();
+    }
+    for (let j = 1; j <= 4; j++) {
+      const yy = horizon + (H - horizon) * (j / 5);
+      ctx.beginPath(); ctx.moveTo(0, yy); ctx.lineTo(W, yy); ctx.stroke();
+    }
+    // стойка/постамент под ногами босса (ноги ~ y=412)
+    const pedTop = BOSS_Y0 + 262;
+    ctx.fillStyle = '#1c1f25';
+    ctx.fillRect(BOSS_X0 - 24, pedTop, SPRITE_W + 48, 34);
+    ctx.fillStyle = '#2a2f38';
+    ctx.fillRect(BOSS_X0 - 24, pedTop, SPRITE_W + 48, 5);
+    ctx.fillStyle = '#0d0f13';
+    ctx.fillRect(BOSS_X0 - 24, pedTop + 30, SPRITE_W + 48, 4);
+    rect(BOSS_X0 - 40, pedTop + 6, 16, 22, '#111318');
+    rect(BOSS_X0 + SPRITE_W + 24, pedTop + 6, 16, 22, '#111318');
+    // виньетка
+    const v = ctx.createRadialGradient(BOSS_CX, H * 0.45, 80, BOSS_CX, H * 0.5, 300);
+    v.addColorStop(0, 'rgba(0,0,0,0)');
+    v.addColorStop(1, 'rgba(0,0,0,0.55)');
+    ctx.fillStyle = v; ctx.fillRect(0, 0, W, H);
+    // амбиентная пыль
+    ctx.fillStyle = 'rgba(200,210,225,0.35)';
+    dust.forEach(d => { ctx.fillRect(d.x | 0, d.y | 0, d.s, d.s); });
   }
 
-  let bossScaleT = 0; // лёгкая «просадка» босса при ударе
+  // -------------------------------------------------------- Отрисовка босса
+  function drawFace(t, sx, sy, u, bobY) {
+    // глаза
+    rect(sx + 30 * u, sy + 36 * u + bobY, 9 * u, 10 * u, '#ffffff');
+    rect(sx + 61 * u, sy + 36 * u + bobY, 9 * u, 10 * u, '#ffffff');
+    rect(sx + 33 * u, sy + 39 * u + bobY, 4 * u, 4 * u, '#14161c');
+    rect(sx + 64 * u, sy + 39 * u + bobY, 4 * u, 4 * u, '#14161c');
+    // рот
+    rect(sx + 36 * u, sy + 56 * u + bobY, 28 * u, 4 * u, '#6b2d1d');
+    if (t.face === 1) { // усы
+      rect(sx + 30 * u, sy + 52 * u + bobY, 40 * u, 4 * u, shade(t.skin, -40));
+    } else if (t.face === 2) { // борода
+      rect(sx + 30 * u, sy + 52 * u + bobY, 40 * u, 8 * u, shade(t.skin, -50));
+    }
+  }
+  function drawBoss(b) {
+    const t = b.type;
+    const sx = BOSS_X0, sy = BOSS_Y0;
+    const u = SPRITE_W / 100;
+    const bobY = Math.round(Math.sin(bob / 320) * 3);
+    const wider = t.wide ? 8 : 0; // широкие плечи
+    // тень (мягкая)
+    for (let i = 5; i > 0; i--) {
+      ctx.fillStyle = 'rgba(0,0,0,' + (0.05 * (6 - i)) + ')';
+      ctx.fillRect(BOSS_X0 + 6 * u, BOSS_Y0 + SPRITE_H - i * 2, SPRITE_W - 12 * u, 10 + i * 2);
+    }
+    // ноги
+    rect(sx + 30 * u, sy + 148 * u + bobY, 17 * u, 30 * u, '#1a1c20');
+    rect(sx + 53 * u, sy + 148 * u + bobY, 17 * u, 30 * u, '#1a1c20');
+    rect(sx + 30 * u, sy + 176 * u + bobY, 17 * u, 6 * u, '#0e0f12');
+    rect(sx + 53 * u, sy + 176 * u + bobY, 17 * u, 6 * u, '#0e0f12');
+    // туловище с бликом и тенью
+    rect(sx + (20 - wider) * u, sy + 62 * u + bobY, (60 + wider * 2) * u, 88 * u, shade(t.coat, -20));
+    rect(sx + (22 - wider) * u, sy + 64 * u + bobY, (56 + wider * 2) * u, 84 * u, t.coat);
+    rect(sx + (22 - wider) * u, sy + 64 * u + bobY, (56 + wider * 2) * u, 6 * u, shade(t.coat, 34));
+    rect(sx + (24 - wider) * u, sy + 130 * u + bobY, (52 + wider * 2) * u, 8 * u, shade(t.coat, -34));
+    // бронежилет / нашивки
+    rect(sx + (30 - wider) * u, sy + 70 * u + bobY, (40 + wider * 2) * u, 30 * u, shade(t.coat, 14));
+    rect(sx + (32 - wider) * u, sy + 72 * u + bobY, 6 * u, 26 * u, t.accent);
+    rect(sx + (62 + wider) * u, sy + 72 * u + bobY, 6 * u, 26 * u, t.accent);
+    // руки
+    rect(sx + (10 - wider) * u, sy + 66 * u + bobY, 12 * u, 44 * u, t.coat);
+    rect(sx + (78 + wider) * u, sy + 66 * u + bobY, 12 * u, 44 * u, t.coat);
+    rect(sx + (8 - wider) * u, sy + 104 * u + bobY, 10 * u, 13 * u, t.skin);
+    rect(sx + (82 + wider) * u, sy + 104 * u + bobY, 10 * u, 13 * u, t.skin);
+    // шея
+    rect(sx + 42 * u, sy + 54 * u + bobY, 16 * u, 12 * u, shade(t.skin, -24));
+    // голова с обводкой
+    rect(sx + 23 * u, sy + 18 * u + bobY, 54 * u, 48 * u, shade(t.skin, -34));
+    rect(sx + 26 * u, sy + 20 * u + bobY, 48 * u, 44 * u, t.skin);
+    // причёска/головной убор
+    const hat = t.hat;
+    if (hat === 'headset') { // s1mple: гарнитура
+      rect(sx + 16 * u, sy + 12 * u + bobY, 12 * u, 24 * u, '#0d0d10');
+      rect(sx + 72 * u, sy + 12 * u + bobY, 12 * u, 24 * u, '#0d0d10');
+      rect(sx + 26 * u, sy + 16 * u + bobY, 48 * u, 8 * u, t.hair);
+    } else if (hat === 'hood') { // капюшон
+      rect(sx + 18 * u, sy + 8 * u + bobY, 64 * u, 16 * u, t.coat);
+      rect(sx + 18 * u, sy + 8 * u + bobY, 10 * u, 34 * u, t.coat);
+      rect(sx + 72 * u, sy + 8 * u + bobY, 10 * u, 34 * u, t.coat);
+      rect(sx + 22 * u, sy + 8 * u + bobY, 56 * u, 4 * u, shade(t.coat, 26));
+    } else if (hat === 'bandana') {
+      rect(sx + 24 * u, sy + 18 * u + bobY, 52 * u, 6 * u, '#ff0033');
+      rect(sx + 24 * u, sy + 23 * u + bobY, 52 * u, 3 * u, '#ffffff');
+      rect(sx + 12 * u, sy + 24 * u + bobY, 8 * u, 6 * u, '#ff0033');
+      rect(sx + 10 * u, sy + 26 * u + bobY, 6 * u, 4 * u, t.accent);
+      rect(sx + 26 * u, sy + 16 * u + bobY, 48 * u, 5 * u, t.hair);
+    } else if (hat === 'bandito') {
+      rect(sx + 22 * u, sy + 14 * u + bobY, 56 * u, 7 * u, '#a62a12');
+      rect(sx + 26 * u, sy + 12 * u + bobY, 48 * u, 4 * u, '#c0392b');
+      rect(sx + 26 * u, sy + 18 * u + bobY, 48 * u, 4 * u, t.hair);
+    } else if (hat === 'helmet') {
+      rect(sx + 20 * u, sy + 12 * u + bobY, 60 * u, 16 * u, t.coat);
+      rect(sx + 18 * u, sy + 18 * u + bobY, 8 * u, 6 * u, t.coat);
+      rect(sx + 74 * u, sy + 18 * u + bobY, 8 * u, 6 * u, t.coat);
+      rect(sx + 26 * u, sy + 26 * u + bobY, 48 * u, 6 * u, '#141720');
+      rect(sx + 20 * u, sy + 12 * u + bobY, 60 * u, 4 * u, shade(t.coat, 30));
+    } else if (hat === 'mask' || hat === 'balaclava') {
+      rect(sx + 22 * u, sy + 14 * u + bobY, 56 * u, 10 * u, hat === 'mask' ? t.hair : '#0c0d10');
+      rect(sx + 26 * u, sy + 26 * u + bobY, 48 * u, 34 * u, hat === 'mask' ? shade(t.skin, -18) : '#0c0d10');
+      // глаза на маске
+      rect(sx + 30 * u, sy + 32 * u + bobY, 9 * u, 8 * u, '#ffffff');
+      rect(sx + 61 * u, sy + 32 * u + bobY, 9 * u, 8 * u, '#ffffff');
+      rect(sx + 33 * u, sy + 34 * u + bobY, 3 * u, 3 * u, '#000');
+      rect(sx + 64 * u, sy + 34 * u + bobY, 3 * u, 3 * u, '#000');
+    } else if (hat === 'suit') { // костюм + галстук
+      rect(sx + 26 * u, sy + 14 * u + bobY, 48 * u, 8 * u, t.hair);
+      rect(sx + 42 * u, sy + 66 * u + bobY, 16 * u, 34 * u, '#c33');
+    } else if (hat === 'cap') {
+      rect(sx + 22 * u, sy + 14 * u + bobY, 56 * u, 8 * u, t.coat);
+      rect(sx + 24 * u, sy + 14 * u + bobY, 52 * u, 3 * u, shade(t.coat, 30));
+      rect(sx + 30 * u, sy + 12 * u + bobY, 22 * u, 4 * u, '#b39a4a');
+    } else if (hat === 'beret') {
+      rect(sx + 22 * u, sy + 14 * u + bobY, 56 * u, 6 * u, t.coat);
+      rect(sx + 26 * u, sy + 14 * u + bobY, 48 * u, 4 * u, shade(t.coat, -30));
+      rect(sx + 36 * u, sy + 12 * u + bobY, 16 * u, 4 * u, t.accent);
+    } else { // bald (Phoenix)
+      rect(sx + 26 * u, sy + 16 * u + bobY, 48 * u, 8 * u, shade(t.skin, -10));
+    }
+    // лицо (если не маска)
+    if (hat !== 'mask' && hat !== 'balaclava') drawFace(t, sx, sy, u, bobY);
+    // эмблема на груди
+    rect(sx + 44 * u, sy + 104 * u + bobY, 12 * u, 12 * u, t.accent);
+    rect(sx + 46 * u, sy + 106 * u + bobY, 8 * u, 8 * u, '#101216');
+  }
 
+  // ------------------------------------------------------------------- Кадр
   function render() {
     ctx.clearRect(0, 0, W, H);
-    // фон: индустриальный бетон, лёгкий градиент
-    const g = ctx.createLinearGradient(0, 0, 0, H);
-    g.addColorStop(0, '#2b303a');
-    g.addColorStop(1, '#16181e');
-    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
-    // пиксельный шум-«бетон»
-    ctx.fillStyle = '#333a45';
-    for (let i = 0; i < 120; i++) ctx.fillRect((i * 41 + 7) % W, (i * 71 + 13) % H, 3, 3);
-    // тонкая сетка-панель
-    ctx.fillStyle = '#262b34';
-    for (let y = 0; y < H; y += 22) ctx.fillRect(0, y, W, 1);
-    // тряска экрана
-    if (shakeT > 0) ctx.translate((Math.random() - 0.5) * shakeAmp, (Math.random() - 0.5) * shakeAmp);
-    // босс: лёгкая просадка при ударе (scale возвращается к 1)
+    drawBg();
+    if (shakeT > 0) ctx.translate((Math.random() - .5) * shakeAmp, (Math.random() - .5) * shakeAmp);
+    // подсветка зоны головы (подсказка)
+    ctx.strokeStyle = 'rgba(255,40,60,0.35)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(BOSS_X0, BOSS_Y0, SPRITE_W, SPRITE_H * 0.32);
     if (boss) {
       if (bossScaleT > 0) {
         bossScaleT--;
-        const sc = 1 - Math.min(0.06, bossScaleT * 0.02);
-        ctx.translate(W / 2, BOSS_CY);
+        const sc = 1 - Math.min(0.06, bossScaleT * 0.015);
+        ctx.translate(BOSS_CX, BOSS_Y0 + SPRITE_H / 2);
         ctx.scale(sc, sc);
-        ctx.translate(-W / 2, -BOSS_CY);
+        ctx.translate(-BOSS_CX, -(BOSS_Y0 + SPRITE_H / 2));
       }
       if (playing) {
-        if (flashT > 0) { ctx.save(); ctx.globalAlpha = 0.5; ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H); ctx.restore(); }
+        if (flashT > 0) { ctx.save(); ctx.globalAlpha = 0.35; ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H); ctx.restore(); }
         drawBoss(boss);
       } else {
-        const dt = (performance.now() - dieT) / 1000;
-        const fall = Math.min(dt * 110, 46);
-        const alpha = Math.max(0, 1 - dt * 1.1);
+        const dt = Math.min((performance.now() - dieT) / 1000, 1);
+        const fall = dt * 90;
+        const alpha = Math.max(0, 1 - dt * 1.3);
         ctx.save(); ctx.globalAlpha = alpha; ctx.translate(0, fall); drawBoss(boss); ctx.restore();
       }
-      // подсветка зоны головы (подсказка)
-      ctx.strokeStyle = 'rgba(255,0,51,0.28)';
-      ctx.lineWidth = 1;
-      ctx.strokeRect(BOSS_X0, BOSS_Y0, SPRITE_W, SPRITE_H * 0.34);
     }
     // частицы
     for (let i = particles.length - 1; i >= 0; i--) {
       const p = particles[i];
+      ctx.globalAlpha = Math.min(1, p.life / 20);
       ctx.fillStyle = p.color;
       ctx.fillRect(p.x - p.s / 2, p.y - p.s / 2, p.s, p.s);
+      ctx.globalAlpha = 1;
       p.x += p.vx; p.y += p.vy; p.vy += 0.3; p.life--;
       if (p.life <= 0) particles.splice(i, 1);
     }
-    // всплывающий текст (числа урона + метки)
+    // числа урона с обводкой
     for (let i = floats.length - 1; i >= 0; i--) {
       const f = floats[i];
-      f.t++; f.y -= (f.big ? 0.9 : 0.7);
-      ctx.fillStyle = f.color;
-      ctx.font = (f.big ? 'bold 20px' : 'bold 15px') + ' monospace';
+      f.t++; f.y -= f.big ? 1 : 0.75;
+      const size = (f.big ? 21 : 15);
+      ctx.font = 'bold ' + size + 'px monospace';
       ctx.textAlign = 'center';
+      ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,0.85)';
+      ctx.strokeText(f.text, f.x, f.y);
+      ctx.fillStyle = f.color;
       ctx.fillText(f.text, f.x, f.y);
       if (f.t >= f.life) floats.splice(i, 1);
     }
   }
 
-  // ---- Комбо-индикатор --------------------------------------------------------
-  function updateCombo() {
-    if (comboMult > 1) {
-      comboBar.style.opacity = '1';
-      comboBar.textContent = 'COMBO x' + comboMult;
-      comboBar.classList.add('on');
-    } else {
-      comboBar.style.opacity = '0';
-      comboBar.classList.remove('on');
-    }
+  function reduceCombo() {
+    comboBar.style.opacity = comboMult > 1 ? '1' : '0';
+    comboBar.textContent = 'COMBO x' + comboMult;
   }
-
-  // ---- HUD обновление ----------------------------------------------------------
   function updateHud() {
     if (!boss) { hpFill.style.width = '0%'; hpText.textContent = ''; return; }
     const pct = Math.max(0, Math.min(100, (boss.hp / boss.maxHp) * 100));
@@ -6070,18 +6154,28 @@ function startTapGame(game) {
       bob++;
       if (flashT > 0) flashT--;
       if (shakeT > 0) shakeT--;
+      dust.forEach(d => { d.y -= d.v; if (d.y < -4) { d.y = H + 4; d.x = Math.random() * W; } });
       updateHud();
       render();
     }
     rafId = requestAnimationFrame(frame);
   }
 
-  let finished = false;
+  // ----------------------------------------------------------------- Финиш
+  function cleanup() {
+    if (autoTimer) { clearInterval(autoTimer); autoTimer = null; }
+    if (respawnT) { clearTimeout(respawnT); respawnT = null; }
+    if (rafId) cancelAnimationFrame(rafId);
+    if (leaveH) document.removeEventListener('visibilitychange', leaveH);
+  }
+  function onVis() { paused = document.hidden; }
+  const leaveH = onVis;
+  document.addEventListener('visibilitychange', onVis);
+
   function finish() {
     if (finished) return;
     finished = true;
     cleanup();
-    // результат
     const dur = Math.max(Date.now() - startTime, 1000);
     api.post('/api/games/submit', {
       game_id: game.id, score: Math.min(killed, 200), total: 200, duration_ms: dur,
@@ -6105,23 +6199,6 @@ function startTapGame(game) {
     res.appendChild(stop);
     view.appendChild(res);
   }
-
-  function cleanup() {
-    if (autoTimer) { clearInterval(autoTimer); autoTimer = null; }
-    if (rafId) cancelAnimationFrame(rafId);
-    if (cleanupFn) { cleanupFn(); cleanupFn = null; }
-  }
-
-  // очистка при уходе со страницы (утечки интервала/rAF)
-  let cleanupFn = null;
-  function registerLeaveCleanup() {
-    const h = () => cleanup();
-    document.addEventListener('visibilitychange', h);
-    cleanupFn = () => document.removeEventListener('visibilitychange', h);
-  }
-  function onHide() { if (document.hidden) paused = true; }
-  document.addEventListener('visibilitychange', onHide);
-  registerLeaveCleanup();
 
   refreshShop(); refreshHud();
   rafId = requestAnimationFrame(frame);
