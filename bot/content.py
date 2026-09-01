@@ -1562,7 +1562,7 @@ MAP_SPOTS = {
             "y": 57.8,
             "videos": [
                 {"url": "https://youtube.com/shorts/H1JgDKO5CJE", "title": "Молотов на фаер бокс"},
-                {"url": "https://youtube.com/shorts/FG0hTt4u_3g", "title": "Смок в апартаменты"},
+                {"url": "https://youtube.com/shorts/QznSOI22_Zg", "title": "Смок в апартаменты"},
             ],
         },
     ],
