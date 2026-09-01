@@ -5732,9 +5732,7 @@ function startTapGame(game) {
   c2.innerHTML = '<span>+</span><span id="tap-run-val">0</span>';
   const c3 = el('div', 'tap-chip tap-chip-stat');
   c3.innerHTML = '<span class="tap-stat-icon">🔨</span><span id="tap-dmg-val">' + save.dmg + '</span>';
-  const c4 = el('div', 'tap-chip tap-chip-multi');
-  c4.innerHTML = '<span class="tap-stat-icon">⚡</span><span id="tap-multi-val">' + (save.multi + 1) + '</span>';
-  hud.appendChild(c1); hud.appendChild(c2); hud.appendChild(c3); hud.appendChild(c4);
+hud.appendChild(c1); hud.appendChild(c2); hud.appendChild(c3);
   view.appendChild(hud);
 
   const comboBar = el('div', 'tap-combo');
@@ -5752,20 +5750,24 @@ function startTapGame(game) {
   subLine.appendChild(bossName); subLine.appendChild(killsSpan);
   view.appendChild(subLine);
 
-  const canvas = document.createElement('canvas');
+const canvas = document.createElement('canvas');
   canvas.className = 'tap-canvas';
   canvas.width = W; canvas.height = H;
   const ctx = canvas.getContext('2d');
   view.appendChild(canvas);
+  // Слушатели вешаем сразу, чтобы никакая поздняя ошибка не отключила тап
+  canvas.addEventListener('pointerdown', onTap);
+  canvas.addEventListener('mousedown', onTap);
+  canvas.addEventListener('touchstart', onTap, { passive: false });
+  let tapDedupeKind = '', tapDedupeTs = 0;
 
   // ------------------------------------------------------------------ Магазин
-  const shop = el('div', 'tap-shop tap-shop5');
+const shop = el('div', 'tap-shop tap-shop4');
   const inv = [
     { key: 'dmg',   icon: '🔨', txt: t('gm_tap_buy_dmg') },
     { key: 'crit',  icon: '💥', txt: t('gm_tap_buy_crit') },
     { key: 'auto',  icon: '🤖', txt: t('gm_tap_buy_auto') },
     { key: 'boost', icon: '💰', txt: t('gm_tap_buy_coin') },
-    { key: 'multi', icon: '⚡', txt: t('gm_tap_buy_multi') },
   ];
   const shopBtns = {};
   inv.forEach(lb => {
@@ -5851,10 +5853,9 @@ function startTapGame(game) {
     });
   }
   function refreshHud() {
-    document.getElementById('tap-coins-val').textContent = save.coins;
+document.getElementById('tap-coins-val').textContent = save.coins;
     document.getElementById('tap-run-val').textContent = coinsEarned;
     document.getElementById('tap-dmg-val').textContent = save.dmg;
-    document.getElementById('tap-multi-val').textContent = save.multi + 1;
   }
 
   // ---------------------------------------------------------------------- Ввод
@@ -5864,46 +5865,57 @@ function startTapGame(game) {
     const ey = (e.touches && e.touches[0]) ? e.touches[0].clientY : e.clientY;
     return { x: (ex - r.left) * (W / r.width), y: (ey - r.top) * (H / r.height) };
   }
-  function onTap(e) {
+function onTap(e) {
     if (!playing || !boss) return;
-    e.preventDefault();
+    // дедупликация: pointerdown+touchstart+mousedown приходят на один тап
+    const now0 = Date.now();
+    if (now0 - tapDedupeTs < 40 && e.type !== tapDedupeKind) return;
+    tapDedupeKind = e.type; tapDedupeTs = now0;
+    try { if (e.preventDefault) e.preventDefault(); } catch (err) {}
     const p = tapPos(e);
-    // ВЕСЬ канвас — зона удара (фикс «нельзя тапать»)
+    if (!isFinite(p.x)) p.x = BOSS_CX;
+    if (!isFinite(p.y)) p.y = BOSS_Y0 + 100;
     if (p.y < 0) p.y = 0;
+    if (p.x < 0) p.x = 0;
+    if (p.x > W) p.x = W;
+    if (p.y > H) p.y = H;
     const head = p.y < BOSS_Y0 + SPRITE_H * 0.30;
     const now = Date.now();
     combo = (now - lastTapAt < COMBO_MS) ? combo + 1 : 1;
     lastTapAt = now;
     comboMult = Math.min(9, 1 + Math.floor(combo / 3));
-    // Многоудар: save.multi дополнительных ударов за тап
     const shots = save.multi + 1;
     let total = 0, critHit = false;
     for (let i = 0; i < shots; i++) {
-      let d = save.dmg;
+      let d = Number(save.dmg);
+      if (!isFinite(d) || d < 1) d = 1;
       if (head) d *= HEAD_MULT;
       const isCrit = Math.random() * 100 < save.crit;
       if (isCrit) { d *= 2; critHit = true; }
       d *= comboMult;
       d = Math.round(d);
+      if (!isFinite(d) || d < 1) d = 1;
       total += d;
-      const ox = p.x + (i * 14 - shots * 7) + (Math.random() * 8 - 4);
-      const oy = p.y + (Math.random() * 10 - 5);
-      burst(ox, oy, head ? 6 : 4, head ? '#ff3344' : (comboMult > 2 ? '#ffb000' : '#ffd27a'));
-      sparks.push({ x: ox, y: oy, r: 2 + Math.random() * 3, life: 10, t: 0 });
     }
-    sndBang();
-    if (critHit) sndCrit();
-    haptic(head || combo >= 12 || critHit ? 'heavy' : 'light');
-    const color = head ? '#ff3344' : (critHit ? '#ff5566' : (comboMult > 2 ? '#ffb000' : '#ffd27a'));
-    floats.push({ x: p.x, y: p.y - 8, text: '-' + total + (head ? '!' : ''), color: color, big: head, life: 46, t: 0 });
-    if (head) sndHead();
-    rings.push({ x: p.x, y: p.y, r: 4, max: 26, life: 16, t: 0, col: color });
-    flashT = 130; shakeT = head ? 9 : 5; shakeAmp = head ? 6 : 3; bossScaleT = 5;
-    reduceCombo();
+    // УРОН ПРИМЕНЯЕТСЯ ПЕРВЫМ — ничто позже не может его заблокировать
     hitBoss(total, p.x, p.y, false);
+    try {
+      for (let i = 0; i < shots; i++) {
+        const ox = p.x + (i * 14 - shots * 7) + (Math.random() * 8 - 4);
+        const oy = p.y + (Math.random() * 10 - 5);
+        burst(ox, oy, head ? 6 : 4, head ? '#ff3344' : (comboMult > 2 ? '#ffb000' : '#ffd27a'));
+        sparks.push({ x: ox, y: oy, r: 2 + Math.random() * 3, life: 10, t: 0 });
+      }
+      sndBang(); if (critHit) sndCrit();
+      haptic(head || combo >= 12 || critHit ? 'heavy' : 'light');
+      const color = head ? '#ff3344' : (critHit ? '#ff5566' : (comboMult > 2 ? '#ffb000' : '#ffd27a'));
+      floats.push({ x: p.x, y: p.y - 8, text: '-' + total + (head ? '!' : ''), color: color, big: head, life: 46, t: 0 });
+      if (head) sndHead();
+      rings.push({ x: p.x, y: p.y, r: 4, max: 26, life: 16, t: 0, col: color });
+      flashT = 130; shakeT = head ? 9 : 5; shakeAmp = head ? 6 : 3; bossScaleT = 5;
+      reduceCombo();
+    } catch (err) {}
   }
-  canvas.addEventListener('mousedown', onTap);
-  canvas.addEventListener('touchstart', onTap, { passive: false });
 
   function hitBoss(dmgHit, px, py, autoHit) {
     if (!playing || !boss) return;
