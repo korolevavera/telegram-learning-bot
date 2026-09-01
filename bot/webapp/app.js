@@ -5643,8 +5643,7 @@ function startTapGame(game) {
   const BOSS_CX = W / 2;
   const BOSS_X0 = BOSS_CX - SPRITE_W / 2;
   const BOSS_Y0 = 126;
-  const HEAD_MULT = 4.5;      // множитель за хедшот
-  const COMBO_MS = 380;
+const COMBO_MS = 380;
   const SAVE_KEY = 'cs2_tapboss_save';
   const AUTO_MAX = 12, DMG_MAX = 150, CRIT_MAX = 95, BOOST_MAX = 18, MULTI_MAX = 9;
 
@@ -5660,12 +5659,13 @@ function startTapGame(game) {
   const MAX = { dmg: DMG_MAX, crit: CRIT_MAX, auto: AUTO_MAX, boost: BOOST_MAX, multi: MULTI_MAX };
   function costOf(key, lvl) { return COST[key].base + (lvl - 1) * COST[key].step; }
   function maxOf(key) { return MAX[key]; }
-  function coinGain() {
-    // база растёт с уровнем босса + жадность + комбо-множитель
-    const base = 10 + Math.min(killed, 26);
+function coinGain() {
+    // база растёт с уровнем босса + жадность + комбо-множитель (без потолка)
+    const base = 10 + killed * 3;
     const greed = save.boost * 2;
     const comboBonus = Math.max(0, comboMult - 1) * 1.5;
-    let g = (base + greed) * (1 + comboBonus * 0.25);
+    const scale = 1 + killed * 0.06;
+    let g = (base + greed) * (1 + comboBonus * 0.25) * scale;
     // бонус за быструю победу
     if (boss && boss.spawned && Date.now() - boss.spawned < 1800) g *= 1.3;
     return Math.round(g);
@@ -5698,15 +5698,16 @@ function startTapGame(game) {
   // ---------------------------------------------------------------- Состояние
   let killed = 0, coinsEarned = 0;
   let playing = true, paused = false, finished = false;
-  let dieT = 0, flashT = 0, shakeT = 0, shakeAmp = 0, bossScaleT = 0, headPulse = 0;
+  let dieT = 0, flashT = 0, shakeT = 0, shakeAmp = 0, bossScaleT = 0;
   let lastTapAt = 0, combo = 0, comboMult = 1, comboDecayT = 0;
   let bob = 0, rafId = 0, respawnT = null, autoTimer = null, bgScroll = 0;
   let boss = null;
   const particles = [], floats = [], rings = [], sparks = [], dust = [];
   const startTime = Date.now();
 
-  function newBoss() {
-    const hp = 50 + killed * 24 + Math.floor(Math.random() * 46);
+function newBoss() {
+    // каждый следующий босс заметно жирнее предыдущего
+    const hp = Math.round((45 + killed * 30) * (1 + killed * 0.035)) + Math.floor(Math.random() * 55);
     boss = { type: bossFor(killed), idx: killed, hp: hp, maxHp: hp, spawned: Date.now() };
     flashT = 0; shakeT = 0; shakeAmp = 0; combo = 0; comboMult = 1;
   }
@@ -5814,13 +5815,11 @@ const shop = el('div', 'tap-shop tap-shop4');
     autoTimer = setInterval(() => {
       if (!playing || !boss || paused) return;
       let dmg = 0;
-      for (let i = 0; i < save.auto; i++) {
+for (let i = 0; i < save.auto; i++) {
         dmg += Math.round(save.dmg * (Math.random() * 100 < save.crit ? 2 : 1));
       }
-      const head = Math.random() < 0.18;
-      if (head) dmg *= HEAD_MULT;
       dmg = Math.round(dmg);
-      autoStrike(dmg, head ? BOSS_Y0 + 18 : BOSS_Y0 + 90);
+      autoStrike(dmg, BOSS_Y0 + 90);
     }, 1000);
   }
   setupAuto();
@@ -5879,7 +5878,6 @@ function onTap(e) {
     if (p.x < 0) p.x = 0;
     if (p.x > W) p.x = W;
     if (p.y > H) p.y = H;
-    const head = p.y < BOSS_Y0 + SPRITE_H * 0.30;
     const now = Date.now();
     combo = (now - lastTapAt < COMBO_MS) ? combo + 1 : 1;
     lastTapAt = now;
@@ -5889,7 +5887,6 @@ function onTap(e) {
     for (let i = 0; i < shots; i++) {
       let d = Number(save.dmg);
       if (!isFinite(d) || d < 1) d = 1;
-      if (head) d *= HEAD_MULT;
       const isCrit = Math.random() * 100 < save.crit;
       if (isCrit) { d *= 2; critHit = true; }
       d *= comboMult;
@@ -5903,16 +5900,15 @@ function onTap(e) {
       for (let i = 0; i < shots; i++) {
         const ox = p.x + (i * 14 - shots * 7) + (Math.random() * 8 - 4);
         const oy = p.y + (Math.random() * 10 - 5);
-        burst(ox, oy, head ? 6 : 4, head ? '#ff3344' : (comboMult > 2 ? '#ffb000' : '#ffd27a'));
+        burst(ox, oy, 4, (comboMult > 2 ? '#ffb000' : '#ffd27a'));
         sparks.push({ x: ox, y: oy, r: 2 + Math.random() * 3, life: 10, t: 0 });
       }
       sndBang(); if (critHit) sndCrit();
-      haptic(head || combo >= 12 || critHit ? 'heavy' : 'light');
-      const color = head ? '#ff3344' : (critHit ? '#ff5566' : (comboMult > 2 ? '#ffb000' : '#ffd27a'));
-      floats.push({ x: p.x, y: p.y - 8, text: '-' + total + (head ? '!' : ''), color: color, big: head, life: 46, t: 0 });
-      if (head) sndHead();
+      haptic(combo >= 12 || critHit ? 'heavy' : 'light');
+      const color = critHit ? '#ff5566' : (comboMult > 2 ? '#ffb000' : '#ffd27a');
+      floats.push({ x: p.x, y: p.y - 8, text: '-' + total + (critHit ? '!' : ''), color: color, big: critHit, life: 46, t: 0 });
       rings.push({ x: p.x, y: p.y, r: 4, max: 26, life: 16, t: 0, col: color });
-      flashT = 130; shakeT = head ? 9 : 5; shakeAmp = head ? 6 : 3; bossScaleT = 5;
+      flashT = 130; shakeT = critHit ? 9 : 5; shakeAmp = critHit ? 6 : 3; bossScaleT = 5;
       reduceCombo();
     } catch (err) {}
   }
@@ -6310,13 +6306,7 @@ function onTap(e) {
   function render() {
     ctx.clearRect(0, 0, W, H);
     drawBg();
-    if (shakeT > 0) ctx.translate((Math.random() - .5) * shakeAmp, (Math.random() - .5) * shakeAmp);
-    // пульсирующая подсветка зоны головы
-    headPulse = (headPulse + 1) % 40;
-    const pulse = 0.2 + 0.15 * Math.abs(Math.sin(headPulse / 6));
-    ctx.strokeStyle = 'rgba(255,55,80,' + pulse + ')';
-    ctx.lineWidth = 1;
-    ctx.strokeRect(BOSS_X0 + 4, BOSS_Y0, SPRITE_W - 8, SPRITE_H * 0.30);
+if (shakeT > 0) ctx.translate((Math.random() - .5) * shakeAmp, (Math.random() - .5) * shakeAmp);
     if (boss) {
       if (bossScaleT > 0) {
         bossScaleT--;
