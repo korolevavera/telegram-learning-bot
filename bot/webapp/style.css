@@ -2035,6 +2035,8 @@ html[data-theme="gurren"] .tab.active .tab-ico { filter: drop-shadow(0 0 8px rgb
 }
 .tap-shop4 { display: flex; gap: 8px; margin: 10px 0 4px; }
 .tap-shop4 .tap-upg { flex: 1; }
+.tap-shop5 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 10px 0 4px; }
+.tap-shop5 .tap-upg { flex: none; }
 .tap-line {
   text-align: center; font-family: 'Courier New', monospace; font-weight: 700;
   color: #9fb4d8; font-size: 13px; letter-spacing: 1px; margin: 4px 0;
